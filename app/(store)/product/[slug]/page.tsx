@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { Banknote, Check, ChevronRight, RotateCcw, Truck } from "lucide-react";
 import MediaGallery from "@/components/MediaGallery";
 import ProductActions from "@/components/ProductActions";
+import Faq from "@/components/Faq";
 import ProductCard from "@/components/ProductCard";
 import VideoEmbed from "@/components/VideoEmbed";
 import { getProductBySlug, getProducts } from "@/lib/products";
 import { discountPercent, formatPrice } from "@/lib/format";
-import { FREE_SHIPPING_THRESHOLD, STORE } from "@/lib/config";
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +93,14 @@ export default async function ProductPage({ params }: { params: Params }) {
 
           <ProductActions product={product} />
 
-          <div className="mt-6 grid gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-sm sm:grid-cols-3">
+          <div className="mt-6 flex items-center gap-3 rounded-2xl bg-brand-50 p-4 text-sm text-brand-900">
+            <Truck className="h-5 w-5 shrink-0 text-brand-600" />
+            <span>
+              Order now, get it between <b>{deliveryWindow()}</b>
+            </span>
+          </div>
+
+          <div className="mt-3 grid gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-sm sm:grid-cols-3">
             <div className="flex items-center gap-2"><Banknote className="h-5 w-5 text-brand-600" /> Cash on Delivery</div>
             <div className="flex items-center gap-2"><Truck className="h-5 w-5 text-brand-600" /> Free over {formatPrice(FREE_SHIPPING_THRESHOLD)}</div>
             <div className="flex items-center gap-2"><RotateCcw className="h-5 w-5 text-brand-600" /> 7-day returns</div>
@@ -116,12 +124,24 @@ export default async function ProductPage({ params }: { params: Params }) {
         </div>
       </div>
 
-      {product.description && (
-        <section className="mt-14 max-w-3xl">
-          <h2 className="text-2xl font-extrabold">Product details</h2>
-          <div className="mt-4 whitespace-pre-line leading-relaxed text-gray-700">{product.description}</div>
-        </section>
-      )}
+      <section className="mt-16 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
+        {product.description && (
+          <div>
+            <h2 className="text-2xl font-extrabold">Product details</h2>
+            <div className="mt-4 whitespace-pre-line text-lg leading-relaxed text-gray-700">{product.description}</div>
+          </div>
+        )}
+        <div>
+          <h2 className="mb-4 text-2xl font-extrabold">Good to know</h2>
+          <Faq
+            items={[
+              { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. ${formatPrice(SHIPPING_FEE)} delivery, free on orders over ${formatPrice(FREE_SHIPPING_THRESHOLD)}.` },
+              { q: "Cash on Delivery", a: "No advance payment — pay the rider in cash when your parcel arrives." },
+              { q: "Returns & warranty", a: "Damaged or faulty? Contact us within 7 days of delivery for a free replacement or refund." },
+            ]}
+          />
+        </div>
+      </section>
 
       {product.videos.length > 0 && (
         <section className="mt-14">
@@ -148,4 +168,10 @@ export default async function ProductPage({ params }: { params: Params }) {
       )}
     </div>
   );
+}
+
+function deliveryWindow() {
+  const fmt = (d: number) =>
+    new Date(Date.now() + d * 864e5).toLocaleDateString("en-PK", { weekday: "short", day: "numeric", month: "short" });
+  return `${fmt(2)} – ${fmt(5)}`;
 }

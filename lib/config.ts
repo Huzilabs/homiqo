@@ -1,5 +1,5 @@
 export const STORE = {
-  name: process.env.NEXT_PUBLIC_STORE_NAME || "HomeCart",
+  name: process.env.NEXT_PUBLIC_STORE_NAME || "Homiqo",
   tagline: "Smart kitchen & home essentials, delivered to your door",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "",

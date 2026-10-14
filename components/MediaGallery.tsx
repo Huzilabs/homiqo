@@ -19,7 +19,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
 
   return (
     <div className="lg:sticky lg:top-28 lg:self-start">
-      <div className="relative aspect-square overflow-hidden rounded-3xl border border-gray-100 bg-white">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-gray-100 bg-gray-100">
         {!current ? (
           <ProductImage alt={name} />
         ) : current.kind === "image" ? (
@@ -60,7 +60,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
                 key={m.url + i}
                 onClick={() => setIndex(i)}
                 aria-label={`Show ${m.kind} ${i + 1}`}
-                className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-gray-100 transition ${
+                className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 bg-gray-100 transition ${
                   i === index ? "border-brand-500" : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
