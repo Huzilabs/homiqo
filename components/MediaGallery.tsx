@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, CirclePlay } from "lucide-react";
+import HoverVideo from "./HoverVideo";
 import ProductImage from "./ProductImage";
 import VideoEmbed from "./VideoEmbed";
 import { youTubeId } from "@/lib/format";
@@ -14,16 +15,29 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
     ...videos.map((url) => ({ kind: "video" as const, url })),
   ];
   const [index, setIndex] = useState(0);
+  const [hover, setHover] = useState(false);
   const current = media[index];
   const go = (d: number) => setIndex((i) => (i + d + media.length) % media.length);
 
   return (
     <div className="lg:sticky lg:top-28 lg:self-start">
-      <div className="relative aspect-square overflow-hidden rounded-3xl border border-gray-100 bg-gray-100">
+      <div
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        className="relative aspect-square overflow-hidden rounded-[32px] bg-cream shadow-card ring-1 ring-brand-50"
+      >
         {!current ? (
           <ProductImage alt={name} />
         ) : current.kind === "image" ? (
-          <ProductImage src={current.url} alt={name} priority sizes="(max-width:1024px) 100vw, 50vw" />
+          <>
+            <ProductImage src={current.url} alt={name} priority sizes="(max-width:1024px) 100vw, 50vw" />
+            <HoverVideo url={videos[0]} active={hover} />
+            {videos.length > 0 && !hover && (
+              <span className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-brand-700 shadow backdrop-blur">
+                ▶ Hover to watch it in action
+              </span>
+            )}
+          </>
         ) : (
           <div className="absolute inset-0 flex items-center bg-black">
             <div className="w-full">
@@ -61,7 +75,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
                 onClick={() => setIndex(i)}
                 aria-label={`Show ${m.kind} ${i + 1}`}
                 className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 bg-gray-100 transition ${
-                  i === index ? "border-brand-500" : "border-transparent opacity-70 hover:opacity-100"
+                  i === index ? "border-accent-500" : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
                 {m.kind === "image" ? (

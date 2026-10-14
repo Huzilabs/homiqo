@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = STORE.siteUrl;
-  const pages: MetadataRoute.Sitemap = ["", "/shop", "/track", "/contact", "/policies"].map((p) => ({ url: base + p }));
+  const pages: MetadataRoute.Sitemap = ["", "/shop", "/contact", "/policies"].map((p) => ({ url: base + p }));
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return pages;

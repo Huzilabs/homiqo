@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, Mail, PhoneCall, Truck } from "lucide-react";
 import OrderDetails from "@/components/OrderDetails";
 import { createClient } from "@/lib/supabase/server";
 import type { TrackedOrder } from "@/lib/types";
@@ -25,27 +25,35 @@ export default async function OrderPage({
   }
 
   return (
-    <div className="container-x max-w-3xl py-12">
+    <div className="container-x max-w-3xl py-14">
       <div className="text-center">
-        <CircleCheck className="mx-auto h-16 w-16 text-brand-600" strokeWidth={1.5} />
-        <h1 className="mt-4 text-3xl font-extrabold">Thank you for your order!</h1>
-        <p className="mt-2 text-gray-600">
-          Your order <b>{number}</b> has been received. We’ll call you shortly to confirm it.
+        <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-leaf-100 text-leaf-600">
+          <CircleCheck className="h-11 w-11" strokeWidth={1.75} />
+        </span>
+        <h1 className="mt-6 text-3xl font-extrabold text-brand-700 sm:text-4xl">Thank you{order ? `, ${order.customer_name.split(" ")[0]}` : ""}!</h1>
+        <p className="mt-3 text-ink/70">
+          Your order <b className="text-brand-700">{number}</b> has been placed successfully.
         </p>
-        <p className="mt-1 text-sm text-gray-500">Save your order number — you can use it to track your delivery.</p>
       </div>
-      <div className="mt-10">
-        {order ? (
-          <OrderDetails order={order} />
-        ) : (
-          <p className="card p-6 text-center text-gray-600">
-            You can view your order status any time on the <Link href="/track" className="font-semibold text-brand-700 underline">tracking page</Link>.
-          </p>
-        )}
+
+      <div className="mt-10 grid gap-3 sm:grid-cols-3">
+        {[
+          { icon: Mail, t: "Check your email", d: "We’ve sent your order details." },
+          { icon: PhoneCall, t: "We’ll confirm", d: "Our team will call or email to confirm." },
+          { icon: Truck, t: "Fast dispatch", d: "Delivered in 2–5 working days." },
+        ].map(({ icon: Icon, t, d }) => (
+          <div key={t} className="rounded-3xl bg-white p-5 text-center shadow-card ring-1 ring-brand-50">
+            <Icon className="mx-auto h-6 w-6 text-accent-500" />
+            <p className="mt-2 font-semibold text-brand-700">{t}</p>
+            <p className="text-xs text-ink/60">{d}</p>
+          </div>
+        ))}
       </div>
-      <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Link href="/shop" className="btn-primary">Continue shopping</Link>
-        <Link href={`/track?order=${number}`} className="btn-secondary">Track order</Link>
+
+      {order && <div className="mt-8"><OrderDetails order={order} /></div>}
+
+      <div className="mt-10 flex justify-center">
+        <Link href="/shop" className="btn-primary px-8">Continue shopping</Link>
       </div>
     </div>
   );

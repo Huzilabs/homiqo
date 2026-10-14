@@ -1,4 +1,4 @@
-# HomeCart — Kitchen & Home E-commerce Store
+# Homiqo — Kitchen & Home E-commerce Store
 
 A complete e-commerce website built with **Next.js 15**, **Supabase** (database, auth and file storage) and **Tailwind CSS**, with **Google Analytics 4** and **Microsoft Clarity** tracking.
 
@@ -10,7 +10,9 @@ A complete e-commerce website built with **Next.js 15**, **Supabase** (database,
 - Product pages with a photo + video gallery (uploaded MP4/WebM or YouTube), features, discount badges, stock status and related products
 - Cart drawer and cart page (saved in the browser), with a free-delivery progress bar
 - Cash-on-Delivery checkout. Orders are created in Supabase by a secure database function that recalculates prices, checks stock and reduces inventory, so customers cannot change prices from the browser.
-- Order confirmation page and public **order tracking** (order number + phone) showing a status timeline, courier and tracking number
+- Order confirmation page with full order summary
+- **Order emails over SMTP**: "order received" on checkout, plus "confirmed", "shipped" (with courier & tracking number), "delivered" and "cancelled" when the admin changes status; new-order alert to the store owner
+- Product videos auto-play (muted) on hover in product cards, the video reels and the product gallery
 - Floating WhatsApp button, contact page, shipping & returns page, SEO metadata, sitemap and product structured data
 - Fully responsive, with a sticky “Buy now” bar on mobile
 
@@ -46,6 +48,20 @@ Copy `.env.example` to `.env.local` and fill it in:
 | `NEXT_PUBLIC_GA_ID` | Google Analytics → Admin → Data streams → Web → Measurement ID (`G-…`) |
 | `NEXT_PUBLIC_CLARITY_ID` | clarity.microsoft.com → your project → Settings → Overview → Project ID |
 | `NEXT_PUBLIC_STORE_NAME`, `NEXT_PUBLIC_SITE_URL`, contact details, `NEXT_PUBLIC_WHATSAPP` | Your store details |
+
+### Order emails (SMTP)
+Add these environment variables (in `.env.local` and in Vercel → Settings → Environment Variables):
+
+| Variable | Example |
+|---|---|
+| `SMTP_HOST` | `smtp.hostinger.com` (Hostinger email) or `smtp.gmail.com` |
+| `SMTP_PORT` | `465` |
+| `SMTP_USER` | `orders@homiqo.site` |
+| `SMTP_PASS` | mailbox password (Gmail: an App Password) |
+| `SMTP_FROM` | `Homiqo <orders@homiqo.site>` |
+| `ADMIN_NOTIFY_EMAIL` | your inbox for new-order alerts |
+
+If SMTP is not configured the store still works; emails are simply skipped.
 
 ### 3. Run locally
 ```bash

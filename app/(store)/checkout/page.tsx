@@ -7,7 +7,6 @@ import ProductImage from "@/components/ProductImage";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
-import { createClient } from "@/lib/supabase/client";
 
 const CITIES = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
 
@@ -38,17 +37,21 @@ export default function CheckoutPage() {
       ["customer_name", "phone", "email", "address", "city", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
     );
     setSubmitting(true);
-    const supabase = createClient();
-    const { data, error } = await supabase.rpc("place_order", {
-      customer,
-      items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
-    });
-    if (error || !data) {
+    let data: { order_number: string; total: number; error?: string } | null = null;
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer, items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })) }),
+      });
+      data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Could not place your order. Please try again.");
+    } catch (err) {
       setSubmitting(false);
-      setError(error?.message || "Could not place your order. Please try again.");
+      setError(err instanceof Error ? err.message : "Could not place your order. Please try again.");
       return;
     }
-    const { order_number, total: serverTotal } = data as { order_number: string; total: number };
+    const { order_number, total: serverTotal } = data!;
     placed.current = true;
     track.purchase(order_number, items, Number(serverTotal), Number(serverTotal) - subtotal);
     try {
@@ -70,7 +73,7 @@ export default function CheckoutPage() {
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <Field label="Full name" name="customer_name" required autoComplete="name" className="sm:col-span-2" />
               <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" pattern="[0-9+\-\s]{10,16}" />
-              <Field label="Email (optional)" name="email" type="email" autoComplete="email" />
+              <Field label="Email (for order updates)" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
               <Field label="Complete address" name="address" required placeholder="House #, street, area" autoComplete="street-address" className="sm:col-span-2" />
               <div>
                 <label className="label" htmlFor="city">City *</label>

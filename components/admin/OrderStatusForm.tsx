@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { ORDER_STATUSES } from "@/lib/config";
 import { STATUS_LABEL } from "@/lib/format";
 import type { Order } from "@/lib/types";
@@ -19,17 +18,28 @@ export default function OrderStatusForm({ order }: { order: Order }) {
     if (status === "cancelled" && order.status !== "cancelled" && !confirm("Cancel this order? Stock will be returned to inventory.")) return;
     setSaving(true);
     setMsg(null);
-    const { error } = await createClient()
-      .from("orders")
-      .update({
+    const res = await fetch(`/api/admin/orders/${order.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         status,
-        courier: String(f.get("courier") || "").trim() || null,
-        tracking_number: String(f.get("tracking_number") || "").trim() || null,
-      })
-      .eq("id", order.id);
+        courier: String(f.get("courier") || ""),
+        tracking_number: String(f.get("tracking_number") || ""),
+        notify: f.get("notify") === "on",
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
     setSaving(false);
-    setMsg(error ? { ok: false, text: error.message } : { ok: true, text: "Order updated" });
-    if (!error) router.refresh();
+    if (!res.ok) return setMsg({ ok: false, text: data.error || "Update failed" });
+    setMsg({
+      ok: true,
+      text: data.emailed
+        ? "Order updated — customer emailed ✉️"
+        : status !== order.status && !data.hasEmail
+          ? "Order updated (no customer email on file)"
+          : "Order updated",
+    });
+    router.refresh();
   }
 
   return (
@@ -54,6 +64,13 @@ export default function OrderStatusForm({ order }: { order: Order }) {
         <label className="label" htmlFor="tracking_number">Tracking number</label>
         <input id="tracking_number" name="tracking_number" defaultValue={order.tracking_number || ""} className="input" />
       </div>
+      <label className="flex items-start gap-3 rounded-xl bg-brand-50 p-3 text-sm">
+        <input type="checkbox" name="notify" defaultChecked className="mt-0.5 h-4 w-4 accent-brand-600" />
+        <span>
+          Email the customer about this status change
+          {order.email ? <span className="block text-xs text-gray-500">{order.email}</span> : <span className="block text-xs text-amber-600">No email on this order</span>}
+        </span>
+      </label>
       {msg && <p className={`rounded-lg p-2.5 text-sm ${msg.ok ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>{msg.text}</p>}
       <button disabled={saving} className="btn-primary w-full">
         {saving && <LoaderCircle className="h-4 w-4 animate-spin" />} Save

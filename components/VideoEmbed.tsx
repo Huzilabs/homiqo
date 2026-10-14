@@ -6,7 +6,7 @@ export default function VideoEmbed({ url, title, autoPlay }: { url: string; titl
     <div className="relative aspect-video bg-black">
       {yt ? (
         <iframe
-          src={`https://www.youtube-nocookie.com/embed/${yt}${autoPlay ? "?autoplay=1&mute=1" : ""}`}
+          src={`https://www.youtube-nocookie.com/embed/${yt}${autoPlay ? "?autoplay=1&rel=0&modestbranding=1" : "?rel=0&modestbranding=1"}`}
           title={title}
           loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
