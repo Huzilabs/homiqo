@@ -16,7 +16,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lift hover:ring-gray-200">
-      <Link href={`/product/${product.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-gray-100">
+      <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-gray-100">
         <ProductImage src={product.images[0]} alt={product.name} priority={priority} className="transition duration-700 group-hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
         {second && (
           <Image src={second} alt="" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover opacity-0 transition duration-500 group-hover:opacity-100" />

@@ -124,7 +124,7 @@ export default async function HomePage() {
           <SectionHead eyebrow="Browse" title="Shop by category" />
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {categories.map((c) => (
-              <Link key={c.name} href={`/shop?category=${encodeURIComponent(c.name)}`} className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-gray-200">
+              <Link key={c.name} href={`/shop?category=${encodeURIComponent(c.name)}`} className="group relative aspect-[3/4] overflow-hidden rounded-3xl bg-gray-200 sm:aspect-[4/5]">
                 <ProductImage src={c.image} alt={c.name} sizes="(max-width:1024px) 50vw, 25vw" className="transition duration-700 group-hover:scale-110" />
                 <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
                 <span className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 text-white sm:p-5">

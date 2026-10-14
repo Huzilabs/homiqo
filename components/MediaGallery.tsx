@@ -19,7 +19,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
 
   return (
     <div className="lg:sticky lg:top-28 lg:self-start">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-gray-100 bg-gray-100">
+      <div className="relative aspect-square overflow-hidden rounded-3xl border border-gray-100 bg-gray-100">
         {!current ? (
           <ProductImage alt={name} />
         ) : current.kind === "image" ? (
