@@ -15,7 +15,7 @@ export default function SortSelect({ value }: { value: string }) {
         else sp.delete("sort");
         router.push(`${pathname}?${sp.toString()}`);
       }}
-      className="input w-full sm:w-52"
+      className="w-full border-0 border-b border-ink/20 bg-transparent py-1.5 pr-8 text-[11px] font-medium uppercase tracking-[.2em] outline-none focus:border-ink sm:w-56"
     >
       <option value="">Recommended</option>
       <option value="newest">Newest</option>

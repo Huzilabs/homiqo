@@ -26,54 +26,53 @@ export default async function ShopPage({ searchParams }: { searchParams: Params 
   };
 
   return (
-    <div className="container-x py-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">{q ? `Results for “${q}”` : category || "All products"}</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {products.length} product{products.length === 1 ? "" : "s"}
+    <>
+      <section className="bg-sand">
+        <div className="container-x py-16 text-center sm:py-24">
+          <p className="eyebrow">{q ? "Search results" : "The collection"}</p>
+          <h1 className="h-display mt-5">{q ? `“${q}”` : category || "Shop all"}</h1>
+          <p className="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-ink/60">
+            {products.length} {products.length === 1 ? "piece" : "pieces"} · Cash on delivery across Pakistan
           </p>
         </div>
-        <SortSelect value={sort || ""} />
+      </section>
+
+      <div className="sticky top-[76px] z-20 border-b border-ink/10 bg-paper/95 backdrop-blur">
+        <div className="container-x flex items-center justify-between gap-6 py-4">
+          <div className="-mx-5 flex gap-7 overflow-x-auto px-5 sm:mx-0 sm:px-0">
+            {[undefined, ...categories].map((c) => {
+              const active = c ? category === c : !category;
+              return (
+                <Link
+                  key={c || "all"}
+                  href={href(c)}
+                  className={`whitespace-nowrap border-b py-1.5 text-[11px] font-medium uppercase tracking-[.2em] transition ${
+                    active ? "border-ink text-ink" : "border-transparent text-ink/50 hover:text-ink"
+                  }`}
+                >
+                  {c || "All"}
+                </Link>
+              );
+            })}
+          </div>
+          <div className="hidden shrink-0 sm:block"><SortSelect value={sort || ""} /></div>
+        </div>
       </div>
 
-      <div className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-        <Chip href={href()} active={!category}>All</Chip>
-        {categories.map((c) => (
-          <Chip key={c} href={href(c)} active={category === c}>
-            {c}
-          </Chip>
-        ))}
+      <div className="container-x pt-12">
+        <div className="mb-8 sm:hidden"><SortSelect value={sort || ""} /></div>
+        {products.length > 0 ? (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-7 lg:grid-cols-4">
+            {products.map((p, i) => <ProductCard key={p.id} product={p} priority={i < 4} />)}
+          </div>
+        ) : (
+          <div className="py-24 text-center">
+            <p className="font-serif text-3xl">Nothing found</p>
+            <p className="mt-3 text-ink/60">Try a different search or category.</p>
+            <Link href="/shop" className="btn-primary mt-8">View all products</Link>
+          </div>
+        )}
       </div>
-
-      {products.length > 0 ? (
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {products.map((p, i) => (
-            <ProductCard key={p.id} product={p} priority={i < 4} />
-          ))}
-        </div>
-      ) : (
-        <div className="card mt-6 p-12 text-center">
-          <p className="font-semibold">No products found</p>
-          <p className="mt-1 text-sm text-gray-500">Try a different search or category.</p>
-          <Link href="/shop" className="btn-primary mt-5">
-            Clear filters
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Chip({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
-        active ? "bg-ink text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-brand-300"
-      }`}
-    >
-      {children}
-    </Link>
+    </>
   );
 }

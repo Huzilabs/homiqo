@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { CirclePlay, Volume2, X } from "lucide-react";
+import { Play, X } from "lucide-react";
 import HoverVideo from "./HoverVideo";
 import ProductImage from "./ProductImage";
 import VideoEmbed from "./VideoEmbed";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, previewVideo, youTubeVideos } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
 export default function VideoShowcase({ products }: { products: Product[] }) {
@@ -19,34 +19,37 @@ export default function VideoShowcase({ products }: { products: Product[] }) {
 
   return (
     <>
-      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+      <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 lg:grid-cols-4">
         {products.map((p) => (
           <div
             key={p.id}
             onMouseEnter={() => setHover(p.id)}
             onMouseLeave={() => setHover(null)}
-            className="group relative aspect-[9/14] w-[72%] shrink-0 snap-start overflow-hidden rounded-[28px] bg-brand-800 sm:w-auto"
+            onTouchStart={() => setHover(p.id)}
+            className="group relative aspect-[3/4] w-[78%] shrink-0 snap-start overflow-hidden bg-brand-900 sm:w-auto"
           >
-            <ProductImage src={p.images[0]} alt={p.name} sizes="(max-width:640px) 75vw, 25vw" className="transition duration-700 group-hover:scale-105" />
-            <HoverVideo url={p.videos[0]} active={hover === p.id} />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-950/90 via-brand-950/10 to-transparent" />
-            <button
-              onClick={() => setOpen(p)}
-              className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-white/25"
-            >
-              <Volume2 className="h-3.5 w-3.5" /> Watch with sound
-            </button>
+            <ProductImage src={p.images[0]} alt={p.name} sizes="(max-width:640px) 80vw, 25vw" className="opacity-90 transition duration-[1.2s] group-hover:scale-[1.04]" />
+            <HoverVideo url={previewVideo(p.videos)} active={hover === p.id} />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/10 to-transparent" />
             {hover !== p.id && (
-              <span className="pointer-events-none absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-brand-600 shadow-xl">
-                <CirclePlay className="h-9 w-9" strokeWidth={1.5} />
+              <span className="pointer-events-none absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/60 text-white backdrop-blur-sm">
+                <Play className="h-5 w-5 translate-x-0.5 fill-current" />
               </span>
             )}
-            <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-              <p className="font-semibold leading-tight">{p.name}</p>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-lg font-bold text-accent-400">{formatPrice(p.price)}</span>
-                <Link href={`/product/${p.slug}`} className="rounded-full bg-white px-4 py-2 text-xs font-bold text-brand-700 transition hover:bg-accent-500 hover:text-white">
-                  Shop now
+            {youTubeVideos(p.videos).length > 0 && (
+              <button
+                onClick={() => setOpen(p)}
+                className="absolute right-3 top-3 bg-white/95 px-3 py-2 text-[10px] font-medium uppercase tracking-[.18em] text-ink transition hover:bg-accent-500 hover:text-white"
+              >
+                Watch on YouTube
+              </button>
+            )}
+            <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+              <p className="font-serif text-2xl leading-tight">{p.name}</p>
+              <div className="mt-4 flex items-center justify-between border-t border-white/20 pt-4">
+                <span className="text-sm">{formatPrice(p.price)}</span>
+                <Link href={`/product/${p.slug}`} className="text-[11px] font-medium uppercase tracking-[.2em] underline-offset-4 hover:underline">
+                  Shop now →
                 </Link>
               </div>
             </div>
@@ -55,15 +58,15 @@ export default function VideoShowcase({ products }: { products: Product[] }) {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-950/90 p-4 backdrop-blur" onClick={() => setOpen(null)} role="dialog" aria-modal="true">
-          <div className="w-full max-w-4xl animate-fade-in" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex items-center justify-between text-white">
-              <p className="font-semibold">{open.name}</p>
-              <button onClick={() => setOpen(null)} aria-label="Close video" className="rounded-full p-2 hover:bg-white/10"><X className="h-6 w-6" /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/95 p-4" onClick={() => setOpen(null)} role="dialog" aria-modal="true">
+          <div className="w-full max-w-5xl animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between text-white">
+              <p className="font-serif text-2xl">{open.name}</p>
+              <button onClick={() => setOpen(null)} aria-label="Close video" className="p-2 hover:text-accent-400"><X className="h-6 w-6" strokeWidth={1.5} /></button>
             </div>
-            <div className="overflow-hidden rounded-3xl"><VideoEmbed url={open.videos[0]} title={open.name} autoPlay /></div>
-            <div className="mt-5 flex justify-center">
-              <Link href={`/product/${open.slug}`} className="btn-accent px-8">Buy now · {formatPrice(open.price)}</Link>
+            <VideoEmbed url={youTubeVideos(open.videos)[0]} title={open.name} autoPlay />
+            <div className="mt-6 flex justify-center">
+              <Link href={`/product/${open.slug}`} className="btn-accent">Shop now · {formatPrice(open.price)}</Link>
             </div>
           </div>
         </div>

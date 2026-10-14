@@ -1,32 +1,50 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Banknote, Leaf, Menu, RotateCcw, Search, ShoppingBag, Truck, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { FREE_SHIPPING_THRESHOLD, STORE } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
 import { track } from "@/lib/analytics";
 
 const nav = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop all" },
-  { href: "/shop?category=Kitchen%20Appliances", label: "Appliances" },
-  { href: "/shop?category=Kitchen%20Tools", label: "Kitchen tools" },
-  { href: "/contact", label: "Contact" },
+  { href: "/shop", label: "Shop all", match: (p: string, c: string | null) => p === "/shop" && !c },
+  { href: "/shop?category=Kitchen%20Appliances", label: "Appliances", match: (p: string, c: string | null) => c === "Kitchen Appliances" },
+  { href: "/shop?category=Kitchen%20Tools", label: "Kitchen tools", match: (p: string, c: string | null) => c === "Kitchen Tools" },
+  { href: "/shop?category=Home%20Cleaning", label: "Cleaning", match: (p: string, c: string | null) => c === "Home Cleaning" },
+  { href: "/contact", label: "Contact", match: (p: string) => p === "/contact" },
 ];
 
-const announcements = [
-  { icon: Truck, text: `Free delivery on orders over ${formatPrice(FREE_SHIPPING_THRESHOLD)}` },
-  { icon: Banknote, text: "Cash on Delivery all over Pakistan" },
-  { icon: RotateCcw, text: "7-day easy returns" },
-  { icon: Leaf, text: "Quality checked before dispatch" },
-];
+function NavLinks({ onClick, mobile }: { onClick?: () => void; mobile?: boolean }) {
+  const pathname = usePathname();
+  const cat = useSearchParams().get("category");
+  return (
+    <>
+      {nav.filter((n) => mobile || n.href !== "/contact").map((n) => {
+        const active = n.match(pathname, cat);
+        return mobile ? (
+          <Link key={n.href} href={n.href} onClick={onClick} className="border-b border-ink/10 py-4 font-serif text-3xl text-ink">
+            {n.label}
+          </Link>
+        ) : (
+          <Link
+            key={n.href}
+            href={n.href}
+            className={`relative whitespace-nowrap py-2 text-[11px] font-medium uppercase tracking-[.2em] transition hover:text-brand-600 ${active ? "text-brand-600" : "text-ink/80"}`}
+          >
+            {n.label}
+            <span className={`absolute -bottom-0.5 left-0 h-px bg-brand-600 transition-all ${active ? "w-full" : "w-0"}`} />
+          </Link>
+        );
+      })}
+    </>
+  );
+}
 
 export default function Header() {
   const { count, setDrawerOpen } = useCart();
-  const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -34,7 +52,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -52,99 +70,81 @@ export default function Header() {
 
   return (
     <>
-      <div className="overflow-hidden bg-brand-900 py-2.5 text-xs font-medium text-brand-50">
-        <div className="flex w-max animate-marquee gap-12 whitespace-nowrap">
-          {[...announcements, ...announcements, ...announcements, ...announcements].map(({ icon: Icon, text }, i) => (
-            <span key={i} className="flex items-center gap-2">
-              <Icon className="h-3.5 w-3.5 text-accent-400" /> {text}
-            </span>
-          ))}
-        </div>
+      <div className="bg-ink px-4 py-2.5 text-center text-[11px] font-medium uppercase tracking-[.22em] text-white/85">
+        Free delivery over {formatPrice(FREE_SHIPPING_THRESHOLD)} <span className="mx-3 text-accent-400">·</span> Cash on delivery across Pakistan
       </div>
 
-      <header className={`sticky top-0 z-40 transition-all ${scrolled ? "bg-white/90 shadow-[0_1px_0_rgba(13,91,88,.08)] backdrop-blur-lg" : "bg-[#FFFAF3]"}`}>
-        <div className="container-x flex h-[72px] items-center gap-4">
-          <button className="-ml-2 rounded-full p-2 hover:bg-brand-50 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
-            <Menu className="h-6 w-6" />
-          </button>
-          <Link href="/" className="shrink-0" aria-label={`${STORE.name} home`}>
-            <Image src="/logo.png" alt={STORE.name} width={357} height={97} priority className="h-9 w-auto sm:h-10" />
+      <header className={`sticky top-0 z-40 border-b transition-colors duration-300 ${scrolled ? "border-ink/10 bg-paper/95 backdrop-blur" : "border-ink/5 bg-paper"}`}>
+        <div className="container-x grid h-[76px] grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <div className="flex items-center gap-8">
+            <button className="-ml-1 p-1 xl:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
+              <Menu className="h-6 w-6" strokeWidth={1.5} />
+            </button>
+            <nav className="hidden items-center gap-7 xl:flex">
+              <Suspense>
+                <NavLinks />
+              </Suspense>
+            </nav>
+          </div>
+
+          <Link href="/" aria-label={`${STORE.name} home`} className="justify-self-center">
+            <Image src="/logo.png" alt={STORE.name} width={357} height={97} priority className="h-9 w-auto sm:h-11" />
           </Link>
 
-          <nav className="mx-auto hidden items-center gap-1 lg:flex">
-            {nav.map((n) => {
-              const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href.split("?")[0]) && n.href === "/shop";
-              return (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  className={`relative rounded-full px-4 py-2 text-sm font-medium transition ${active ? "text-brand-600" : "text-ink/70 hover:text-brand-600"}`}
-                >
-                  {n.label}
-                  {active && <span className="absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full bg-accent-500" />}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="ml-auto flex items-center gap-1 lg:ml-0">
-            <button onClick={() => setSearchOpen((v) => !v)} className="rounded-full p-2.5 text-ink/80 hover:bg-brand-50 hover:text-brand-600" aria-label="Search">
-              <Search className="h-5 w-5" />
+          <div className="flex items-center justify-end gap-2 sm:gap-4">
+            <button onClick={() => setSearchOpen((v) => !v)} className="p-2 text-ink transition hover:text-brand-600" aria-label="Search">
+              <Search className="h-5 w-5" strokeWidth={1.5} />
             </button>
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="flex items-center gap-2 rounded-full bg-brand-600 py-2 pl-3 pr-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-              aria-label={`Open cart, ${count} items`}
-            >
-              <ShoppingBag className="h-[18px] w-[18px]" />
-              <span className="hidden sm:inline">Cart</span>
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-500 px-1 text-[11px] font-bold">{count}</span>
+            <button onClick={() => setDrawerOpen(true)} className="relative p-2 text-ink transition hover:text-brand-600" aria-label={`Open cart, ${count} items`}>
+              <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
+              {count > 0 && (
+                <span className="absolute right-0 top-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent-500 px-1 text-[10px] font-semibold text-white">
+                  {count}
+                </span>
+              )}
             </button>
           </div>
         </div>
 
         {searchOpen && (
-          <div className="border-t border-brand-50 bg-white">
-            <form onSubmit={submit} className="container-x py-4">
-              <label className="relative block">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-400" />
-                <input
-                  autoFocus
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search choppers, coffee makers, vacuums…"
-                  className="h-14 w-full rounded-full border border-brand-100 bg-cream/60 pl-12 pr-4 text-base outline-none focus:border-brand-400 focus:bg-white"
-                />
-              </label>
+          <div className="border-t border-ink/10 bg-paper">
+            <form onSubmit={submit} className="container-x flex items-center gap-4 py-6">
+              <Search className="h-6 w-6 text-ink/40" strokeWidth={1.5} />
+              <input
+                autoFocus
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search for choppers, coffee makers, vacuums…"
+                className="w-full bg-transparent font-serif text-2xl text-ink outline-none placeholder:text-ink/30 sm:text-3xl"
+              />
+              <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search" className="p-1">
+                <X className="h-6 w-6" strokeWidth={1.5} />
+              </button>
             </form>
           </div>
         )}
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-ink/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-80 max-w-[85%] animate-fade-in flex-col bg-[#FFFAF3] p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 xl:hidden">
+          <div className="absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} />
+          <div className="absolute inset-y-0 left-0 flex w-[88%] max-w-sm animate-fade-in flex-col bg-paper px-7 py-6">
             <div className="flex items-center justify-between">
               <Image src="/logo.png" alt={STORE.name} width={357} height={97} className="h-9 w-auto" />
-              <button onClick={() => setOpen(false)} aria-label="Close menu" className="rounded-full p-1.5 hover:bg-brand-50">
-                <X className="h-6 w-6" />
+              <button onClick={() => setOpen(false)} aria-label="Close menu" className="p-1">
+                <X className="h-6 w-6" strokeWidth={1.5} />
               </button>
             </div>
-            <form onSubmit={submit} className="mt-6">
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products…" className="input rounded-full" />
+            <form onSubmit={submit} className="mt-8">
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products" className="input" />
             </form>
-            <nav className="mt-6 flex flex-col gap-1">
-              {nav.map((n) => (
-                <Link key={n.href} href={n.href} onClick={() => setOpen(false)} className="rounded-2xl px-4 py-3 text-lg font-semibold text-ink hover:bg-brand-50">
-                  {n.label}
-                </Link>
-              ))}
+            <nav className="mt-6 flex flex-col">
+              <Link href="/" onClick={() => setOpen(false)} className="border-b border-ink/10 py-4 font-serif text-3xl text-ink">Home</Link>
+              <Suspense>
+                <NavLinks mobile onClick={() => setOpen(false)} />
+              </Suspense>
             </nav>
-            <div className="mt-auto rounded-3xl bg-brand-600 p-5 text-white">
-              <p className="font-semibold">Cash on Delivery</p>
-              <p className="mt-1 text-sm text-brand-100">Pay only when your order arrives.</p>
-            </div>
+            <p className="mt-auto text-[11px] uppercase tracking-[.2em] text-ink/50">Cash on delivery · 7-day returns</p>
           </div>
         </div>
       )}

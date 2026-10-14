@@ -26,8 +26,8 @@ export default function CartPage() {
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-50 text-brand-600">
           <ShoppingBag className="h-10 w-10" />
         </div>
-        <h1 className="mt-6 text-2xl font-extrabold">Your cart is empty</h1>
-        <p className="mt-2 text-gray-500">Looks like you haven’t added anything yet.</p>
+        <h1 className="mt-6 font-serif text-3xl font-medium">Your cart is empty</h1>
+        <p className="mt-2 text-ink/55">Looks like you haven’t added anything yet.</p>
         <Link href="/shop" className="btn-primary mt-6">Continue shopping</Link>
       </div>
     );
@@ -35,21 +35,21 @@ export default function CartPage() {
 
   return (
     <div className="container-x py-10">
-      <h1 className="text-3xl font-extrabold tracking-tight">Shopping cart</h1>
+      <h1 className="font-serif text-4xl font-medium sm:text-5xl">Shopping cart</h1>
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
         <ul className="card divide-y">
           {items.map((i) => (
             <li key={i.product_id} className="flex gap-4 p-4 sm:p-5">
-              <Link href={`/product/${i.slug}`} className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-gray-50">
+              <Link href={`/product/${i.slug}`} className="relative h-24 w-24 shrink-0 overflow-hidden bg-sand">
                 <ProductImage src={i.image} alt={i.name} sizes="96px" />
               </Link>
               <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
                 <div className="flex-1">
                   <Link href={`/product/${i.slug}`} className="font-semibold hover:text-brand-700">{i.name}</Link>
-                  <p className="text-sm text-gray-500">{formatPrice(i.price)} each</p>
+                  <p className="text-sm text-ink/55">{formatPrice(i.price)} each</p>
                 </div>
                 <div className="flex items-center justify-between gap-6">
-                  <div className="flex items-center rounded-full border">
+                  <div className="flex items-center border">
                     <button className="p-2" onClick={() => setQty(i.product_id, i.quantity - 1)} aria-label="Decrease">
                       <Minus className="h-4 w-4" />
                     </button>
@@ -59,7 +59,7 @@ export default function CartPage() {
                     </button>
                   </div>
                   <p className="w-24 text-right font-bold">{formatPrice(i.price * i.quantity)}</p>
-                  <button onClick={() => remove(i.product_id)} className="p-2 text-gray-400 hover:text-rose-600" aria-label="Remove">
+                  <button onClick={() => remove(i.product_id)} className="p-2 text-ink/40 hover:text-rose-600" aria-label="Remove">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -68,10 +68,10 @@ export default function CartPage() {
           ))}
         </ul>
         <aside className="card h-fit p-6 lg:sticky lg:top-28">
-          <h2 className="text-lg font-bold">Order summary</h2>
+          <h2 className="font-serif text-2xl font-medium">Order summary</h2>
           <dl className="mt-4 space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-gray-600">Subtotal</dt><dd className="font-medium">{formatPrice(subtotal)}</dd></div>
-            <div className="flex justify-between"><dt className="text-gray-600">Delivery</dt><dd className="font-medium">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
+            <div className="flex justify-between"><dt className="text-ink/65">Subtotal</dt><dd className="font-medium">{formatPrice(subtotal)}</dd></div>
+            <div className="flex justify-between"><dt className="text-ink/65">Delivery</dt><dd className="font-medium">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
             <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
           </dl>
           <Link href="/checkout" className="btn-primary mt-6 w-full py-3.5 text-base">Proceed to checkout</Link>

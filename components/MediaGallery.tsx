@@ -20,11 +20,11 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
   const go = (d: number) => setIndex((i) => (i + d + media.length) % media.length);
 
   return (
-    <div className="lg:sticky lg:top-28 lg:self-start">
+    <div className="lg:sticky lg:top-24 lg:self-start">
       <div
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        className="relative aspect-square overflow-hidden rounded-[32px] bg-cream shadow-card ring-1 ring-brand-50"
+        className="relative aspect-[4/5] overflow-hidden bg-sand"
       >
         {!current ? (
           <ProductImage alt={name} />
@@ -33,31 +33,35 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
             <ProductImage src={current.url} alt={name} priority sizes="(max-width:1024px) 100vw, 50vw" />
             <HoverVideo url={videos[0]} active={hover} />
             {videos.length > 0 && !hover && (
-              <span className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-brand-700 shadow backdrop-blur">
+              <span className="pointer-events-none absolute bottom-5 left-5 bg-paper/95 px-4 py-2.5 text-[10px] font-medium uppercase tracking-[.2em] text-ink">
                 ▶ Hover to watch it in action
               </span>
             )}
           </>
         ) : (
-          <div className="absolute inset-0 flex items-center bg-black">
-            <div className="w-full">
-              <VideoEmbed key={current.url} url={current.url} title={name} autoPlay />
+          youTubeId(current.url) ? (
+            <div className="absolute inset-0 flex items-center bg-black">
+              <div className="w-full">
+                <VideoEmbed key={current.url} url={current.url} title={name} autoPlay />
+              </div>
             </div>
-          </div>
+          ) : (
+            <video key={current.url} src={current.url} autoPlay muted loop playsInline controls className="absolute inset-0 h-full w-full bg-black object-cover" />
+          )
         )}
         {media.length > 1 && (
           <>
             <button
               onClick={() => go(-1)}
               aria-label="Previous"
-              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow hover:bg-white"
+              className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-paper/90 hover:bg-white"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               onClick={() => go(1)}
               aria-label="Next"
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow hover:bg-white"
+              className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-paper/90 hover:bg-white"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -66,7 +70,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
       </div>
 
       {media.length > 1 && (
-        <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
+        <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-5">
           {media.map((m, i) => {
             const yt = m.kind === "video" ? youTubeId(m.url) : null;
             return (
@@ -74,14 +78,14 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
                 key={m.url + i}
                 onClick={() => setIndex(i)}
                 aria-label={`Show ${m.kind} ${i + 1}`}
-                className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 bg-gray-100 transition ${
-                  i === index ? "border-accent-500" : "border-transparent opacity-70 hover:opacity-100"
+                className={`relative aspect-[4/5] w-full overflow-hidden border-2 bg-sand transition ${
+                  i === index ? "border-ink" : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
                 {m.kind === "image" ? (
-                  <Image src={m.url} alt="" fill sizes="80px" className="object-cover" />
+                  <Image src={m.url} alt="" fill sizes="140px" className="object-cover" />
                 ) : yt ? (
-                  <Image src={`https://img.youtube.com/vi/${yt}/mqdefault.jpg`} alt="" fill sizes="80px" className="object-cover" />
+                  <Image src={`https://img.youtube.com/vi/${yt}/mqdefault.jpg`} alt="" fill sizes="140px" className="object-cover" />
                 ) : (
                   <video src={m.url} muted preload="metadata" className="absolute inset-0 h-full w-full object-cover" />
                 )}

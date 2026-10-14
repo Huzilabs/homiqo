@@ -4,34 +4,42 @@
 
 @layer base {
   html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
-  body { @apply bg-[#FFFAF3] text-ink antialiased; }
+  body { @apply bg-paper font-sans text-ink antialiased; font-feature-settings: "kern"; }
+  h1, h2, h3 { text-wrap: balance; }
   ::selection { @apply bg-accent-200 text-ink; }
 }
 
 @layer components {
-  .container-x { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition duration-200 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-60; }
-  .btn-primary { @apply btn bg-brand-600 text-white shadow-sm hover:bg-brand-700 hover:shadow-lift; }
-  .btn-accent { @apply btn bg-accent-500 text-white shadow-glow hover:bg-accent-600; }
-  .btn-secondary { @apply btn border border-brand-100 bg-white text-ink hover:border-brand-300 hover:bg-brand-50; }
-  .btn-danger { @apply btn bg-rose-600 text-white hover:bg-rose-700; }
-  .input { @apply block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10; }
-  .label { @apply mb-1.5 block text-sm font-medium text-gray-700; }
-  .card { @apply rounded-3xl border border-brand-50 bg-white shadow-card; }
-  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset; }
-  .eyebrow { @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.2em] text-accent-600; }
-  .h-display { @apply text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl; }
-  .h-section { @apply text-3xl font-bold tracking-tight sm:text-4xl; }
+  .container-x { @apply mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12; }
+
+  /* Buttons — square, tracked uppercase, editorial */
+  .btn { @apply inline-flex items-center justify-center gap-2.5 px-8 py-4 text-xs font-medium uppercase tracking-[.22em] transition duration-300 disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-ink text-white hover:bg-brand-600; }
+  .btn-accent { @apply btn bg-accent-500 text-white hover:bg-accent-600; }
+  .btn-secondary { @apply btn border border-ink/20 bg-transparent text-ink hover:border-ink hover:bg-ink hover:text-white; }
+  .btn-light { @apply btn bg-white text-ink hover:bg-cream; }
+  .btn-danger { @apply btn bg-rose-700 text-white hover:bg-rose-800; }
+  .link-arrow { @apply inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[.22em] text-ink underline-offset-8 transition hover:text-brand-600 hover:underline; }
+
+  /* Forms */
+  .input { @apply block w-full rounded-none border border-ink/15 bg-white px-4 py-3.5 text-sm text-ink outline-none transition placeholder:text-ink/35 focus:border-ink; }
+  .label { @apply mb-2 block text-[11px] font-medium uppercase tracking-[.18em] text-ink/60; }
+
+  /* Surfaces */
+  .card { @apply border border-ink/10 bg-white; }
+  .badge { @apply inline-flex items-center px-2.5 py-1 text-[10px] font-medium uppercase tracking-[.14em] ring-1 ring-inset; }
+
+  /* Type */
+  .eyebrow { @apply text-[11px] font-medium uppercase tracking-[.28em] text-accent-600; }
+  .h-display { @apply font-serif text-[2.9rem] font-medium leading-[1.02] tracking-[-.01em] sm:text-6xl lg:text-[5.25rem]; }
+  .h-section { @apply font-serif text-[2.4rem] font-medium leading-[1.05] tracking-[-.01em] sm:text-5xl; }
+  .h-card { @apply font-serif text-xl font-medium leading-snug sm:text-[1.4rem]; }
 }
 
-/* Video that always covers its box, whatever the aspect ratio */
+/* Video that always covers its box */
 .cover-video { container-type: size; }
-.cover-video > iframe,
-.cover-video > video {
+.cover-video > iframe {
   position: absolute; top: 50%; left: 50%;
-  width: max(100%, calc(100cqh * 16 / 9));
-  height: max(100%, calc(100cqw * 9 / 16));
-  transform: translate(-50%, -50%);
-  border: 0; pointer-events: none;
+  width: max(100%, calc(100cqh * 16 / 9)); height: max(100%, calc(100cqw * 9 / 16));
+  transform: translate(-50%, -50%); border: 0; pointer-events: none;
 }
-.cover-video > video { object-fit: cover; width: 100%; height: 100%; }

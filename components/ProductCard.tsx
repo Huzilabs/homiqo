@@ -1,11 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { CirclePlay, Plus, Truck } from "lucide-react";
+import { Play } from "lucide-react";
 import HoverVideo from "./HoverVideo";
 import ProductImage from "./ProductImage";
-import { discountPercent, formatPrice } from "@/lib/format";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/config";
+import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import type { Product } from "@/lib/types";
 
@@ -15,12 +14,12 @@ export default function ProductCard({ product, priority }: { product: Product; p
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const off = discountPercent(product.price, product.compare_at_price);
   const soldOut = product.stock <= 0;
-  const video = product.videos[0];
+  const video = previewVideo(product.videos);
 
   const start = () => {
     if (!video) return;
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setPlaying(true), 250);
+    timer.current = setTimeout(() => setPlaying(true), 200);
   };
   const stop = () => {
     clearTimeout(timer.current);
@@ -28,57 +27,54 @@ export default function ProductCard({ product, priority }: { product: Product; p
   };
 
   return (
-    <div
-      onMouseEnter={start}
-      onMouseLeave={stop}
-      className="group relative flex flex-col rounded-[28px] bg-white p-2.5 shadow-card ring-1 ring-brand-50 transition duration-300 hover:-translate-y-1 hover:shadow-lift"
-    >
-      <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden rounded-[22px] bg-cream">
-        <ProductImage src={product.images[0]} alt={product.name} priority={priority} className="transition duration-700 group-hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
-        <HoverVideo url={video} active={playing} />
-        <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
-          {off > 0 && <span className="rounded-full bg-accent-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-glow">-{off}%</span>}
-          {soldOut && <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-semibold text-white">Sold out</span>}
+    <div className="group" onMouseEnter={start} onMouseLeave={stop}>
+      <div className="relative aspect-[4/5] overflow-hidden bg-sand">
+        <Link href={`/product/${product.slug}`} className="absolute inset-0" aria-label={product.name}>
+          <ProductImage src={product.images[0]} alt={product.name} priority={priority} sizes="(max-width: 768px) 50vw, 25vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.04]" />
+          <HoverVideo url={video} active={playing} />
+        </Link>
+
+        <div className="pointer-events-none absolute left-3 top-3 flex flex-col items-start gap-1.5">
+          {soldOut ? (
+            <span className="bg-ink px-2.5 py-1 text-[10px] font-medium uppercase tracking-[.16em] text-white">Sold out</span>
+          ) : off > 0 ? (
+            <span className="bg-accent-600 px-2.5 py-1 text-[10px] font-medium tracking-[.12em] text-white">−{off}%</span>
+          ) : null}
+          {product.is_featured && !soldOut && (
+            <span className="bg-white px-2.5 py-1 text-[10px] font-medium uppercase tracking-[.16em] text-ink">Bestseller</span>
+          )}
         </div>
-        {video && !playing && (
+
+        {video && (
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              setPlaying(true);
-            }}
-            className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-ink shadow backdrop-blur transition hover:bg-white"
+            onClick={() => setPlaying((v) => !v)}
+            aria-label={playing ? "Stop preview" : "Play preview"}
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white"
           >
-            <CirclePlay className="h-3.5 w-3.5 text-accent-500" /> <span className="hidden sm:inline">Hover to</span> preview
+            <Play className={`h-3.5 w-3.5 fill-current ${playing ? "opacity-40" : ""}`} />
           </button>
         )}
-      </Link>
 
-      <div className="flex flex-1 flex-col px-2 pb-1.5 pt-3.5">
-        <p className="text-[10px] font-bold uppercase tracking-[.16em] text-leaf-600">{product.category}</p>
-        <Link href={`/product/${product.slug}`} className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-ink transition hover:text-brand-600 sm:text-[15px]">
+        <button
+          type="button"
+          disabled={soldOut}
+          onClick={() => add(product, 1)}
+          className="absolute inset-x-3 bottom-3 translate-y-[calc(100%+12px)] bg-white py-3.5 text-[11px] font-medium uppercase tracking-[.2em] text-ink opacity-0 transition duration-300 hover:bg-ink hover:text-white group-hover:translate-y-0 group-hover:opacity-100 disabled:hidden max-lg:translate-y-0 max-lg:opacity-100 max-lg:py-2.5 max-lg:text-[10px]"
+        >
+          Add to cart
+        </button>
+      </div>
+
+      <div className="pt-4">
+        <p className="text-[10px] font-medium uppercase tracking-[.2em] text-ink/50 sm:text-[11px]">{product.category}</p>
+        <Link href={`/product/${product.slug}`} className="h-card mt-1.5 block text-ink transition hover:text-brand-600">
           {product.name}
         </Link>
-        <div className="mt-auto flex items-end justify-between gap-2 pt-3">
-          <div>
-            <p className="text-base font-bold text-brand-600 sm:text-lg">{formatPrice(product.price)}</p>
-            {off > 0 ? (
-              <p className="text-xs text-gray-400 line-through">{formatPrice(product.compare_at_price!)}</p>
-            ) : product.price >= FREE_SHIPPING_THRESHOLD ? (
-              <p className="flex items-center gap-1 text-[11px] font-medium text-leaf-600"><Truck className="h-3 w-3" /> Free delivery</p>
-            ) : null}
-          </div>
-          <button
-            type="button"
-            disabled={soldOut}
-            onClick={() => add(product, 1)}
-            aria-label={`Add ${product.name} to cart`}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white transition hover:rotate-90 hover:bg-accent-500 disabled:bg-gray-300"
-          >
-            <Plus className="h-5 w-5" />
-          </button>
-        </div>
-        {!soldOut && product.stock <= 10 && <p className="mt-2 text-[11px] font-semibold text-accent-600">🔥 Only {product.stock} left</p>}
+        <p className="mt-1.5 flex items-baseline gap-2.5 text-sm">
+          <span className={`font-medium ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
+          {off > 0 && <span className="text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price!)}</span>}
+        </p>
       </div>
     </div>
   );

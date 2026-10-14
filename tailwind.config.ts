@@ -30,13 +30,16 @@ const config: Config = {
         },
         leaf: { 100: "#DDF1E6", 500: "#4CAF7F", 600: "#3B9468" },
         cream: "#FFF4E6",
-        ink: "#10302E",
+        sand: "#F4EEE5",
+        paper: "#FAF8F4",
+        ink: "#0E2A28",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
       boxShadow: {
-        card: "0 1px 2px rgba(16,48,46,.04), 0 8px 24px -12px rgba(16,48,46,.12)",
+        card: "0 1px 2px rgba(14,42,40,.04), 0 10px 30px -18px rgba(14,42,40,.18)",
         lift: "0 24px 48px -20px rgba(13,91,88,.35)",
         glow: "0 12px 32px -8px rgba(255,138,0,.45)",
       },

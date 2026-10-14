@@ -14,15 +14,15 @@ export default function ContactPage() {
 
   return (
     <div className="container-x max-w-3xl py-12">
-      <h1 className="text-3xl font-extrabold tracking-tight">Contact us</h1>
-      <p className="mt-2 text-gray-600">Questions about a product or your order? We’re happy to help.</p>
+      <h1 className="font-serif text-4xl font-medium sm:text-5xl">Contact us</h1>
+      <p className="mt-2 text-ink/65">Questions about a product or your order? We’re happy to help.</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         {items.map(({ icon: Icon, label, value, href }) => {
           const body = (
             <>
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Icon className="h-5 w-5" /></div>
+              <div className="flex h-11 w-11 items-center justify-center bg-brand-50 text-brand-600"><Icon className="h-5 w-5" /></div>
               <div>
-                <p className="text-sm text-gray-500">{label}</p>
+                <p className="text-sm text-ink/55">{label}</p>
                 <p className="font-semibold">{value}</p>
               </div>
             </>

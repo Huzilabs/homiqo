@@ -30,7 +30,7 @@ export default async function OrderPage({
         <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-leaf-100 text-leaf-600">
           <CircleCheck className="h-11 w-11" strokeWidth={1.75} />
         </span>
-        <h1 className="mt-6 text-3xl font-extrabold text-brand-700 sm:text-4xl">Thank you{order ? `, ${order.customer_name.split(" ")[0]}` : ""}!</h1>
+        <h1 className="mt-6 font-serif text-4xl font-medium sm:text-5xl">Thank you{order ? `, ${order.customer_name.split(" ")[0]}` : ""}!</h1>
         <p className="mt-3 text-ink/70">
           Your order <b className="text-brand-700">{number}</b> has been placed successfully.
         </p>
@@ -42,7 +42,7 @@ export default async function OrderPage({
           { icon: PhoneCall, t: "We’ll confirm", d: "Our team will call or email to confirm." },
           { icon: Truck, t: "Fast dispatch", d: "Delivered in 2–5 working days." },
         ].map(({ icon: Icon, t, d }) => (
-          <div key={t} className="rounded-3xl bg-white p-5 text-center shadow-card ring-1 ring-brand-50">
+          <div key={t} className=" bg-white p-5 text-center  ring-1 ring-brand-50">
             <Icon className="mx-auto h-6 w-6 text-accent-500" />
             <p className="mt-2 font-semibold text-brand-700">{t}</p>
             <p className="text-xs text-ink/60">{d}</p>

@@ -35,3 +35,9 @@ export const STATUS_STYLE: Record<string, string> = {
   delivered: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
   cancelled: "bg-rose-50 text-rose-700 ring-rose-600/20",
 };
+
+const isYouTube = (url: string) => youTubeId(url) !== null;
+/** First uploaded video file (mp4/webm) — used for lightweight hover/inline previews. */
+export const previewVideo = (videos: string[]) => videos.find((v) => !isYouTube(v));
+/** YouTube links — shown as "Watch on YouTube". */
+export const youTubeVideos = (videos: string[]) => videos.filter(isYouTube);

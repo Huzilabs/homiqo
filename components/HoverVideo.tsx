@@ -1,22 +1,24 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { youTubeId } from "@/lib/format";
 
-/** Muted, looping, chrome-less video that fills its (relative) parent. Only mounted while active. */
+/** Muted, looping video file that fills its (relative) parent. Mounted only while active; YouTube links are ignored. */
 export default function HoverVideo({ url, active, className = "" }: { url?: string; active: boolean; className?: string }) {
-  if (!url || !active) return null;
-  const yt = youTubeId(url);
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (active) ref.current?.play().catch(() => {});
+  }, [active]);
+  if (!url || !active || youTubeId(url)) return null;
   return (
-    <div className={`cover-video absolute inset-0 overflow-hidden bg-black animate-fade-in ${className}`}>
-      {yt ? (
-        <iframe
-          src={`https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=1&controls=0&loop=1&playlist=${yt}&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1`}
-          title="Product video"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          tabIndex={-1}
-        />
-      ) : (
-        <video src={url} autoPlay muted loop playsInline />
-      )}
-    </div>
+    <video
+      ref={ref}
+      src={url}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      className={`pointer-events-none absolute inset-0 h-full w-full animate-fade-in object-cover ${className}`}
+    />
   );
 }

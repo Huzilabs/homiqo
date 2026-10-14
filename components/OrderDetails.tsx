@@ -18,7 +18,7 @@ export default function OrderDetails({ order }: { order: TrackedOrder }) {
       <ul className="divide-y divide-brand-50 px-6">
         {order.items.map((i, idx) => (
           <li key={idx} className="flex items-center gap-4 py-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-cream">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-cream">
               <ProductImage src={i.product_image} alt={i.product_name} sizes="64px" />
             </div>
             <p className="flex-1 text-sm font-medium">{i.product_name} <span className="text-ink/50">× {i.quantity}</span></p>

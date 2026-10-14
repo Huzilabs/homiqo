@@ -10,7 +10,7 @@ function msToMidnightPKT() {
   return end.getTime() - pkt.getTime();
 }
 
-export default function Countdown() {
+export default function Countdown({ dark }: { dark?: boolean }) {
   const [ms, setMs] = useState<number | null>(null);
   useEffect(() => {
     setMs(msToMidnightPKT());
@@ -19,11 +19,14 @@ export default function Countdown() {
   }, []);
   const parts = ms == null ? ["--", "--", "--"] : [ms / 3.6e6, (ms / 6e4) % 60, (ms / 1e3) % 60].map((n) => String(Math.floor(n)).padStart(2, "0"));
   return (
-    <div className="flex gap-2" aria-label="Time left on today's deal">
-      {["Hours", "Mins", "Secs"].map((label, i) => (
-        <div key={label} className="flex w-16 flex-col items-center rounded-xl bg-white/10 py-2 ring-1 ring-white/20 backdrop-blur">
-          <span className="text-2xl font-extrabold tabular-nums">{parts[i]}</span>
-          <span className="text-[10px] uppercase tracking-wider text-white/70">{label}</span>
+    <div className="flex items-start gap-3" aria-label="Time left on today's deal">
+      {["Hours", "Minutes", "Seconds"].map((label, i) => (
+        <div key={label} className="flex items-start gap-3">
+          <div className={`flex w-[76px] flex-col items-center border py-3 ${dark ? "border-white/20" : "border-ink/15 bg-white"}`}>
+            <span className="font-serif text-4xl font-medium tabular-nums leading-none">{parts[i]}</span>
+            <span className={`mt-2 text-[9px] uppercase tracking-[.2em] ${dark ? "text-white/60" : "text-ink/50"}`}>{label}</span>
+          </div>
+          {i < 2 && <span className="pt-3 font-serif text-3xl opacity-40">:</span>}
         </div>
       ))}
     </div>

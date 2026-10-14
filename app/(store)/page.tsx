@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Banknote, Check, CookingPot, Headphones, Leaf, PackageCheck, Phone, RotateCcw, ShieldCheck, Sofa, Sparkles, Truck, UtensilsCrossed, Zap } from "lucide-react";
+import { ArrowRight, Banknote, PackageCheck, RotateCcw, Truck } from "lucide-react";
 import Countdown from "@/components/Countdown";
 import Faq from "@/components/Faq";
 import InViewVideo from "@/components/InViewVideo";
@@ -10,38 +10,32 @@ import SetupNotice from "@/components/SetupNotice";
 import VideoShowcase from "@/components/VideoShowcase";
 import { getProducts } from "@/lib/products";
 import { supabaseConfigured } from "@/lib/supabase/server";
-import { discountPercent, formatPrice } from "@/lib/format";
+import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
+import { LIFESTYLE_IMAGE } from "@/lib/media";
 import type { Product } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const CATEGORY_ICON: Record<string, typeof Leaf> = {
-  "Kitchen Appliances": CookingPot,
-  "Kitchen Tools": UtensilsCrossed,
-  "Kitchen Storage": Sofa,
-  "Home Cleaning": Sparkles,
-};
-
 const faqs = [
   { q: "How does Cash on Delivery work?", a: "Place your order online without paying anything. Our rider delivers to your door and you pay in cash after receiving the parcel." },
   { q: "How long does delivery take?", a: "Most orders arrive within 2–5 working days anywhere in Pakistan. Karachi, Lahore and Islamabad are usually faster." },
-  { q: "How much is delivery?", a: `Delivery is ${formatPrice(SHIPPING_FEE)} per order, and free on orders of ${formatPrice(FREE_SHIPPING_THRESHOLD)} or more.` },
-  { q: "Will I get a confirmation?", a: "Yes — you’ll receive an email as soon as your order is placed, another when we confirm it, and one more when it ships." },
-  { q: "What if the product is damaged or not working?", a: "Contact us within 7 days of delivery and we’ll replace it or refund you. Please keep the original packaging." },
+  { q: "How much is delivery?", a: `Delivery is ${formatPrice(SHIPPING_FEE)} per order, and complimentary on orders of ${formatPrice(FREE_SHIPPING_THRESHOLD)} or more.` },
+  { q: "Will I receive a confirmation?", a: "Yes — an email as soon as your order is placed, another when we confirm it, and one more when it ships." },
+  { q: "What if something arrives damaged?", a: "Write to us within 7 days of delivery and we’ll replace it or refund you. Please keep the original packaging." },
 ];
 
 export default async function HomePage() {
   if (!supabaseConfigured) return <SetupNotice />;
   const products = await getProducts();
-  if (products.length === 0) return <div className="container-x py-24 text-center text-gray-500">No products yet — add some from the admin panel.</div>;
+  if (products.length === 0) return <div className="container-x py-32 text-center font-serif text-3xl text-ink/50">The collection is being prepared.</div>;
 
   const featured = products.filter((p) => p.is_featured);
-  const best = (featured.length >= 4 ? featured : products).slice(0, 4);
-  const spotlight = products.find((p) => p.slug.includes("qeema")) || products.find((p) => p.videos.length) || products[0];
-  const heroSide = products.filter((p) => p.id !== spotlight.id && p.is_featured).slice(0, 2);
-  const deal = [...products].filter((p) => p.stock > 0 && p.id !== spotlight.id).sort((a, b) => discountPercent(b.price, b.compare_at_price) - discountPercent(a.price, a.compare_at_price))[0];
-  const reels = products.filter((p) => p.videos.length > 0).slice(0, 4);
+  const edit = [...featured, ...products.filter((p) => !p.is_featured)].slice(0, 4);
+  const hero = products.find((p) => p.slug.includes("qeema")) || featured[0] || products[0];
+  const spotlight = products.find((p) => p.slug.includes("vacuum") && p.id !== hero.id) || featured.find((p) => p.id !== hero.id) || products[0];
+  const deal = [...products].filter((p) => p.stock > 0 && p.id !== hero.id && p.id !== spotlight.id).sort((a, b) => discountPercent(b.price, b.compare_at_price) - discountPercent(a.price, a.compare_at_price))[0];
+  const reels = products.filter((p) => previewVideo(p.videos)).slice(0, 4);
   const categories = Array.from(new Set(products.map((p) => p.category))).map((c) => ({
     name: c,
     image: products.find((p) => p.category === c)?.images[0],
@@ -50,213 +44,205 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ───────────── HERO ───────────── */}
-      <section className="container-x pt-4 sm:pt-6">
-        <div className="relative overflow-hidden rounded-[36px] bg-cream px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
-          <LeafShape className="pointer-events-none absolute -right-10 -top-12 h-56 w-56 rotate-12 text-accent-500/15" />
-          <LeafShape className="pointer-events-none absolute -bottom-16 left-1/3 h-44 w-44 -rotate-45 text-leaf-500/15" />
-          <div className="relative grid items-center gap-10 lg:grid-cols-[1fr_1.05fr]">
-            <div className="animate-fade-in">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-brand-700 shadow-card">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-white"><Zap className="h-3 w-3" /></span>
-                New season sale — up to 40% off
-              </span>
-              <h1 className="h-display mt-6 text-brand-700">
-                Smart tools for a <span className="relative whitespace-nowrap text-accent-500">happier<Squiggle className="absolute -bottom-2 left-0 w-full text-accent-500/40" /></span> home.
-              </h1>
-              <p className="mt-6 max-w-lg text-base leading-relaxed text-ink/70 sm:text-lg">
-                Qeema makers, choppers, coffee makers &amp; cordless vacuums — demo-tested and delivered anywhere in Pakistan. Pay only when it arrives.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/shop" className="btn-primary px-8 py-4 text-base">
-                  Shop collection <ArrowRight className="h-4 w-4" />
-                </Link>
-                <a href="#reels" className="btn-secondary px-7 py-4 text-base">Watch demos</a>
-              </div>
-              <div className="mt-10 grid max-w-md grid-cols-3 gap-3">
-                {[
-                  { icon: Banknote, t: "Cash on", b: "Delivery" },
-                  { icon: Truck, t: "2–5 day", b: "Delivery" },
-                  { icon: RotateCcw, t: "7-day", b: "Returns" },
-                ].map(({ icon: Icon, t, b }) => (
-                  <div key={t + b} className="rounded-2xl bg-white/70 p-3 text-center ring-1 ring-white">
-                    <Icon className="mx-auto h-5 w-5 text-accent-500" />
-                    <p className="mt-1.5 text-[11px] leading-tight text-ink/60">{t}</p>
-                    <p className="text-xs font-bold text-brand-700">{b}</p>
-                  </div>
-                ))}
-              </div>
+      {/* ═════════ HERO — full-screen editorial split ═════════ */}
+      <section className="grid lg:h-[calc(100svh-113px)] lg:min-h-[640px] lg:grid-cols-2">
+        <div className="relative order-2 flex items-center bg-sand px-6 py-16 sm:px-12 lg:order-1 lg:px-[max(3rem,calc((100vw-1320px)/2+3rem))] lg:py-0">
+          <div className="max-w-[560px] animate-fade-in">
+            <p className="eyebrow">The Homiqo Kitchen Edit</p>
+            <h1 className="h-display mt-6 text-ink">
+              Clever tools for the <em className="font-serif italic text-brand-600">heart</em> of your home
+            </h1>
+            <p className="mt-7 max-w-md text-base leading-relaxed text-ink/65 sm:text-[17px]">
+              Qeema makers, choppers, coffee makers and cordless vacuums — tested in real kitchens, delivered anywhere in Pakistan. Pay only when it arrives.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+              <Link href="/shop" className="btn-primary">Shop now</Link>
+              <a href="#watch" className="link-arrow">Watch it in action <ArrowRight className="h-3.5 w-3.5" /></a>
             </div>
-
-            <div className="grid grid-cols-5 grid-rows-2 gap-3 sm:gap-4 lg:h-[520px]">
-              <Link href={`/product/${spotlight.slug}`} className="group relative col-span-5 row-span-2 aspect-[4/3] overflow-hidden rounded-[28px] bg-brand-800 shadow-lift sm:col-span-3 sm:aspect-auto">
-                <ProductImage src={spotlight.images[0]} alt={spotlight.name} priority sizes="(max-width:1024px) 100vw, 35vw" />
-                <InViewVideo url={spotlight.videos[0]} />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-950/80 via-transparent to-transparent" />
-                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-bold text-brand-700 backdrop-blur">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /> Live demo
-                </span>
-                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 text-white">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-accent-400">Best seller</p>
-                    <p className="mt-1 text-lg font-bold leading-tight">{spotlight.name}</p>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-accent-500 px-4 py-2 text-sm font-bold shadow-glow">{formatPrice(spotlight.price)}</span>
-                </div>
-              </Link>
-              {heroSide.map((p) => (
-                <Link key={p.id} href={`/product/${p.slug}`} className="group relative col-span-2 hidden overflow-hidden rounded-[28px] bg-white shadow-card sm:block">
-                  <ProductImage src={p.images[0]} alt={p.name} sizes="20vw" className="transition duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-x-2 bottom-2 rounded-2xl bg-white/95 p-3 backdrop-blur">
-                    <p className="line-clamp-1 text-xs font-semibold">{p.name}</p>
-                    <p className="text-sm font-bold text-brand-600">{formatPrice(p.price)}</p>
-                  </div>
-                  {discountPercent(p.price, p.compare_at_price) > 0 && (
-                    <span className="absolute right-3 top-3 rounded-full bg-accent-500 px-2 py-1 text-[10px] font-bold text-white">-{discountPercent(p.price, p.compare_at_price)}%</span>
-                  )}
-                </Link>
+            <div className="mt-14 hidden grid-cols-3 border-t border-ink/10 pt-8 sm:grid">
+              {[
+                ["Cash on", "delivery"],
+                ["2–5 day", "delivery"],
+                ["7-day", "returns"],
+              ].map(([a, b]) => (
+                <p key={a} className="text-[11px] uppercase leading-relaxed tracking-[.2em] text-ink/55">
+                  <span className="block font-serif text-2xl normal-case tracking-normal text-ink">{a}</span>
+                  {b}
+                </p>
               ))}
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ───────────── CATEGORIES ───────────── */}
-      <section className="container-x pt-16">
-        <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
-          {categories.map((c) => {
-            const Icon = CATEGORY_ICON[c.name] || Leaf;
-            return (
-              <Link key={c.name} href={`/shop?category=${encodeURIComponent(c.name)}`} className="group flex w-28 flex-col items-center text-center sm:w-32">
-                <span className="relative h-24 w-24 overflow-hidden rounded-full bg-accent-50 ring-4 ring-white shadow-card transition duration-300 group-hover:-translate-y-1 group-hover:ring-accent-200 sm:h-28 sm:w-28">
-                  <ProductImage src={c.image} alt={c.name} sizes="112px" className="transition duration-500 group-hover:scale-110" />
-                  <span className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-accent-500 text-white ring-2 ring-white">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                </span>
-                <span className="mt-3 text-sm font-semibold text-brand-700">{c.name}</span>
-                <span className="text-xs text-ink/50">{c.count} item{c.count === 1 ? "" : "s"}</span>
-              </Link>
-            );
-          })}
+        <div className="relative order-1 aspect-[4/5] overflow-hidden bg-brand-900 sm:aspect-[16/11] lg:order-2 lg:aspect-auto">
+          <ProductImage src={hero.images[0]} alt={hero.name} priority sizes="(max-width:1024px) 100vw, 50vw" />
+          <InViewVideo url={previewVideo(hero.videos)} />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent" />
+          <Link
+            href={`/product/${hero.slug}`}
+            className="group absolute bottom-5 left-5 right-5 flex items-center gap-4 bg-paper/95 p-3 pr-5 backdrop-blur transition hover:bg-white sm:bottom-8 sm:left-8 sm:right-auto"
+          >
+            <span className="relative h-16 w-16 shrink-0 overflow-hidden bg-sand">
+              <ProductImage src={hero.images[1] || hero.images[0]} alt="" sizes="64px" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[10px] uppercase tracking-[.2em] text-accent-600">Now playing</span>
+              <span className="block truncate font-serif text-lg text-ink">{hero.name}</span>
+              <span className="text-sm text-ink/60">{formatPrice(hero.price)}</span>
+            </span>
+            <ArrowRight className="ml-auto h-4 w-4 shrink-0 transition group-hover:translate-x-1" />
+          </Link>
         </div>
       </section>
 
-      {/* ───────────── BEST SELLERS ───────────── */}
-      <section className="container-x pt-20">
-        <Head eyebrow="Customer favourites" title="Best sellers" text="Hover any product to watch it in action." link="/shop" />
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
-          {best.map((p, i) => <ProductCard key={p.id} product={p} priority={i < 2} />)}
+      {/* ═════════ CATEGORIES ═════════ */}
+      <section className="container-x pt-24 sm:pt-28">
+        <div className="text-center">
+          <p className="eyebrow">Shop by room &amp; ritual</p>
+          <h2 className="h-section mt-4">Find your essentials</h2>
+        </div>
+        <div className="mt-14 grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-4">
+          {categories.map((c) => (
+            <Link key={c.name} href={`/shop?category=${encodeURIComponent(c.name)}`} className="group flex flex-col items-center text-center">
+              <span className="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-full bg-sand">
+                <ProductImage src={c.image} alt={c.name} sizes="240px" className="transition duration-[1.2s] group-hover:scale-110" />
+              </span>
+              <span className="mt-6 font-serif text-2xl text-ink transition group-hover:text-brand-600">{c.name}</span>
+              <span className="mt-1 text-[11px] uppercase tracking-[.2em] text-ink/45">{c.count} {c.count === 1 ? "piece" : "pieces"}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* ───────────── SPOTLIGHT ───────────── */}
+      {/* ═════════ FEATURED EDIT ═════════ */}
+      <section className="container-x pt-28 sm:pt-36">
+        <SectionHead eyebrow="Featured collection" title="The Bestseller Edit" href="/shop" />
+        <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-7 lg:grid-cols-4">
+          {edit.map((p, i) => <ProductCard key={p.id} product={p} priority={i < 2} />)}
+        </div>
+      </section>
+
+      {/* ═════════ SPOTLIGHT — editorial split ═════════ */}
       <Spotlight product={spotlight} />
 
-      {/* ───────────── REELS ───────────── */}
+      {/* ═════════ PROMISES ═════════ */}
+      <section className="container-x pt-28">
+        <div className="grid grid-cols-2 border-y border-ink/10 lg:grid-cols-4">
+          {[
+            { icon: Banknote, t: "Cash on delivery", d: "Pay at your doorstep" },
+            { icon: Truck, t: "Delivered in 2–5 days", d: `Free over ${formatPrice(FREE_SHIPPING_THRESHOLD)}` },
+            { icon: RotateCcw, t: "7-day returns", d: "Simple replacements" },
+            { icon: PackageCheck, t: "Quality checked", d: "Tested before dispatch" },
+          ].map(({ icon: Icon, t, d }, i) => (
+            <div key={t} className={`flex flex-col items-center px-4 py-10 text-center ${i % 2 ? "border-l border-ink/10" : ""} ${i === 2 ? "max-lg:border-t lg:border-l" : ""} ${i === 3 ? "max-lg:border-t" : ""}`}>
+              <Icon className="h-7 w-7 text-brand-600" strokeWidth={1.25} />
+              <p className="mt-4 font-serif text-xl text-ink">{t}</p>
+              <p className="mt-1 text-[11px] uppercase tracking-[.18em] text-ink/50">{d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═════════ WATCH & SHOP ═════════ */}
       {reels.length > 0 && (
-        <section id="reels" className="mt-24 scroll-mt-24 bg-brand-700 py-20 text-white">
+        <section id="watch" className="mt-28 scroll-mt-28 bg-ink py-24 text-white sm:mt-36 sm:py-28">
           <div className="container-x">
-            <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+            <div className="mb-14 grid items-end gap-6 lg:grid-cols-2">
               <div>
-                <span className="eyebrow text-accent-400">See it before you buy</span>
-                <h2 className="h-section mt-2">Watch &amp; shop</h2>
-                <p className="mt-2 text-brand-100">Hover a video to play it — real product demos.</p>
+                <p className="eyebrow text-accent-400">See before you buy</p>
+                <h2 className="h-section mt-4">Watch &amp; shop</h2>
               </div>
-              <Link href="/shop" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold ring-1 ring-white/20 hover:bg-white/20">
-                All products <ArrowUpRight className="h-4 w-4" />
-              </Link>
+              <p className="max-w-md text-[15px] leading-relaxed text-white/60 lg:justify-self-end">
+                Hover over a film to see each product at work. Want the full review? Watch it on YouTube.
+              </p>
             </div>
             <VideoShowcase products={reels} />
           </div>
         </section>
       )}
 
-      {/* ───────────── ALL PRODUCTS ───────────── */}
-      <section className="container-x pt-24">
-        <Head eyebrow="The full range" title="Everything for your kitchen" link="/shop" />
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
-          {products.map((p) => <ProductCard key={p.id} product={p} />)}
-        </div>
-      </section>
-
-      {/* ───────────── DEAL ───────────── */}
+      {/* ═════════ DEAL OF THE DAY ═════════ */}
       {deal && (
-        <section className="container-x pt-24">
-          <div className="grid overflow-hidden rounded-[36px] bg-accent-500 text-white lg:grid-cols-2">
-            <div className="relative order-2 p-8 sm:p-12 lg:order-1">
-              <LeafShape className="pointer-events-none absolute -bottom-10 -right-10 h-48 w-48 text-white/10" />
-              <span className="inline-block rounded-full bg-white px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-600">Deal of the day</span>
-              <h2 className="mt-5 text-3xl font-extrabold leading-tight sm:text-4xl">{deal.name}</h2>
-              <p className="mt-3 max-w-md text-white/90">{deal.short_description}</p>
-              <div className="mt-6 flex items-baseline gap-3">
-                <span className="text-5xl font-extrabold">{formatPrice(deal.price)}</span>
-                {deal.compare_at_price && <span className="text-xl text-white/70 line-through">{formatPrice(deal.compare_at_price)}</span>}
-              </div>
-              <p className="mb-3 mt-8 text-sm font-medium text-white/85">Hurry — offer ends in</p>
-              <Countdown />
-              <Link href={`/product/${deal.slug}`} className="btn mt-8 bg-brand-700 px-8 py-4 text-base text-white hover:bg-brand-800">
-                Grab the deal <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="relative order-1 min-h-[280px] lg:order-2">
-              <ProductImage src={deal.images[0]} alt={deal.name} sizes="(max-width:1024px) 100vw, 50vw" />
-              <span className="absolute right-6 top-6 flex h-24 w-24 rotate-12 flex-col items-center justify-center rounded-full bg-brand-700 text-center font-extrabold shadow-xl">
-                <span className="text-2xl leading-none">{discountPercent(deal.price, deal.compare_at_price)}%</span>
-                <span className="text-xs">OFF</span>
+        <section className="container-x pt-28 sm:pt-36">
+          <div className="grid bg-sand lg:grid-cols-2">
+            <Link href={`/product/${deal.slug}`} className="group relative block aspect-square overflow-hidden lg:aspect-auto lg:min-h-[600px]">
+              <ProductImage src={deal.images[0]} alt={deal.name} sizes="(max-width:1024px) 100vw, 50vw" className="transition duration-[1.2s] group-hover:scale-[1.03]" />
+              <span className="absolute left-5 top-5 bg-accent-600 px-3 py-1.5 text-[11px] font-medium tracking-[.14em] text-white">
+                −{discountPercent(deal.price, deal.compare_at_price)}% TODAY
               </span>
+            </Link>
+            <div className="flex flex-col justify-center px-6 py-14 sm:px-14 lg:px-20">
+              <p className="eyebrow">Deal of the day</p>
+              <h2 className="h-section mt-4">{deal.name}</h2>
+              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/65">{deal.short_description}</p>
+              <p className="mt-8 flex items-baseline gap-4">
+                <span className="font-serif text-5xl text-accent-700">{formatPrice(deal.price)}</span>
+                {deal.compare_at_price && <span className="text-lg text-ink/40 line-through">{formatPrice(deal.compare_at_price)}</span>}
+              </p>
+              <p className="mb-4 mt-10 text-[11px] uppercase tracking-[.22em] text-ink/50">Offer ends in</p>
+              <Countdown />
+              <div className="mt-10"><Link href={`/product/${deal.slug}`} className="btn-primary">Shop the deal</Link></div>
             </div>
           </div>
         </section>
       )}
 
-      {/* ───────────── HOW IT WORKS ───────────── */}
-      <section className="container-x pt-24">
-        <div className="text-center">
-          <span className="eyebrow">Simple &amp; safe</span>
-          <h2 className="h-section mt-2 text-brand-700">Order now, pay at your door</h2>
-        </div>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { icon: PackageCheck, t: "Pick your products", d: "Watch the demos and add what you love to your cart." },
-            { icon: Check, t: "Place your order", d: "Just your name, phone & address. No card needed." },
-            { icon: Truck, t: "We confirm & ship", d: "You get an email confirmation, then we dispatch within 24h." },
-            { icon: Banknote, t: "Pay on delivery", d: "Receive your parcel, check it, then pay the rider." },
-          ].map(({ icon: Icon, t, d }, i) => (
-            <div key={t} className="relative rounded-[28px] bg-white p-7 shadow-card ring-1 ring-brand-50">
-              <span className="absolute right-6 top-5 text-5xl font-extrabold text-brand-50">0{i + 1}</span>
-              <span className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-50 text-accent-500"><Icon className="h-7 w-7" /></span>
-              <p className="relative mt-5 text-lg font-bold text-brand-700">{t}</p>
-              <p className="relative mt-1.5 text-sm leading-relaxed text-ink/60">{d}</p>
-            </div>
-          ))}
+      {/* ═════════ FULL RANGE ═════════ */}
+      <section className="container-x pt-28 sm:pt-36">
+        <SectionHead eyebrow="The full range" title="Everything for the kitchen" href="/shop" />
+        <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-7 lg:grid-cols-4">
+          {products.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
       </section>
 
-      {/* ───────────── FAQ ───────────── */}
-      <section className="container-x pt-24">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
+      {/* ═════════ HOW IT WORKS ═════════ */}
+      <section className="container-x pt-28 sm:pt-36">
+        <div className="grid gap-14 lg:grid-cols-[1fr_2fr]">
           <div>
-            <span className="eyebrow">Need help?</span>
-            <h2 className="h-section mt-2 text-brand-700">Questions, answered</h2>
-            <p className="mt-3 text-ink/60">Still unsure? Our team replies fast.</p>
-            <div className="mt-6 space-y-3">
-              {STORE.whatsapp && (
-                <a href={`https://wa.me/${STORE.whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl bg-white p-4 font-semibold text-[#128C7E] shadow-card hover:ring-1 hover:ring-[#25D366]">
-                  <Headphones className="h-5 w-5" /> Chat on WhatsApp
-                </a>
-              )}
-              {STORE.phone && (
-                <a href={`tel:${STORE.phone.replace(/\s/g, "")}`} className="flex items-center gap-3 rounded-2xl bg-white p-4 font-semibold text-brand-700 shadow-card">
-                  <Phone className="h-5 w-5" /> {STORE.phone}
-                </a>
-              )}
-              <Link href="/contact" className="flex items-center gap-3 rounded-2xl bg-brand-600 p-4 font-semibold text-white hover:bg-brand-700">
-                <ShieldCheck className="h-5 w-5" /> Contact support
-              </Link>
+            <p className="eyebrow">Simple &amp; safe</p>
+            <h2 className="h-section mt-4">Order today, pay at your door</h2>
+          </div>
+          <ol className="grid gap-x-10 gap-y-12 sm:grid-cols-2">
+            {[
+              ["Choose", "Watch the films and add what you love to your cart."],
+              ["Place your order", "Just your name, phone, email and address — no card needed."],
+              ["We confirm & ship", "You’ll get an email confirmation, then we dispatch within 24 hours."],
+              ["Pay on delivery", "Receive your parcel, check it, then pay the rider in cash."],
+            ].map(([t, d], i) => (
+              <li key={t} className="border-t border-ink/15 pt-6">
+                <span className="font-serif text-5xl italic text-accent-500">0{i + 1}</span>
+                <p className="mt-4 font-serif text-2xl text-ink">{t}</p>
+                <p className="mt-2 text-[15px] leading-relaxed text-ink/60">{d}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ═════════ FAQ ═════════ */}
+      <section className="container-x pt-28 sm:pt-36">
+        <div className="grid gap-12 lg:grid-cols-[1fr_2fr]">
+          <div>
+            <p className="eyebrow">Questions</p>
+            <h2 className="h-section mt-4">Good to know</h2>
+            <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink/60">Can’t find what you’re looking for? Our team usually replies within the hour.</p>
+            <div className="mt-8 flex flex-col items-start gap-4">
+              {STORE.whatsapp && <a href={`https://wa.me/${STORE.whatsapp}`} target="_blank" rel="noopener noreferrer" className="btn-primary">WhatsApp us</a>}
+              <Link href="/contact" className="link-arrow">Contact support <ArrowRight className="h-3.5 w-3.5" /></Link>
             </div>
           </div>
           <Faq items={faqs} />
+        </div>
+      </section>
+
+      {/* ═════════ CLOSING BANNER ═════════ */}
+      <section className="relative mt-28 overflow-hidden sm:mt-36">
+        <Image src={LIFESTYLE_IMAGE} alt="" fill sizes="100vw" className="object-cover" />
+        <div className="absolute inset-0 bg-ink/55" />
+        <div className="container-x relative flex min-h-[520px] flex-col items-center justify-center py-24 text-center text-white">
+          <p className="eyebrow text-accent-400">No advance payment, ever</p>
+          <h2 className="h-display mt-6 max-w-3xl">A smarter kitchen is one click away</h2>
+          <Link href="/shop" className="btn-light mt-10">Explore the collection</Link>
         </div>
       </section>
     </>
@@ -266,36 +252,32 @@ export default async function HomePage() {
 function Spotlight({ product }: { product: Product }) {
   const off = discountPercent(product.price, product.compare_at_price);
   return (
-    <section className="container-x pt-24">
-      <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-        <div className="relative">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[36px] bg-brand-800 shadow-lift sm:aspect-[5/4] lg:aspect-[4/5]">
-            <ProductImage src={product.images[1] || product.images[0]} alt={product.name} sizes="(max-width:1024px) 100vw, 50vw" />
-            <InViewVideo url={product.videos[1] || product.videos[0]} />
-          </div>
-          <div className="absolute -bottom-6 -right-2 hidden animate-float rounded-3xl bg-white p-5 shadow-lift sm:block lg:-right-8">
-            <p className="text-xs font-semibold uppercase tracking-widest text-ink/50">Only</p>
-            <p className="text-3xl font-extrabold text-brand-600">{formatPrice(product.price)}</p>
-            {off > 0 && <p className="text-sm font-semibold text-accent-600">Save {off}% today</p>}
-          </div>
+    <section className="pt-28 sm:pt-36">
+      <div className="grid lg:grid-cols-2">
+        <div className="relative aspect-[4/5] overflow-hidden bg-brand-900 sm:aspect-[16/12] lg:aspect-auto lg:min-h-[720px]">
+          <ProductImage src={product.images[0]} alt={product.name} sizes="(max-width:1024px) 100vw, 50vw" />
+          <InViewVideo url={previewVideo(product.videos)} />
         </div>
-        <div>
-          <span className="eyebrow">Product spotlight</span>
-          <h2 className="h-section mt-2 text-brand-700">{product.name}</h2>
-          <p className="mt-4 text-lg leading-relaxed text-ink/70">{product.description || product.short_description}</p>
-          <ul className="mt-7 grid gap-3 sm:grid-cols-2">
-            {product.features.slice(0, 6).map((f) => (
-              <li key={f} className="flex items-start gap-3 rounded-2xl bg-white p-3.5 text-sm font-medium shadow-card ring-1 ring-brand-50">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-leaf-100 text-leaf-600"><Check className="h-3.5 w-3.5" /></span>
-                {f}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={`/product/${product.slug}`} className="btn-accent px-8 py-4 text-base">
-              Shop now — {formatPrice(product.price)}
-            </Link>
-            <Link href={`/product/${product.slug}`} className="btn-secondary px-7 py-4 text-base">View details</Link>
+        <div className="flex items-center bg-brand-600 px-6 py-16 text-white sm:px-14 lg:px-20">
+          <div className="max-w-lg">
+            <p className="eyebrow text-accent-400">In the spotlight</p>
+            <h2 className="h-section mt-4">{product.name}</h2>
+            <p className="mt-6 text-[15px] leading-relaxed text-white/75">{product.description || product.short_description}</p>
+            <ul className="mt-8 border-t border-white/15">
+              {product.features.slice(0, 4).map((f) => (
+                <li key={f} className="flex items-center gap-4 border-b border-white/15 py-4 text-sm text-white/90">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
+              <span className="font-serif text-4xl">{formatPrice(product.price)}</span>
+              {off > 0 && <span className="text-[11px] uppercase tracking-[.2em] text-accent-400">Save {off}%</span>}
+            </div>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link href={`/product/${product.slug}`} className="btn-light">Discover</Link>
+            </div>
           </div>
         </div>
       </div>
@@ -303,35 +285,18 @@ function Spotlight({ product }: { product: Product }) {
   );
 }
 
-function Head({ eyebrow, title, text, link }: { eyebrow: string; title: string; text?: string; link?: string }) {
+function SectionHead({ eyebrow, title, href }: { eyebrow: string; title: string; href?: string }) {
   return (
-    <div className="mb-10 flex items-end justify-between gap-4">
+    <div className="mb-12 flex items-end justify-between gap-6">
       <div>
-        <span className="eyebrow">{eyebrow}</span>
-        <h2 className="h-section mt-2 text-brand-700">{title}</h2>
-        {text && <p className="mt-2 text-ink/60">{text}</p>}
+        <p className="eyebrow">{eyebrow}</p>
+        <h2 className="h-section mt-4">{title}</h2>
       </div>
-      {link && (
-        <Link href={link} className="group hidden items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-700 shadow-card ring-1 ring-brand-50 hover:ring-brand-200 sm:inline-flex">
-          View all <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+      {href && (
+        <Link href={href} className="link-arrow shrink-0 pb-2">
+          View all <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       )}
     </div>
-  );
-}
-
-function LeafShape({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} fill="currentColor" aria-hidden>
-      <path d="M90 8C50 6 14 26 10 66c-1 10 2 20 6 26 6-22 22-44 48-56-22 16-36 36-42 58 36 6 68-20 72-58 1-10-1-20-4-28Z" />
-    </svg>
-  );
-}
-
-function Squiggle({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 12" preserveAspectRatio="none" className={className} aria-hidden>
-      <path d="M2 8c30-6 60-6 98 0s70 6 98 0" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
-    </svg>
   );
 }

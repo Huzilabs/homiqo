@@ -26,8 +26,8 @@ export default function CartDrawer() {
       <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
       <aside className="absolute inset-y-0 right-0 flex w-full max-w-md animate-slide-in flex-col bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b px-5 py-4">
-          <h2 className="text-lg font-bold">Your cart</h2>
-          <button onClick={() => setDrawerOpen(false)} aria-label="Close cart" className="rounded-full p-1.5 hover:bg-gray-100">
+          <h2 className="font-serif text-2xl font-medium">Your cart</h2>
+          <button onClick={() => setDrawerOpen(false)} aria-label="Close cart" className="rounded-full p-1.5 hover:bg-sand">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -59,7 +59,7 @@ export default function CartDrawer() {
             <ul className="flex-1 divide-y overflow-y-auto px-5">
               {items.map((i) => (
                 <li key={i.product_id} className="flex gap-4 py-4">
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-50">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-sand">
                     <ProductImage src={i.image} alt={i.name} sizes="80px" />
                   </div>
                   <div className="flex flex-1 flex-col">
@@ -70,9 +70,9 @@ export default function CartDrawer() {
                     >
                       {i.name}
                     </Link>
-                    <p className="mt-0.5 text-sm text-gray-500">{formatPrice(i.price)}</p>
+                    <p className="mt-0.5 text-sm text-ink/55">{formatPrice(i.price)}</p>
                     <div className="mt-auto flex items-center justify-between pt-2">
-                      <div className="flex items-center rounded-full border">
+                      <div className="flex items-center border">
                         <button className="p-1.5" onClick={() => setQty(i.product_id, i.quantity - 1)} aria-label="Decrease">
                           <Minus className="h-3.5 w-3.5" />
                         </button>
@@ -81,7 +81,7 @@ export default function CartDrawer() {
                           <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                      <button onClick={() => remove(i.product_id)} className="p-1.5 text-gray-400 hover:text-rose-600" aria-label="Remove">
+                      <button onClick={() => remove(i.product_id)} className="p-1.5 text-ink/40 hover:text-rose-600" aria-label="Remove">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -94,7 +94,7 @@ export default function CartDrawer() {
                 <span>Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
-              <p className="text-xs text-gray-500">Delivery calculated at checkout. Pay cash when your order arrives.</p>
+              <p className="text-xs text-ink/55">Delivery calculated at checkout. Pay cash when your order arrives.</p>
               <Link href="/checkout" onClick={() => setDrawerOpen(false)} className="btn-primary w-full">
                 Checkout
               </Link>

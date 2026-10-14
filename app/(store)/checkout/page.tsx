@@ -65,11 +65,11 @@ export default function CheckoutPage() {
 
   return (
     <div className="container-x py-10">
-      <h1 className="text-3xl font-extrabold tracking-tight">Checkout</h1>
+      <h1 className="font-serif text-4xl font-medium sm:text-5xl">Checkout</h1>
       <form onSubmit={onSubmit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
         <div className="space-y-6">
           <section className="card p-6">
-            <h2 className="text-lg font-bold">Contact & delivery details</h2>
+            <h2 className="font-serif text-2xl font-medium">Contact & delivery details</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <Field label="Full name" name="customer_name" required autoComplete="name" className="sm:col-span-2" />
               <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" pattern="[0-9+\-\s]{10,16}" />
@@ -87,23 +87,23 @@ export default function CheckoutPage() {
             </div>
           </section>
           <section className="card p-6">
-            <h2 className="text-lg font-bold">Payment</h2>
-            <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border-2 border-brand-500 bg-brand-50/50 p-4">
+            <h2 className="font-serif text-2xl font-medium">Payment</h2>
+            <label className="mt-4 flex cursor-pointer items-start gap-3 border-2 border-brand-500 bg-brand-50/50 p-4">
               <input type="radio" name="payment" defaultChecked className="mt-1 accent-brand-600" />
               <span>
                 <span className="flex items-center gap-2 font-semibold"><Banknote className="h-5 w-5 text-brand-600" /> Cash on Delivery</span>
-                <span className="mt-0.5 block text-sm text-gray-600">Pay in cash when your order is delivered.</span>
+                <span className="mt-0.5 block text-sm text-ink/65">Pay in cash when your order is delivered.</span>
               </span>
             </label>
           </section>
         </div>
 
         <aside className="card h-fit p-6 lg:sticky lg:top-28">
-          <h2 className="text-lg font-bold">Your order</h2>
+          <h2 className="font-serif text-2xl font-medium">Your order</h2>
           <ul className="mt-4 max-h-72 space-y-4 overflow-y-auto">
             {items.map((i) => (
               <li key={i.product_id} className="flex items-center gap-3">
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-50">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-sand">
                   <ProductImage src={i.image} alt={i.name} sizes="56px" />
                   <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-800 px-1 text-[11px] font-bold text-white">{i.quantity}</span>
                 </div>
@@ -113,16 +113,16 @@ export default function CheckoutPage() {
             ))}
           </ul>
           <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
-            <div className="flex justify-between"><dt className="text-gray-600">Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div>
-            <div className="flex justify-between"><dt className="text-gray-600">Delivery</dt><dd>{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
+            <div className="flex justify-between"><dt className="text-ink/65">Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div>
+            <div className="flex justify-between"><dt className="text-ink/65">Delivery</dt><dd>{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
             <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>Total (COD)</dt><dd>{formatPrice(total)}</dd></div>
           </dl>
-          {error && <p className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700" role="alert">{error}</p>}
+          {error && <p className="mt-4 bg-rose-50 p-3 text-sm text-rose-700" role="alert">{error}</p>}
           <button type="submit" disabled={submitting} className="btn-accent mt-5 w-full py-3.5 text-base">
             {submitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Lock className="h-4 w-4" />}
             {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
           </button>
-          <p className="mt-3 text-center text-xs text-gray-500">
+          <p className="mt-3 text-center text-xs text-ink/55">
             By placing your order you agree to our <Link href="/policies" className="underline">shipping & return policy</Link>.
           </p>
         </aside>
