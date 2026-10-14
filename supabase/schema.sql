@@ -273,6 +273,9 @@ revoke all on function public.track_order(text, text) from public;
 grant execute on function public.place_order(jsonb, jsonb) to anon, authenticated;
 grant execute on function public.track_order(text, text) to anon, authenticated;
 grant execute on function public.is_admin() to anon, authenticated;
+-- trigger-only functions should not be callable through the API
+revoke execute on function public.on_order_status_change() from public, anon, authenticated;
+revoke execute on function public.touch_updated_at() from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------
 -- Row Level Security
