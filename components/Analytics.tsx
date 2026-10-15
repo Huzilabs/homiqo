@@ -5,7 +5,7 @@ import { Suspense, useEffect, useRef } from "react";
 
 // Public tracking IDs (they appear in page source by design). Env vars override them.
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-SF061PGJB4";
-const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
+const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID || "yy4j1gykb4";
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || "1461422069206467";
 
 /** Meta Pixel needs a PageView on every client-side navigation (GA4 & Clarity track these automatically). */
