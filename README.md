@@ -65,6 +65,16 @@ Add these environment variables (in `.env.local` and in Vercel → Settings → 
 
 If SMTP is not configured the store still works; emails are simply skipped.
 
+### Marketing dashboard (Meta Ads)
+`/admin/marketing` shows ad spend, cost per purchase, ROAS (Meta-attributed and blended against real store orders), cost per order, CTR, CPC, CPM, reach, an ad funnel, a revenue-vs-spend chart and per-campaign results.
+
+| Variable | Where to get it |
+|---|---|
+| `META_AD_ACCOUNT_ID` | Ads Manager → account dropdown → the number after `act_` |
+| `META_ACCESS_TOKEN` | Business Settings → Users → System users → Generate token (permission `ads_read`, expiry *Never*) |
+
+These are server-only (no `NEXT_PUBLIC_` prefix) so the token never reaches the browser.
+
 ### 3. Run locally
 ```bash
 npm install
