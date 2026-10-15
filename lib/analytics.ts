@@ -1,6 +1,7 @@
 "use client";
 import type { CartItem, Product } from "./types";
 import { STORE } from "./config";
+import { sendVisitEvent } from "./visits";
 
 declare global {
   interface Window {
@@ -53,6 +54,10 @@ function event(name: string, params: Record<string, unknown>) {
   try {
     window.gtag?.("event", name, params);
     meta(name, params);
+    if (["view_item", "add_to_cart", "begin_checkout", "purchase"].includes(name)) {
+      const items = (params.items as GaItem[] | undefined) || [];
+      sendVisitEvent(name, { pid: items.length === 1 ? items[0].item_id : undefined, val: Number(params.value) || undefined });
+    }
     window.clarity?.("event", name);
   } catch {
     /* analytics must never break the store */

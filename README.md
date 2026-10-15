@@ -65,6 +65,9 @@ Add these environment variables (in `.env.local` and in Vercel → Settings → 
 
 If SMTP is not configured the store still works; emails are simply skipped.
 
+### Visitor analytics (built in)
+`/admin/analytics` shows visitors, sessions, page views, bounce rate, conversion and add-to-cart rates, live visitors (last 5 minutes), traffic sources (UTM / referrer), devices, countries, top pages, top products and a shopping funnel. Visits are recorded by the store itself (`/api/track` → `analytics_events` table); admin pages and bots are excluded. Nothing to configure.
+
 ### Marketing dashboard (Meta Ads)
 `/admin/marketing` shows ad spend, cost per purchase, ROAS (Meta-attributed and blended against real store orders), cost per order, CTR, CPC, CPM, reach, an ad funnel, a revenue-vs-spend chart and per-campaign results.
 

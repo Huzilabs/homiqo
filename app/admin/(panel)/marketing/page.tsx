@@ -1,42 +1,13 @@
-import Link from "next/link";
-import TrendChart, { type TrendPoint } from "@/components/admin/TrendChart";
+import TrendChart from "@/components/admin/TrendChart";
+
+type Day = { date: string; revenue: number; spend: number; orders: number };
 import { createClient } from "@/lib/supabase/server";
+import RangeFilter from "@/components/admin/RangeFilter";
+import { addDays, iso, resolveRange } from "@/lib/date-range";
 import { getMetaAds, metaAdsConfigured, type AdMetrics, type CampaignAds } from "@/lib/meta-ads";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Marketing" };
-
-const RANGES = [
-  { key: "today", label: "Today" },
-  { key: "yesterday", label: "Yesterday" },
-  { key: "7d", label: "Last 7 days" },
-  { key: "30d", label: "Last 30 days" },
-  { key: "month", label: "This month" },
-  { key: "lastmonth", label: "Last month" },
-  { key: "90d", label: "Last 90 days" },
-] as const;
-
-/** Dates in Pakistan time (UTC+5), as YYYY-MM-DD. */
-const pkToday = () => new Date(Date.now() + 5 * 3600e3);
-const iso = (d: Date) => d.toISOString().slice(0, 10);
-const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 864e5);
-
-function resolveRange(key: string) {
-  const t = pkToday();
-  switch (key) {
-    case "today": return { since: iso(t), until: iso(t) };
-    case "yesterday": return { since: iso(addDays(t, -1)), until: iso(addDays(t, -1)) };
-    case "30d": return { since: iso(addDays(t, -29)), until: iso(t) };
-    case "90d": return { since: iso(addDays(t, -89)), until: iso(t) };
-    case "month": return { since: iso(new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), 1))), until: iso(t) };
-    case "lastmonth": {
-      const first = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() - 1, 1));
-      const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), 0));
-      return { since: iso(first), until: iso(last) };
-    }
-    default: return { since: iso(addDays(t, -6)), until: iso(t) };
-  }
-}
 
 const rs = (n: number) => "Rs " + Math.round(n).toLocaleString("en-PK");
 const num = (n: number) => Math.round(n).toLocaleString("en-PK");
@@ -73,7 +44,7 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
   const spend = m?.spend ?? 0;
 
   // ── Daily series
-  const days: TrendPoint[] = [];
+  const days: Day[] = [];
   for (let d = new Date(since + "T00:00:00Z"); iso(d) <= until; d = addDays(d, 1)) days.push({ date: iso(d), revenue: 0, spend: 0, orders: 0 });
   const byDate = new Map(days.map((d) => [d.date, d]));
   orders.forEach((o) => {
@@ -119,17 +90,7 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
       </div>
 
       {/* Filters — one row above everything */}
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:px-0">
-        {RANGES.map((r) => (
-          <Link
-            key={r.key}
-            href={`/admin/marketing?range=${r.key}`}
-            className={`whitespace-nowrap border px-3.5 py-1.5 text-sm font-medium ${range === r.key ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"}`}
-          >
-            {r.label}
-          </Link>
-        ))}
-      </div>
+      <RangeFilter base="/admin/marketing" active={range} />
 
       {!metaAdsConfigured() && <SetupCard />}
       {adsError && (

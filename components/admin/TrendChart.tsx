@@ -1,26 +1,42 @@
 "use client";
 import { useMemo, useRef, useState } from "react";
+import { CHART_COLORS } from "@/lib/chart-colors";
 
-export interface TrendPoint { date: string; revenue: number; spend: number; orders: number }
+export type TrendPoint = { date: string } & Record<string, number | string>;
+type Series = { key: string; label: string; color: string };
 
-// Validated pair (dataviz validator: lightness, chroma, CVD & normal-vision separation pass on white)
-const SERIES = [
-  { key: "revenue" as const, label: "Store revenue", color: "#0F9A92" },
-  { key: "spend" as const, label: "Ad spend", color: "#E67A00" },
+const DEFAULT_SERIES: Series[] = [
+  { key: "revenue", label: "Store revenue", color: CHART_COLORS[0] },
+  { key: "spend", label: "Ad spend", color: CHART_COLORS[1] },
 ];
 
 const W = 900, H = 280, PAD = { t: 16, r: 16, b: 32, l: 56 };
 const short = (n: number) => (n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${+(n / 1e3).toFixed(1)}k` : String(Math.round(n)));
 const rs = (n: number) => "Rs " + Math.round(n).toLocaleString("en-PK");
+const plain = (n: number) => Math.round(n).toLocaleString("en-PK");
 const day = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("en-PK", { day: "numeric", month: "short" });
 
-export default function TrendChart({ data }: { data: TrendPoint[] }) {
+export default function TrendChart({
+  data,
+  series: SERIES = DEFAULT_SERIES,
+  format = "currency",
+  extra = [{ key: "orders", label: "Orders" }],
+  label = "Daily store revenue and ad spend",
+}: {
+  data: TrendPoint[];
+  series?: Series[];
+  format?: "currency" | "number";
+  extra?: { key: string; label: string }[];
+  label?: string;
+}) {
+  const fmt = format === "currency" ? rs : plain;
+  const val = (d: TrendPoint, k: string) => Number(d[k]) || 0;
   const [hover, setHover] = useState<number | null>(null);
   const [table, setTable] = useState(false);
   const svg = useRef<SVGSVGElement>(null);
 
   const { max, x, y, ticks } = useMemo(() => {
-    const raw = Math.max(1, ...data.flatMap((d) => [d.revenue, d.spend]));
+    const raw = Math.max(1, ...data.flatMap((d) => SERIES.map((s) => val(d, s.key))));
     // "nice" tick step: 1, 2, 2.5 or 5 × 10^n so 4 gridlines land on round numbers
     const rough = raw / 4;
     const mag = Math.pow(10, Math.floor(Math.log10(rough)));
@@ -33,9 +49,10 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
       y: (v: number) => PAD.t + ih - (v / max) * ih,
       ticks: Array.from({ length: Math.round(max / step) + 1 }, (_, i) => i * step),
     };
-  }, [data]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, SERIES]);
 
-  const path = (k: "revenue" | "spend") => data.map((d, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(d[k]).toFixed(1)}`).join("");
+  const path = (k: string) => data.map((d, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(val(d, k)).toFixed(1)}`).join("");
 
   const onMove = (e: React.PointerEvent) => {
     const r = svg.current!.getBoundingClientRect();
@@ -67,18 +84,26 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
         <div className="max-h-[300px] overflow-auto border border-gray-100">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-              <tr><th className="px-3 py-2">Date</th><th className="px-3 py-2 text-right">Revenue</th><th className="px-3 py-2 text-right">Ad spend</th><th className="px-3 py-2 text-right">Orders</th></tr>
+              <tr>
+                <th className="px-3 py-2">Date</th>
+                {SERIES.map((s) => <th key={s.key} className="px-3 py-2 text-right">{s.label}</th>)}
+                {extra.map((e) => <th key={e.key} className="px-3 py-2 text-right">{e.label}</th>)}
+              </tr>
             </thead>
             <tbody className="divide-y">
               {data.map((d) => (
-                <tr key={d.date}><td className="px-3 py-2">{day(d.date)}</td><td className="px-3 py-2 text-right">{rs(d.revenue)}</td><td className="px-3 py-2 text-right">{rs(d.spend)}</td><td className="px-3 py-2 text-right">{d.orders}</td></tr>
+                <tr key={d.date}>
+                  <td className="px-3 py-2">{day(d.date)}</td>
+                  {SERIES.map((s) => <td key={s.key} className="px-3 py-2 text-right">{fmt(val(d, s.key))}</td>)}
+                  {extra.map((e) => <td key={e.key} className="px-3 py-2 text-right">{plain(val(d, e.key))}</td>)}
+                </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : (
         <div className="relative">
-          <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="h-auto w-full touch-none" onPointerMove={onMove} onPointerLeave={() => setHover(null)} role="img" aria-label="Daily store revenue and ad spend">
+          <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="h-auto w-full touch-none" onPointerMove={onMove} onPointerLeave={() => setHover(null)} role="img" aria-label={label}>
             {ticks.map((t) => (
               <g key={t}>
                 <line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} stroke="#E5E7EB" strokeWidth={1} strokeDasharray={t ? "3 4" : undefined} />
@@ -92,8 +117,11 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
             {SERIES.map((s) => (
               <path key={s.key} d={path(s.key)} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
             ))}
+            {data.length <= 2 && hover == null && SERIES.map((s) => data.map((d, i) => (
+              <circle key={s.key + i} cx={x(i)} cy={y(val(d, s.key))} r={5} fill={s.color} stroke="#fff" strokeWidth={2} />
+            )))}
             {hover != null && SERIES.map((s) => (
-              <circle key={s.key} cx={x(hover)} cy={y(data[hover][s.key])} r={4.5} fill={s.color} stroke="#fff" strokeWidth={2} />
+              <circle key={s.key} cx={x(hover)} cy={y(val(data[hover], s.key))} r={4.5} fill={s.color} stroke="#fff" strokeWidth={2} />
             ))}
             {max === 1 && <text x={W / 2} y={H / 2} textAnchor="middle" fontSize="13" fill="#9CA3AF">No data for this period</text>}
           </svg>
@@ -106,10 +134,12 @@ export default function TrendChart({ data }: { data: TrendPoint[] }) {
               {SERIES.map((s) => (
                 <p key={s.key} className="flex items-center justify-between gap-4 py-0.5 text-gray-700">
                   <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: s.color }} />{s.label}</span>
-                  <span className="font-medium text-gray-900">{rs(h[s.key])}</span>
+                  <span className="font-medium text-gray-900">{fmt(val(h, s.key))}</span>
                 </p>
               ))}
-              <p className="mt-1 flex justify-between border-t pt-1.5 text-gray-700"><span>Orders</span><span className="font-medium text-gray-900">{h.orders}</span></p>
+              {extra.map((e, i) => (
+                <p key={e.key} className={`flex justify-between text-gray-700 ${i === 0 ? "mt-1 border-t pt-1.5" : ""}`}><span>{e.label}</span><span className="font-medium text-gray-900">{plain(val(h, e.key))}</span></p>
+              ))}
             </div>
           )}
         </div>

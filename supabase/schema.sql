@@ -397,3 +397,98 @@ on conflict (slug) do nothing;
 --   insert into public.admins (user_id)
 --   select id from auth.users where email = 'you@example.com';
 -- =====================================================================
+
+-- =====================================================================
+-- First-party visitor analytics (admin → Analytics)
+-- =====================================================================
+create table if not exists public.analytics_events (
+  id           bigint generated always as identity primary key,
+  created_at   timestamptz not null default now(),
+  visitor_id   text not null check (length(visitor_id) between 8 and 64),
+  session_id   text not null check (length(session_id) between 8 and 64),
+  type         text not null check (type in ('pageview','view_item','add_to_cart','begin_checkout','purchase')),
+  path         text check (length(path) <= 300),
+  product_id   uuid,
+  referrer     text check (length(referrer) <= 300),
+  utm_source   text check (length(utm_source) <= 100),
+  utm_medium   text check (length(utm_medium) <= 100),
+  utm_campaign text check (length(utm_campaign) <= 150),
+  device       text check (device in ('mobile','tablet','desktop')),
+  country      text check (length(country) <= 2),
+  value        numeric(12,2)
+);
+create index if not exists analytics_events_time_idx on public.analytics_events (created_at);
+create index if not exists analytics_events_type_time_idx on public.analytics_events (type, created_at);
+alter table public.analytics_events enable row level security;
+drop policy if exists "anyone can record events" on public.analytics_events;
+create policy "anyone can record events" on public.analytics_events for insert to anon, authenticated with check (true);
+drop policy if exists "admins read events" on public.analytics_events;
+create policy "admins read events" on public.analytics_events for select using (public.is_admin());
+
+-- Admin-only aggregate used by /admin/analytics
+create or replace function public.analytics_summary(p_from timestamptz, p_to timestamptz)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  result jsonb;
+begin
+  if not public.is_admin() then raise exception 'not allowed'; end if;
+
+  with ev as (select * from analytics_events where created_at >= p_from and created_at < p_to),
+  pv as (select * from ev where type = 'pageview'),
+  sess as (
+    select session_id, count(*) filter (where type = 'pageview') pages,
+           (array_agg(referrer order by created_at))[1] ref, (array_agg(utm_source order by created_at))[1] utm,
+           (array_agg(device order by created_at))[1] device, (array_agg(country order by created_at))[1] country
+    from ev group by session_id
+  ),
+  src as (
+    select case when utm ~* '^(facebook|fb|ig|instagram|meta)' then 'Facebook / Instagram'
+                when utm ~* '^google' then 'Google'
+                when utm ~* '^tiktok' then 'TikTok'
+                when coalesce(utm, '') <> '' then initcap(utm)
+                when ref is null or ref = '' then 'Direct'
+                when ref ~* '(facebook|fb\.|instagram)' then 'Facebook / Instagram'
+                when ref ~* 'google\.' then 'Google'
+                when ref ~* '(t\.co|twitter|x\.com)' then 'X / Twitter'
+                when ref ~* 'tiktok' then 'TikTok'
+                when ref ~* 'youtube' then 'YouTube'
+                when ref ~* 'whatsapp|wa\.me' then 'WhatsApp'
+                  else regexp_replace(regexp_replace(ref, '^https?://(www\.)?', ''), '/.*$', '') end source
+    from sess
+  ),
+  days as (
+    select (created_at at time zone 'Asia/Karachi')::date d, count(distinct visitor_id) visitors, count(distinct session_id) sessions,
+           count(*) filter (where type = 'pageview') pageviews
+    from ev group by 1
+  )
+  select jsonb_build_object(
+    'visitors', (select count(distinct visitor_id) from ev),
+    'sessions', (select count(*) from sess),
+    'pageviews', (select count(*) from pv),
+    'bounce_sessions', (select count(*) from sess where pages <= 1),
+    'live', (select count(distinct visitor_id) from analytics_events where created_at > now() - interval '5 minutes'),
+    'funnel', jsonb_build_object(
+       'sessions', (select count(*) from sess),
+       'view_item', (select count(distinct session_id) from ev where type = 'view_item'),
+       'add_to_cart', (select count(distinct session_id) from ev where type = 'add_to_cart'),
+       'begin_checkout', (select count(distinct session_id) from ev where type = 'begin_checkout'),
+       'purchase', (select count(distinct session_id) from ev where type = 'purchase')),
+    'daily', coalesce((select jsonb_agg(jsonb_build_object('date', d, 'visitors', visitors, 'sessions', sessions, 'pageviews', pageviews) order by d) from days), '[]'),
+    'pages', coalesce((select jsonb_agg(x) from (select path, count(*) views, count(distinct visitor_id) visitors from pv group by path order by 2 desc limit 10) x), '[]'),
+    'sources', coalesce((select jsonb_agg(x) from (select source, count(*) sessions from src group by 1 order by 2 desc limit 10) x), '[]'),
+    'devices', coalesce((select jsonb_agg(x) from (select coalesce(device, 'unknown') device, count(*) sessions from sess group by 1 order by 2 desc) x), '[]'),
+    'countries', coalesce((select jsonb_agg(x) from (select coalesce(country, '??') country, count(*) sessions from sess group by 1 order by 2 desc limit 8) x), '[]'),
+    'products', coalesce((select jsonb_agg(x) from (
+        select p.name, p.slug, count(*) filter (where e.type = 'view_item') views, count(*) filter (where e.type = 'add_to_cart') carts
+        from ev e join products p on p.id = e.product_id where e.type in ('view_item','add_to_cart')
+        group by p.name, p.slug order by 3 desc limit 10) x), '[]')
+  ) into result;
+  return result;
+end $$;
+revoke all on function public.analytics_summary(timestamptz, timestamptz) from public, anon;
+grant execute on function public.analytics_summary(timestamptz, timestamptz) to authenticated;
