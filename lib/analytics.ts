@@ -6,6 +6,7 @@ declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
     clarity?: (...args: unknown[]) => void;
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
@@ -22,9 +23,36 @@ const toItem = (p: Product, quantity = 1): GaItem => ({
 const cartToItems = (items: CartItem[]): GaItem[] =>
   items.map((i) => ({ item_id: i.product_id, item_name: i.name, price: i.price, quantity: i.quantity }));
 
+const META_EVENTS: Record<string, string> = {
+  view_item: "ViewContent",
+  add_to_cart: "AddToCart",
+  begin_checkout: "InitiateCheckout",
+  purchase: "Purchase",
+  search: "Search",
+};
+
+function meta(name: string, params: Record<string, unknown>) {
+  const metaName = META_EVENTS[name];
+  if (!metaName || !window.fbq) return;
+  const items = (params.items as GaItem[] | undefined) || [];
+  const data: Record<string, unknown> = {
+    currency: params.currency,
+    value: params.value,
+    content_type: "product",
+    content_ids: items.map((i) => i.item_id),
+    contents: items.map((i) => ({ id: i.item_id, quantity: i.quantity, item_price: i.price })),
+    num_items: items.reduce((n, i) => n + i.quantity, 0) || undefined,
+  };
+  if (name === "search") data.search_string = params.search_term;
+  // event_id lets Meta de-duplicate if a server-side Conversions API is added later
+  const eventId = name === "purchase" ? String(params.transaction_id) : undefined;
+  window.fbq("track", metaName, data, eventId ? { eventID: eventId } : undefined);
+}
+
 function event(name: string, params: Record<string, unknown>) {
   try {
     window.gtag?.("event", name, params);
+    meta(name, params);
     window.clarity?.("event", name);
   } catch {
     /* analytics must never break the store */

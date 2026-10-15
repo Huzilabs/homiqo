@@ -24,6 +24,7 @@ A complete e-commerce website built with **Next.js 15**, **Supabase** (database,
 
 **Analytics**
 - GA4 and Clarity load from environment variables (storefront only; admin traffic is not tracked)
+- Meta (Facebook) Pixel: PageView on every page, plus ViewContent, AddToCart, InitiateCheckout, Purchase (order number as event ID) and Search
 - GA4 e-commerce events: `view_item`, `add_to_cart`, `remove_from_cart`, `view_cart`, `begin_checkout`, `purchase` (with order number as `transaction_id`), `search`
 
 ## Setup
@@ -46,6 +47,7 @@ Copy `.env.example` to `.env.local` and fill it in:
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API |
 | `NEXT_PUBLIC_GA_ID` | Google Analytics → Admin → Data streams → Web → Measurement ID (`G-…`) |
+| `NEXT_PUBLIC_META_PIXEL_ID` | Meta Events Manager → Data sources → your Pixel → Pixel ID |
 | `NEXT_PUBLIC_CLARITY_ID` | clarity.microsoft.com → your project → Settings → Overview → Project ID |
 | `NEXT_PUBLIC_STORE_NAME`, `NEXT_PUBLIC_SITE_URL`, contact details, `NEXT_PUBLIC_WHATSAPP` | Your store details |
 
