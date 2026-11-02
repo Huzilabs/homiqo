@@ -10,6 +10,7 @@ export interface Product {
   short_description: string;
   description: string;
   features: string[];
+  faqs: { q: string; a: string }[];
   price: number;
   compare_at_price: number | null;
   stock: number;

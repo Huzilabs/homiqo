@@ -97,6 +97,14 @@ export default function ProductForm({ product, categories, cost }: { product?: P
       category: String(f.get("category") || "").trim() || "Kitchen",
       short_description: String(f.get("short_description") || "").trim(),
       description: String(f.get("description") || "").trim(),
+      faqs: String(f.get("faqs") || "")
+        .replace(/\r\n/g, "\n")
+        .split(/\n\s*\n/)
+        .map((block) => {
+          const [first, ...rest] = block.trim().split("\n");
+          return { q: (first || "").replace(/^Q:\s*/i, "").trim(), a: rest.join(" ").replace(/^A:\s*/i, "").trim() };
+        })
+        .filter((x) => x.q && x.a),
       features: String(f.get("features") || "")
         .split("\n")
         .map((s) => s.trim())
@@ -183,11 +191,23 @@ export default function ProductForm({ product, categories, cost }: { product?: P
           </div>
           <div>
             <label className="label" htmlFor="description">Full description</label>
-            <textarea id="description" name="description" rows={6} defaultValue={product?.description} className="input" />
+            <textarea id="description" name="description" rows={12} defaultValue={product?.description} className="input" />
+            <p className="mt-1 text-xs text-gray-500">Start a line with <code>## </code> for a heading and <code>- </code> for a bullet point. Leave a blank line between paragraphs.</p>
           </div>
           <div>
             <label className="label" htmlFor="features">Key features <span className="font-normal text-gray-400">(one per line)</span></label>
             <textarea id="features" name="features" rows={5} defaultValue={product?.features.join("\n")} className="input" />
+          </div>
+          <div>
+            <label className="label" htmlFor="faqs">Product FAQs <span className="font-normal text-gray-400">(question on one line, answer below, blank line between FAQs)</span></label>
+            <textarea
+              id="faqs"
+              name="faqs"
+              rows={8}
+              defaultValue={(product?.faqs || []).map((x) => `${x.q}\n${x.a}`).join("\n\n")}
+              className="input"
+              placeholder={"Is it easy to clean?\nYes — rinse the blades under running water.\n\nDoes it come with a warranty?\nYes, 7-day replacement."}
+            />
           </div>
         </section>
 

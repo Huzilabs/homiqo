@@ -33,6 +33,7 @@ create table if not exists public.products (
   short_description text not null default '',
   description       text not null default '',
   features          text[] not null default '{}',
+  faqs              jsonb not null default '[]'::jsonb,
   price             numeric(12,2) not null check (price >= 0),
   compare_at_price  numeric(12,2) check (compare_at_price is null or compare_at_price >= 0),
   stock             integer not null default 0 check (stock >= 0),

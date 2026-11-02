@@ -93,7 +93,7 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
 }
 
 export function siteJsonLd() {
-  const sameAs = [process.env.NEXT_PUBLIC_FACEBOOK_URL, process.env.NEXT_PUBLIC_INSTAGRAM_URL, process.env.NEXT_PUBLIC_TIKTOK_URL].filter(Boolean);
+  const sameAs = [STORE.facebook, STORE.instagram, STORE.tiktok].filter(Boolean);
   return [
     {
       "@context": "https://schema.org",
@@ -132,6 +132,14 @@ export function itemListJsonLd(products: Product[]) {
     "@context": "https://schema.org",
     "@type": "ItemList",
     itemListElement: products.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: abs(`/product/${p.slug}`), name: p.name })),
+  };
+}
+
+export function faqJsonLd(faqs: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
   };
 }
 

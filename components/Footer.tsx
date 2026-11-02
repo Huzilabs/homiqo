@@ -16,6 +16,23 @@ export default function Footer() {
               Chat on WhatsApp
             </a>
           )}
+          <div className="mt-8 flex gap-3">
+            {STORE.instagram && (
+              <a href={STORE.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${STORE.name} on Instagram`} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white hover:text-white">
+                <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
+              </a>
+            )}
+            {STORE.facebook && (
+              <a href={STORE.facebook} target="_blank" rel="noopener noreferrer" aria-label={`${STORE.name} on Facebook`} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white hover:text-white">
+                <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden><path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.9.3-1.5 1.5-1.5H16.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21h3z" /></svg>
+              </a>
+            )}
+            {STORE.tiktok && (
+              <a href={STORE.tiktok} target="_blank" rel="noopener noreferrer" aria-label={`${STORE.name} on TikTok`} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white hover:text-white">
+                <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden><path d="M16.6 5.8A4.3 4.3 0 0 1 15.5 3h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.3 7.3 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.2-1.6z" /></svg>
+              </a>
+            )}
+          </div>
         </div>
         <FooterCol title="Shop" links={[["All products", "/shop"], ["Appliances", "/shop?category=Kitchen%20Appliances"], ["Kitchen tools", "/shop?category=Kitchen%20Tools"], ["Home cleaning", "/shop?category=Home%20Cleaning"]]} />
         <FooterCol title="Help" links={[["Contact us", "/contact"], ["Shipping & returns", "/policies"], ["Your cart", "/cart"]]} />

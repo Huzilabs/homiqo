@@ -3,13 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Banknote, RotateCcw, Truck } from "lucide-react";
 import Faq from "@/components/Faq";
+import RichText from "@/components/RichText";
 import MediaGallery from "@/components/MediaGallery";
 import ProductActions from "@/components/ProductActions";
 import ProductCard from "@/components/ProductCard";
 import { getProductBySlug, getProducts } from "@/lib/products";
 import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
-import { abs, breadcrumbJsonLd, ld, productDescription, productJsonLd, productTitle } from "@/lib/seo";
+import { abs, breadcrumbJsonLd, faqJsonLd, ld, productDescription, productJsonLd, productTitle } from "@/lib/seo";
 
 // Static pages served from Vercel's edge cache; refreshed when products change (see /api/revalidate) or every 5 minutes
 export const revalidate = 300;
@@ -57,8 +58,17 @@ export default async function ProductPage({ params }: { params: Params }) {
   const off = discountPercent(product.price, product.compare_at_price);
   const preview = previewVideo(product.videos);
 
+  const productFaqs = (product.faqs || []).filter((f) => f?.q && f?.a);
+  const faqs = [
+    ...productFaqs,
+    { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. ${formatPrice(SHIPPING_FEE)} delivery, complimentary on orders over ${formatPrice(FREE_SHIPPING_THRESHOLD)}.` },
+    { q: "Cash on delivery", a: "No advance payment — pay the rider in cash when your parcel arrives." },
+    { q: "Returns & warranty", a: "Damaged or faulty? Contact us within 7 days of delivery for a free replacement or refund." },
+  ];
+
   const jsonLd = [
     productJsonLd(product),
+    faqJsonLd(faqs),
     breadcrumbJsonLd([
       { name: "Home", path: "/" },
       { name: product.category, path: `/shop?category=${encodeURIComponent(product.category)}` },
@@ -140,16 +150,11 @@ export default async function ProductPage({ params }: { params: Params }) {
           <div>
             <p className="eyebrow">The details</p>
             <h2 className="h-section mt-4">About this piece</h2>
-            <div className="mt-8 whitespace-pre-line text-[17px] leading-[1.8] text-ink/70">{product.description || product.short_description}</div>
+            <div className="mt-8"><RichText text={product.description || product.short_description} /></div>
           </div>
           <div className="lg:pt-16">
-            <Faq
-              items={[
-                { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. ${formatPrice(SHIPPING_FEE)} delivery, complimentary on orders over ${formatPrice(FREE_SHIPPING_THRESHOLD)}.` },
-                { q: "Cash on delivery", a: "No advance payment — pay the rider in cash when your parcel arrives." },
-                { q: "Returns & warranty", a: "Damaged or faulty? Contact us within 7 days of delivery for a free replacement or refund." },
-              ]}
-            />
+            <p className="eyebrow mb-6">Questions, answered</p>
+            <Faq items={faqs} />
           </div>
         </div>
       </section>
