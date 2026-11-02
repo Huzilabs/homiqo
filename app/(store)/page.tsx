@@ -260,12 +260,12 @@ function Spotlight({ product }: { product: Product }) {
   const off = discountPercent(product.price, product.compare_at_price);
   return (
     <section className="pt-28 sm:pt-36">
-      <div className="grid lg:grid-cols-2">
+      <div className="grid lg:grid-cols-[min(640px,calc(100svh-120px))_1fr]">
         {/* Square frame = the product photo shows in full, and the section fits one screen */}
-        <div className="relative aspect-square overflow-hidden bg-white lg:aspect-auto lg:min-h-[min(640px,calc(100svh-120px))]">
+        <div className="relative aspect-square overflow-hidden bg-white">
           <ProductImage src={product.images[0]} alt={product.name} sizes="(max-width:1024px) 100vw, 50vw" />
         </div>
-        <div className="flex items-center bg-brand-600 px-6 py-12 text-white sm:px-14 lg:min-h-[min(640px,calc(100svh-120px))] lg:px-20">
+        <div className="flex items-center bg-brand-600 px-6 py-12 text-white sm:px-14 lg:px-20">
           <div className="max-w-lg">
             <p className="eyebrow text-accent-400">In the spotlight</p>
             <h2 className="h-section mt-4">{product.name}</h2>
