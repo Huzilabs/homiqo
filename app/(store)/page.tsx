@@ -107,11 +107,12 @@ export default async function HomePage() {
           <p className="eyebrow">Shop by room &amp; ritual</p>
           <h2 className="h-section mt-4">Find your essentials</h2>
         </div>
-        <div className="mt-14 grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-4">
+        <div className="mt-14 grid grid-cols-2 gap-x-5 gap-y-12 sm:grid-cols-3 lg:grid-cols-5">
           {categories.map((c) => (
             <Link key={c.name} href={`/shop?category=${encodeURIComponent(c.name)}`} className="group flex flex-col items-center text-center">
-              <span className="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-full bg-sand">
-                <ProductImage src={c.image} alt={c.name} sizes="240px" className="transition duration-[1.2s] group-hover:scale-110" />
+              {/* Rounded square (not a circle) so square product photos — and the text on them — show in full */}
+              <span className="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-sm transition duration-500 group-hover:-translate-y-1 group-hover:shadow-md">
+                <ProductImage src={c.image} alt={c.name} sizes="240px" />
               </span>
               <span className="mt-6 font-serif text-2xl text-ink transition group-hover:text-brand-600">{c.name}</span>
               <span className="mt-1 text-[11px] uppercase tracking-[.2em] text-ink/45">{c.count} {c.count === 1 ? "piece" : "pieces"}</span>
@@ -172,7 +173,7 @@ export default async function HomePage() {
         <section className="container-x pt-28 sm:pt-36">
           <div className="grid bg-sand lg:grid-cols-2">
             <Link href={`/product/${deal.slug}`} className="group relative block aspect-square overflow-hidden lg:aspect-auto lg:min-h-[600px]">
-              <ProductImage src={deal.images[0]} alt={deal.name} sizes="(max-width:1024px) 100vw, 50vw" className="transition duration-[1.2s] group-hover:scale-[1.03]" />
+              <ProductImage src={deal.images[0]} alt={deal.name} sizes="(max-width:1024px) 100vw, 50vw" />
               <span className="absolute left-5 top-5 bg-accent-600 px-3 py-1.5 text-[11px] font-medium tracking-[.14em] text-white">
                 −{discountPercent(deal.price, deal.compare_at_price)}% TODAY
               </span>

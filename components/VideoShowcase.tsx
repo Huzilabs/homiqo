@@ -28,7 +28,7 @@ export default function VideoShowcase({ products }: { products: Product[] }) {
             onTouchStart={() => setHover(p.id)}
             className="group relative aspect-[3/4] w-[78%] shrink-0 snap-start overflow-hidden bg-brand-900 sm:w-auto"
           >
-            <ProductImage src={p.images[0]} alt={p.name} sizes="(max-width:640px) 80vw, 25vw" className="opacity-90 transition duration-[1.2s] group-hover:scale-[1.04]" />
+            <ProductImage src={p.images[0]} alt={p.name} sizes="(max-width:640px) 80vw, 25vw" className="opacity-90" />
             <HoverVideo url={previewVideo(p.videos)} active={hover === p.id} />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/10 to-transparent" />
             {hover !== p.id && (

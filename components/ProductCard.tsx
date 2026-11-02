@@ -30,7 +30,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
     <div className="group" onMouseEnter={start} onMouseLeave={stop}>
       <div className="relative aspect-[4/5] overflow-hidden bg-sand">
         <Link href={`/product/${product.slug}`} className="absolute inset-0" aria-label={product.name}>
-          <ProductImage src={product.images[0]} alt={product.name} priority={priority} sizes="(max-width: 768px) 50vw, 25vw" className="transition duration-[1.2s] ease-out group-hover:scale-[1.04]" />
+          <ProductImage src={product.images[0]} alt={product.name} priority={priority} sizes="(max-width: 768px) 50vw, 25vw" />
           <HoverVideo url={video} active={playing} />
         </Link>
 
