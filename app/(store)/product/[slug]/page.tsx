@@ -9,6 +9,7 @@ import ProductCard from "@/components/ProductCard";
 import { getProductBySlug, getProducts } from "@/lib/products";
 import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
+import { abs, breadcrumbJsonLd, ld, productDescription, productJsonLd, productTitle } from "@/lib/seo";
 
 // Static pages served from Vercel's edge cache; refreshed when products change (see /api/revalidate) or every 5 minutes
 export const revalidate = 300;
@@ -22,11 +23,28 @@ type Params = Promise<{ slug: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProductBySlug(slug);
-  if (!p) return { title: "Product not found" };
+  if (!p) return { title: "Product not found", robots: { index: false } };
+  const title = productTitle(p);
+  const description = productDescription(p);
+  const path = `/product/${p.slug}`;
   return {
-    title: p.name,
-    description: p.short_description,
-    openGraph: { title: p.name, description: p.short_description, images: p.images.slice(0, 1) },
+    title,
+    description,
+    keywords: [p.name, `${p.name} price in Pakistan`, `${p.category} Pakistan`, "cash on delivery", STORE.name],
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      url: path,
+      title,
+      description,
+      images: p.images.slice(0, 4).map((u) => ({ url: abs(u), alt: p.name })),
+    },
+    twitter: { card: "summary_large_image", title, description, images: p.images.slice(0, 1).map(abs) },
+    other: {
+      "product:price:amount": String(p.price),
+      "product:price:currency": STORE.currency,
+      "product:availability": p.stock > 0 ? "in stock" : "out of stock",
+    },
   };
 }
 
@@ -39,25 +57,18 @@ export default async function ProductPage({ params }: { params: Params }) {
   const off = discountPercent(product.price, product.compare_at_price);
   const preview = previewVideo(product.videos);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.short_description,
-    image: product.images,
-    category: product.category,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: STORE.currency,
-      price: product.price,
-      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `${STORE.siteUrl}/product/${product.slug}`,
-    },
-  };
+  const jsonLd = [
+    productJsonLd(product),
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: product.category, path: `/shop?category=${encodeURIComponent(product.category)}` },
+      { name: product.name, path: `/product/${product.slug}` },
+    ]),
+  ];
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={ld(jsonLd)} />
       <div className="container-x pb-28 pt-8 lg:pb-10">
         <nav className="mb-8 flex items-center gap-2 text-[11px] uppercase tracking-[.2em] text-ink/45">
           <Link href="/" className="hover:text-ink">Home</Link>

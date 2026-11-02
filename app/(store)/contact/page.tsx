@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { Clock, Mail, MessageCircle, Phone } from "lucide-react";
 import { STORE } from "@/lib/config";
 
-export const metadata: Metadata = { title: "Contact us" };
+export const metadata: Metadata = {
+  title: "Contact us",
+  description: "Get in touch with Homiqo — questions about products, orders, delivery or returns. We reply quickly on WhatsApp and email.",
+  alternates: { canonical: "/contact" },
+};
 
 export default function ContactPage() {
   const items = [

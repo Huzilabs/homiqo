@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Shipping & returns" };
+export const metadata: Metadata = {
+  title: "Shipping & returns",
+  description: "Homiqo delivery and returns policy: cash on delivery across Pakistan, 2–5 working day delivery, free delivery over Rs 5,000 and 7-day replacements.",
+  alternates: { canonical: "/policies" },
+};
 
 export default function PoliciesPage() {
   return (

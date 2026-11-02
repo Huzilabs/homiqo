@@ -5,10 +5,27 @@ import SetupNotice from "@/components/SetupNotice";
 import SortSelect from "@/components/SortSelect";
 import { getCategories, getProducts } from "@/lib/products";
 import { supabaseConfigured } from "@/lib/supabase/server";
-
-export const metadata: Metadata = { title: "Shop all products" };
+import { itemListJsonLd, ld } from "@/lib/seo";
 
 type Params = Promise<{ category?: string; q?: string; sort?: string }>;
+
+export async function generateMetadata({ searchParams }: { searchParams: Params }): Promise<Metadata> {
+  const { category, q, sort } = await searchParams;
+  if (q) return { title: `Search: ${q}`, robots: { index: false, follow: true } };
+  const title = category ? `${category} — Buy Online in Pakistan` : "Shop All Kitchen Gadgets & Home Essentials in Pakistan";
+  const description = category
+    ? `Shop ${category.toLowerCase()} online in Pakistan at the best prices. Cash on delivery nationwide, 2–5 day delivery and 7-day returns.`
+    : "Browse every Homiqo product — vegetable choppers, qeema makers, milk frothers, coffee makers, cordless vacuums, sink organizers and more. Cash on delivery across Pakistan.";
+  const canonical = category ? `/shop?category=${encodeURIComponent(category)}` : "/shop";
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { url: canonical, title, description },
+    // sorted views are duplicates of the canonical listing
+    ...(sort ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 export default async function ShopPage({ searchParams }: { searchParams: Params }) {
   if (!supabaseConfigured) return <SetupNotice />;
@@ -26,6 +43,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Params 
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={ld(itemListJsonLd(products))} />
       <section className="bg-sand">
         <div className="container-x py-16 text-center sm:py-24">
           <p className="eyebrow">{q ? "Search results" : "The collection"}</p>

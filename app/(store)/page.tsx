@@ -14,6 +14,10 @@ import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
 import { LIFESTYLE_IMAGE } from "@/lib/media";
 import type { Product } from "@/lib/types";
+import type { Metadata } from "next";
+import { itemListJsonLd, ld } from "@/lib/seo";
+
+export const metadata: Metadata = { alternates: { canonical: "/" }, openGraph: { url: "/" } };
 
 // Static page served from Vercel's edge cache; refreshed when products change (see /api/revalidate) or every 5 minutes
 export const revalidate = 300;
@@ -45,6 +49,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={ld(itemListJsonLd(products))} />
       {/* ═════════ HERO — full-screen editorial split ═════════ */}
       <section className="grid lg:h-[calc(100svh-113px)] lg:min-h-[640px] lg:grid-cols-2">
         <div className="relative order-2 flex items-center bg-sand px-6 py-16 sm:px-12 lg:order-1 lg:px-[max(3rem,calc((100vw-1320px)/2+3rem))] lg:py-0">
