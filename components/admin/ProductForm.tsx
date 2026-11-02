@@ -54,7 +54,7 @@ export default function ProductForm({ product, categories, cost }: { product?: P
     }
     setUploading(null);
     if (kind === "image") setImages((prev) => [...prev, ...urls]);
-    else setVideos((prev) => [...prev, ...urls]);
+    else if (urls.length) setVideos(urls.slice(0, 1));
     if (imgInput.current) imgInput.current.value = "";
     if (vidInput.current) vidInput.current.value = "";
   }
@@ -72,7 +72,7 @@ export default function ProductForm({ product, categories, cost }: { product?: P
     const url = videoUrl.trim();
     if (!url) return;
     if (!/^https?:\/\//.test(url)) return setError("Enter a full video link starting with https://");
-    setVideos((v) => [...v, url]);
+    setVideos([url]);
     setVideoUrl("");
   }
 
@@ -220,8 +220,8 @@ export default function ProductForm({ product, categories, cost }: { product?: P
         </section>
 
         <section className="card p-6">
-          <h2 className="font-bold">Videos</h2>
-          <p className="mt-1 text-sm text-gray-500">Upload MP4/WebM files (max {MAX_VIDEO_MB} MB) or add YouTube links. Videos appear in the product gallery and the homepage.</p>
+          <h2 className="font-bold">Video</h2>
+          <p className="mt-1 text-sm text-gray-500">One video per product. Upload an MP4/WebM (max {MAX_VIDEO_MB} MB) or paste a YouTube link. Adding a new one replaces the current video.</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {videos.map((url, i) => (
               <div key={url + i} className="overflow-hidden rounded-xl border">

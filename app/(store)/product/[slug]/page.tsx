@@ -6,9 +6,8 @@ import Faq from "@/components/Faq";
 import MediaGallery from "@/components/MediaGallery";
 import ProductActions from "@/components/ProductActions";
 import ProductCard from "@/components/ProductCard";
-import VideoEmbed from "@/components/VideoEmbed";
 import { getProductBySlug, getProducts } from "@/lib/products";
-import { discountPercent, formatPrice, previewVideo, youTubeVideos } from "@/lib/format";
+import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +33,6 @@ export default async function ProductPage({ params }: { params: Params }) {
   const related = (await getProducts()).filter((p) => p.id !== product.id).slice(0, 4);
   const off = discountPercent(product.price, product.compare_at_price);
   const preview = previewVideo(product.videos);
-  const yt = youTubeVideos(product.videos);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -139,24 +137,6 @@ export default async function ProductPage({ params }: { params: Params }) {
           </div>
         </div>
       </section>
-
-      {yt.length > 0 && (
-        <section className="container-x pt-28">
-          <div className="mb-12 flex items-end justify-between gap-6">
-            <div>
-              <p className="eyebrow">Watch on YouTube</p>
-              <h2 className="h-section mt-4">See it in action</h2>
-            </div>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2">
-            {yt.map((v, i) => (
-              <div key={v} className="overflow-hidden bg-ink">
-                <VideoEmbed url={v} title={`${product.name} video ${i + 1}`} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {related.length > 0 && (
         <section className="container-x pt-28">
