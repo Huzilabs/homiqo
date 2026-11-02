@@ -24,7 +24,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
       <div
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        className="relative aspect-square max-h-[min(540px,calc(100svh-300px))] w-full overflow-hidden bg-sand"
+        className="relative aspect-square w-full max-w-[min(560px,calc(100svh-250px))] overflow-hidden bg-white"
       >
         {!current ? (
           <ProductImage alt={name} />
@@ -70,7 +70,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
       </div>
 
       {media.length > 1 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-3 flex max-w-[min(560px,calc(100svh-250px))] gap-2 overflow-x-auto pb-1">
           {media.map((m, i) => {
             const yt = m.kind === "video" ? youTubeId(m.url) : null;
             return (
@@ -83,7 +83,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
                 }`}
               >
                 {m.kind === "image" ? (
-                  <Image src={m.url} alt="" fill sizes="140px" className="object-cover" />
+                  <Image src={m.url} alt="" fill sizes="140px" className="bg-white object-contain" />
                 ) : yt ? (
                   <Image src={`https://img.youtube.com/vi/${yt}/mqdefault.jpg`} alt="" fill sizes="140px" className="object-cover" />
                 ) : (

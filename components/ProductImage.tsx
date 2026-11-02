@@ -33,7 +33,12 @@ export default function ProductImage({
   className?: string;
 }) {
   if (src) {
-    return <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={`object-cover ${className}`} />;
+    // Product photos are shown whole (never cropped) on white, whatever the frame's shape
+    return (
+      <div className="absolute inset-0 bg-white">
+        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={`object-contain ${className}`} />
+      </div>
+    );
   }
   const Icon = iconFor(alt);
   const tone = tones[alt.length % tones.length];
