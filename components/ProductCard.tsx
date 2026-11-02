@@ -28,7 +28,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
 
   return (
     <div className="group" onMouseEnter={start} onMouseLeave={stop}>
-      <div className="relative aspect-[4/5] overflow-hidden bg-sand">
+      <div className="relative aspect-square overflow-hidden bg-white">
         <Link href={`/product/${product.slug}`} className="absolute inset-0" aria-label={product.name}>
           <ProductImage src={product.images[0]} alt={product.name} priority={priority} sizes="(max-width: 768px) 50vw, 25vw" />
           <HoverVideo url={video} active={playing} />

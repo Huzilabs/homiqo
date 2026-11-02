@@ -172,7 +172,7 @@ export default async function HomePage() {
       {deal && (
         <section className="container-x pt-28 sm:pt-36">
           <div className="grid bg-sand lg:grid-cols-2">
-            <Link href={`/product/${deal.slug}`} className="group relative block aspect-square overflow-hidden lg:aspect-auto lg:min-h-[600px]">
+            <Link href={`/product/${deal.slug}`} className="group relative block aspect-square overflow-hidden bg-white">
               <ProductImage src={deal.images[0]} alt={deal.name} sizes="(max-width:1024px) 100vw, 50vw" />
               <span className="absolute left-5 top-5 bg-accent-600 px-3 py-1.5 text-[11px] font-medium tracking-[.14em] text-white">
                 −{discountPercent(deal.price, deal.compare_at_price)}% TODAY
@@ -261,28 +261,28 @@ function Spotlight({ product }: { product: Product }) {
   return (
     <section className="pt-28 sm:pt-36">
       <div className="grid lg:grid-cols-2">
-        <div className="relative aspect-[4/5] overflow-hidden bg-brand-900 sm:aspect-[16/12] lg:aspect-auto lg:min-h-[720px]">
+        {/* Square frame = the product photo shows in full, and the section fits one screen */}
+        <div className="relative aspect-square overflow-hidden bg-white lg:aspect-auto lg:min-h-[min(640px,calc(100svh-120px))]">
           <ProductImage src={product.images[0]} alt={product.name} sizes="(max-width:1024px) 100vw, 50vw" />
-          <InViewVideo url={previewVideo(product.videos)} />
         </div>
-        <div className="flex items-center bg-brand-600 px-6 py-16 text-white sm:px-14 lg:px-20">
+        <div className="flex items-center bg-brand-600 px-6 py-12 text-white sm:px-14 lg:min-h-[min(640px,calc(100svh-120px))] lg:px-20">
           <div className="max-w-lg">
             <p className="eyebrow text-accent-400">In the spotlight</p>
             <h2 className="h-section mt-4">{product.name}</h2>
-            <p className="mt-6 text-[15px] leading-relaxed text-white/75">{product.description || product.short_description}</p>
-            <ul className="mt-8 border-t border-white/15">
+            <p className="mt-5 text-[15px] leading-relaxed text-white/75">{product.short_description}</p>
+            <ul className="mt-6 border-t border-white/15">
               {product.features.slice(0, 4).map((f) => (
-                <li key={f} className="flex items-center gap-4 border-b border-white/15 py-4 text-sm text-white/90">
+                <li key={f} className="flex items-center gap-4 border-b border-white/15 py-3 text-sm text-white/90">
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
                   {f}
                 </li>
               ))}
             </ul>
-            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
+            <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-5">
               <span className="font-serif text-4xl">{formatPrice(product.price)}</span>
               {off > 0 && <span className="text-[11px] uppercase tracking-[.2em] text-accent-400">Save {off}%</span>}
             </div>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-wrap gap-4">
               <Link href={`/product/${product.slug}`} className="btn-light">Discover</Link>
             </div>
           </div>
