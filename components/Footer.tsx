@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { STORE } from "@/lib/config";
+import { BANK, STORE } from "@/lib/config";
 
 export default function Footer() {
   return (
@@ -44,12 +44,20 @@ export default function Footer() {
             <li>Delivering across Pakistan</li>
             <li>Mon – Sat, 10am – 8pm</li>
           </ul>
+          <p className="mt-8 text-[11px] font-medium uppercase tracking-[.24em] text-white">We accept</p>
+          <ul className="mt-4 space-y-3 text-sm">
+            <li>Cash on delivery</li>
+            <li>
+              Bank transfer ({BANK.bank}) —{" "}
+              <span className="font-medium text-accent-400">{BANK.discountPct}% off + free delivery</span>
+            </li>
+          </ul>
         </div>
       </div>
       <div className="border-t border-white/10">
         <div className="container-x flex flex-col items-center justify-between gap-3 py-7 text-[11px] uppercase tracking-[.2em] text-white/45 sm:flex-row">
           <p>© {new Date().getFullYear()} {STORE.name}</p>
-          <p>Cash on delivery · Secure checkout</p>
+          <p className="text-center">Cash on delivery · Bank transfer {BANK.discountPct}% off · Secure checkout</p>
         </div>
       </div>
     </footer>

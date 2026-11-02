@@ -11,7 +11,7 @@ import VideoShowcase from "@/components/VideoShowcase";
 import { getProducts } from "@/lib/products";
 import { supabaseConfigured } from "@/lib/supabase/server";
 import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
-import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
+import { BANK, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
 import { LIFESTYLE_IMAGE } from "@/lib/media";
 import type { Product } from "@/lib/types";
 import type { Metadata } from "next";
@@ -24,6 +24,7 @@ export const revalidate = 300;
 
 const faqs = [
   { q: "How does Cash on Delivery work?", a: "Place your order online without paying anything. Our rider delivers to your door and you pay in cash after receiving the parcel." },
+  { q: "Can I pay by bank transfer?", a: `Yes. Choose Bank Transfer at checkout to get ${BANK.discountPct}% off plus free delivery. Transfer the amount to our ${BANK.bank} account and send the payment screenshot on WhatsApp to ${BANK.whatsappDisplay} — we dispatch as soon as it is confirmed.` },
   { q: "How long does delivery take?", a: "Most orders arrive within 2–5 working days anywhere in Pakistan. Karachi, Lahore and Islamabad are usually faster." },
   { q: "How much is delivery?", a: `Delivery is ${formatPrice(SHIPPING_FEE)} per order, and complimentary on orders of ${formatPrice(FREE_SHIPPING_THRESHOLD)} or more.` },
   { q: "Will I receive a confirmation?", a: "Yes — an email as soon as your order is placed, another when we confirm it, and one more when it ships." },

@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import { FREE_SHIPPING_THRESHOLD, STORE } from "@/lib/config";
+import { BANK, FREE_SHIPPING_THRESHOLD, STORE } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
 import { track } from "@/lib/analytics";
 
@@ -71,7 +71,8 @@ export default function Header() {
   return (
     <>
       <div className="bg-ink px-4 py-2.5 text-center text-[11px] font-medium uppercase tracking-[.22em] text-white/85">
-        Free delivery over {formatPrice(FREE_SHIPPING_THRESHOLD)} <span className="mx-3 text-accent-400">·</span> Cash on delivery across Pakistan
+        Free delivery over {formatPrice(FREE_SHIPPING_THRESHOLD)} <span className="mx-3 text-accent-400">·</span> Cash on delivery
+        <span className="hidden sm:inline"><span className="mx-3 text-accent-400">·</span> {BANK.discountPct}% off on bank transfer</span>
       </div>
 
       <header className={`sticky top-0 z-40 border-b transition-colors duration-300 ${scrolled ? "border-ink/10 bg-paper/95 backdrop-blur" : "border-ink/5 bg-paper"}`}>
