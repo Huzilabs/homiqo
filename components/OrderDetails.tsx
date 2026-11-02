@@ -28,8 +28,9 @@ export default function OrderDetails({ order }: { order: TrackedOrder }) {
       </ul>
       <dl className="space-y-2 border-t border-brand-50 px-6 py-5 text-sm">
         <div className="flex justify-between"><dt className="text-ink/60">Subtotal</dt><dd>{formatPrice(order.subtotal)}</dd></div>
+        {Number(order.discount) > 0 && <div className="flex justify-between text-leaf-600"><dt>Bank transfer discount</dt><dd>−{formatPrice(Number(order.discount))}</dd></div>}
         <div className="flex justify-between"><dt className="text-ink/60">Delivery</dt><dd>{Number(order.shipping_fee) === 0 ? "Free" : formatPrice(order.shipping_fee)}</dd></div>
-        <div className="flex justify-between pt-2 text-base font-bold text-brand-700"><dt>Total — pay on delivery</dt><dd>{formatPrice(order.total)}</dd></div>
+        <div className="flex justify-between pt-2 text-base font-bold text-brand-700"><dt>{order.payment_method === "bank_transfer" ? "Total — bank transfer" : "Total — pay on delivery"}</dt><dd>{formatPrice(order.total)}</dd></div>
       </dl>
     </div>
   );

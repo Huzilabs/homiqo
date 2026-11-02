@@ -38,6 +38,7 @@ export interface Order {
   courier: string | null;
   subtotal: number;
   shipping_fee: number;
+  discount?: number;
   total: number;
   created_at: string;
   updated_at: string;
@@ -77,6 +78,7 @@ export interface TrackedOrder {
   tracking_number: string | null;
   subtotal: number;
   shipping_fee: number;
+  discount?: number;
   total: number;
   payment_method: string;
   created_at: string;

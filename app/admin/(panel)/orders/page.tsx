@@ -162,7 +162,12 @@ export default async function AdminOrders({
                   <td className="px-5 py-4 text-xs">
                     <CourierCell o={o} />
                   </td>
-                  <td className="px-5 py-4 text-right font-semibold tabular-nums">{formatPrice(o.total)}</td>
+                  <td className="px-5 py-4 text-right font-semibold tabular-nums">
+                    {formatPrice(o.total)}
+                    <span className={`mt-0.5 block text-[10px] font-medium uppercase tracking-wider ${o.payment_method === "bank_transfer" ? "text-violet-700" : "text-gray-400"}`}>
+                      {o.payment_method === "bank_transfer" ? "Bank transfer" : "COD"}
+                    </span>
+                  </td>
                   <td className="py-4 pr-4">
                     <Link href={`/admin/orders/${o.id}`} aria-label={`Open ${o.order_number}`} className="flex h-8 w-8 items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-ink">
                       <ChevronRight className="h-4 w-4" />
@@ -190,7 +195,10 @@ export default async function AdminOrders({
                   <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700">{o.order_number}</Link>
                   <p className="text-xs text-gray-500">{t.date} · {t.time}</p>
                 </div>
-                <p className="font-semibold tabular-nums">{formatPrice(o.total)}</p>
+                <p className="text-right font-semibold tabular-nums">
+                  {formatPrice(o.total)}
+                  <span className={`block text-[10px] font-medium uppercase tracking-wider ${o.payment_method === "bank_transfer" ? "text-violet-700" : "text-gray-400"}`}>{o.payment_method === "bank_transfer" ? "Bank transfer" : "COD"}</span>
+                </p>
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">

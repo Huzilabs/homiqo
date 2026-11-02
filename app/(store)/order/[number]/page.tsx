@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { CircleCheck, Mail, PhoneCall, Truck } from "lucide-react";
+import BankDetails from "@/components/BankDetails";
 import OrderDetails from "@/components/OrderDetails";
 import { createClient } from "@/lib/supabase/server";
 import type { TrackedOrder } from "@/lib/types";
@@ -35,6 +36,14 @@ export default async function OrderPage({
           Your order <b className="text-brand-700">{number}</b> has been placed successfully.
         </p>
       </div>
+
+      {order?.payment_method === "bank_transfer" && (
+        <div className="mt-10">
+          <h2 className="text-center font-serif text-3xl font-medium">Complete your bank transfer</h2>
+          <p className="mt-2 text-center text-sm text-ink/60">Transfer the amount below, then send us the screenshot on WhatsApp so we can dispatch your order.</p>
+          <div className="mx-auto mt-6 max-w-xl"><BankDetails amount={Number(order.total)} orderNumber={order.order_number} /></div>
+        </div>
+      )}
 
       <div className="mt-10 grid gap-3 sm:grid-cols-3">
         {[

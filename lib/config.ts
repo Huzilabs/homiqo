@@ -18,6 +18,19 @@ export const FREE_SHIPPING_THRESHOLD = 5000;
 export const shippingFor = (subtotal: number) =>
   subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
 
+/** Bank transfer (prepaid) — 5% off the products + free delivery. Keep in sync with public.place_order(). */
+export const BANK = {
+  bank: "Meezan Bank",
+  title: "AMIR SOHAIL",
+  account: "10010111768253",
+  iban: "PK84MEZN0010010111768253",
+  branch: "Kasur Branch",
+  whatsapp: "923034229001", // payment screenshots go here
+  whatsappDisplay: "+92 303 4229001",
+  discountPct: 5,
+};
+export const bankDiscount = (subtotal: number) => Math.round(subtotal * BANK.discountPct / 100);
+
 export const MEDIA_BUCKET = "product-media";
 
 export const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;

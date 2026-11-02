@@ -2,18 +2,26 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Banknote, LoaderCircle, Lock } from "lucide-react";
+import { Banknote, Landmark, LoaderCircle, Lock } from "lucide-react";
+import BankDetails from "@/components/BankDetails";
 import ProductImage from "@/components/ProductImage";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
+import { BANK, bankDiscount } from "@/lib/config";
 import { createClient } from "@/lib/supabase/client";
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
 const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function CheckoutPage() {
-  const { items, ready, subtotal, shipping, total, clear } = useCart();
+  const { items, ready, subtotal, shipping: codShipping, clear } = useCart();
+  const [payment, setPayment] = useState<"cod" | "bank_transfer">("cod");
+  const isBank = payment === "bank_transfer";
+  // Must match public.place_order(): bank transfer = 10% off products + free delivery
+  const discount = isBank ? bankDiscount(subtotal) : 0;
+  const shipping = isBank ? 0 : codShipping;
+  const total = subtotal - discount + shipping;
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,9 +55,10 @@ export default function CheckoutPage() {
     e.preventDefault();
     setError(null);
     const f = new FormData(e.currentTarget);
-    const customer = Object.fromEntries(
+    const customer: Record<string, string> = Object.fromEntries(
       ["customer_name", "phone", "email", "address", "city", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
     );
+    customer.payment_method = payment;
     // Use the courier's spelling of the city so the parcel can be booked without edits
     const match = cities.find((c) => c.toLowerCase() === String(customer.city).toLowerCase());
     if (cities.length > POPULAR.length && !match) {
@@ -109,13 +118,23 @@ export default function CheckoutPage() {
           </section>
           <section className="card p-6">
             <h2 className="font-serif text-2xl font-medium">Payment</h2>
-            <label className="mt-4 flex cursor-pointer items-start gap-3 border-2 border-brand-500 bg-brand-50/50 p-4">
-              <input type="radio" name="payment" defaultChecked className="mt-1 accent-brand-600" />
-              <span>
-                <span className="flex items-center gap-2 font-semibold"><Banknote className="h-5 w-5 text-brand-600" /> Cash on Delivery</span>
-                <span className="mt-0.5 block text-sm text-ink/65">Pay in cash when your order is delivered.</span>
-              </span>
-            </label>
+            <div className="mt-4 space-y-3">
+              <PayOption checked={!isBank} onSelect={() => setPayment("cod")} icon={<Banknote className="h-5 w-5 text-brand-600" />} title="Cash on Delivery" text="Pay in cash when your order is delivered." />
+              <PayOption
+                checked={isBank}
+                onSelect={() => setPayment("bank_transfer")}
+                icon={<Landmark className="h-5 w-5 text-brand-600" />}
+                title="Bank Transfer"
+                badge={`${BANK.discountPct}% OFF + FREE DELIVERY`}
+                text={`Pay in advance to our ${BANK.bank} account and save ${BANK.discountPct}% plus delivery charges.`}
+              />
+            </div>
+            {isBank && (
+              <div className="mt-5">
+                <BankDetails amount={total} />
+                <p className="mt-3 text-xs text-ink/55">Place your order first — you’ll see your order number and these details again on the next page.</p>
+              </div>
+            )}
           </section>
         </div>
 
@@ -135,8 +154,9 @@ export default function CheckoutPage() {
           </ul>
           <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
             <div className="flex justify-between"><dt className="text-ink/65">Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div>
+            {discount > 0 && <div className="flex justify-between text-leaf-600"><dt>Bank transfer discount ({BANK.discountPct}%)</dt><dd>−{formatPrice(discount)}</dd></div>}
             <div className="flex justify-between"><dt className="text-ink/65">Delivery</dt><dd>{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
-            <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>Total (COD)</dt><dd>{formatPrice(total)}</dd></div>
+            <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>{isBank ? "Total (bank transfer)" : "Total (COD)"}</dt><dd>{formatPrice(total)}</dd></div>
           </dl>
           {error && <p className="mt-4 bg-rose-50 p-3 text-sm text-rose-700" role="alert">{error}</p>}
           <button type="submit" disabled={submitting} className="btn-accent mt-5 w-full py-3.5 text-base">
@@ -149,6 +169,21 @@ export default function CheckoutPage() {
         </aside>
       </form>
     </div>
+  );
+}
+
+function PayOption({ checked, onSelect, icon, title, text, badge }: { checked: boolean; onSelect: () => void; icon: React.ReactNode; title: string; text: string; badge?: string }) {
+  return (
+    <label className={`flex cursor-pointer items-start gap-3 border-2 p-4 transition ${checked ? "border-brand-500 bg-brand-50/50" : "border-ink/10 hover:border-ink/30"}`}>
+      <input type="radio" name="payment" checked={checked} onChange={onSelect} className="mt-1 accent-brand-600" />
+      <span className="flex-1">
+        <span className="flex flex-wrap items-center gap-2 font-semibold">
+          {icon} {title}
+          {badge && <span className="bg-accent-600 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white">{badge}</span>}
+        </span>
+        <span className="mt-0.5 block text-sm text-ink/65">{text}</span>
+      </span>
+    </label>
   );
 }
 

@@ -1,3 +1,4 @@
+import { BANK } from "@/lib/config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, MessageCircle, Phone } from "lucide-react";
@@ -31,7 +32,13 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
       </Link>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-3 text-2xl font-extrabold">{o.order_number} <StatusBadge status={o.status} /></h1>
+          <h1 className="flex flex-wrap items-center gap-3 text-2xl font-extrabold">
+            {o.order_number} <StatusBadge status={o.status} />
+            {o.payment_method === "bank_transfer" && <span className="badge bg-violet-50 text-violet-700 ring-violet-600/20">Bank transfer</span>}
+          </h1>
+          {o.payment_method === "bank_transfer" && o.status === "pending" && (
+            <p className="mt-1 text-sm font-medium text-violet-700">Check the payment screenshot on WhatsApp ({BANK.whatsappDisplay}) before confirming. PostEx will collect Rs 0 for this order.</p>
+          )}
           <p className="text-sm text-gray-500">Placed {formatDate(o.created_at)}</p>
         </div>
         <div className="flex gap-2 print:hidden">
@@ -63,8 +70,13 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
             </ul>
             <dl className="mt-3 space-y-2 border-t pt-4 text-sm">
               <div className="flex justify-between"><dt className="text-gray-600">Subtotal</dt><dd>{formatPrice(o.subtotal)}</dd></div>
+              {Number(o.discount) > 0 && <div className="flex justify-between text-emerald-700"><dt>Bank transfer discount</dt><dd>−{formatPrice(Number(o.discount))}</dd></div>}
               <div className="flex justify-between"><dt className="text-gray-600">Delivery</dt><dd>{formatPrice(o.shipping_fee)}</dd></div>
-              <div className="flex justify-between text-base font-bold"><dt>Total to collect (COD)</dt><dd>{formatPrice(o.total)}</dd></div>
+              {o.payment_method === "bank_transfer" ? (
+                <div className="flex justify-between text-base font-bold"><dt>Total paid by bank transfer</dt><dd>{formatPrice(o.total)}</dd></div>
+              ) : (
+                <div className="flex justify-between text-base font-bold"><dt>Total to collect (COD)</dt><dd>{formatPrice(o.total)}</dd></div>
+              )}
             </dl>
           </div>
 

@@ -17,6 +17,8 @@ export interface EmailOrder {
   total: number;
   courier?: string | null;
   tracking_number?: string | null;
+  payment_method?: string;
+  discount?: number;
   items: { product_name: string; quantity: number; unit_price: number; line_total: number; product_image?: string | null }[];
 }
 
@@ -107,8 +109,9 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
         ${shipping}
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">${rows}
           <tr><td style="padding:10px 0 0;font-size:14px;color:#6B6B6B">Subtotal</td><td style="padding:10px 0 0;font-size:14px;text-align:right">${formatPrice(o.subtotal)}</td></tr>
+          ${Number(o.discount) > 0 ? `<tr><td style="padding:6px 0;font-size:14px;color:#3B9468">Bank transfer discount</td><td style="padding:6px 0;font-size:14px;color:#3B9468;text-align:right">−${formatPrice(Number(o.discount))}</td></tr>` : ""}
           <tr><td style="padding:6px 0;font-size:14px;color:#6B6B6B">Delivery</td><td style="padding:6px 0;font-size:14px;text-align:right">${Number(o.shipping_fee) === 0 ? "Free" : formatPrice(o.shipping_fee)}</td></tr>
-          <tr><td style="padding:10px 0;font-size:16px;font-weight:700;color:#0D5B58">Total (Cash on Delivery)</td><td style="padding:10px 0;font-size:16px;font-weight:700;color:#0D5B58;text-align:right">${formatPrice(o.total)}</td></tr>
+          <tr><td style="padding:10px 0;font-size:16px;font-weight:700;color:#0D5B58">Total (${o.payment_method === "bank_transfer" ? "Bank Transfer" : "Cash on Delivery"})</td><td style="padding:10px 0;font-size:16px;font-weight:700;color:#0D5B58;text-align:right">${formatPrice(o.total)}</td></tr>
         </table>
         ${o.address ? `<p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#6B6B6B"><b style="color:#10302E">Delivery address</b><br>${esc(o.address)}, ${esc(o.city)}</p>` : ""}
         <a href="${site}/shop" style="display:inline-block;margin-top:28px;padding:14px 28px;border-radius:999px;background:#FF8A00;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px">Continue shopping</a>
@@ -128,6 +131,8 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
 export async function sendOrderEmail(kind: OrderEmailKind, order: EmailOrder): Promise<boolean> {
   // Confirmations are copied to the store team (even when the customer left no email)
   const team = kind === "confirmed" ? adminRecipients() : [];
+  // CUSTOMER_EMAILS=off → customers get nothing for now; only the store team is emailed
+  if (process.env.CUSTOMER_EMAILS === "off") order = { ...order, email: null };
   if (!emailConfigured() || (!order.email && team.length === 0)) return false;
   try {
     const { subject, html, text } = render(kind, order);
@@ -159,7 +164,7 @@ export async function sendNewOrderAlert(order: EmailOrder) {
       subject: `🛒 New order ${order.order_number} — ${formatPrice(order.total)}`,
       text: `New order ${order.order_number}\n\n${order.customer_name}\n${order.phone || ""}\n${order.email || ""}\n${order.address || ""}, ${order.city}\n\n${order.items
         .map((i) => `- ${i.product_name} x${i.quantity}: ${formatPrice(i.line_total)}`)
-        .join("\n")}\n\nTotal (COD): ${formatPrice(order.total)}\n\nManage: ${site}/admin/orders`,
+        .join("\n")}\n\nTotal (${order.payment_method === "bank_transfer" ? "BANK TRANSFER — check WhatsApp for the screenshot" : "COD"}): ${formatPrice(order.total)}\n\nManage: ${site}/admin/orders`,
     });
     return true;
   } catch (e) {

@@ -104,7 +104,8 @@ begin
     into v_detail, v_items from order_items where order_id = o.id;
   return jsonb_strip_nulls(jsonb_build_object(
     'orderRefNumber', o.order_number,
-    'invoicePayment', o.total,
+    -- bank transfers are prepaid: nothing to collect on delivery
+    'invoicePayment', case when o.payment_method = 'bank_transfer' then 0 else o.total end,
     'orderDetail', left(coalesce(v_detail, ''), 250),
     'customerName', o.customer_name,
     'customerPhone', private.postex_phone(o.phone),
