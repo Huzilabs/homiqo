@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import BackLink from "@/components/admin/BackLink";
 import ProductForm from "@/components/admin/ProductForm";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/types";
@@ -15,6 +16,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const categories = Array.from(new Set((cats || []).map((r: { category: string }) => r.category)));
   return (
     <div className="space-y-6">
+      <BackLink href="/admin/products" label="Back to products" />
       <h1 className="text-2xl font-extrabold">Edit product</h1>
       <ProductForm product={product as Product} categories={categories} cost={costRow ? Number(costRow.cost) : null} />
     </div>

@@ -1,3 +1,4 @@
+import BackLink from "@/components/admin/BackLink";
 import ProductForm from "@/components/admin/ProductForm";
 import { createClient } from "@/lib/supabase/server";
 
@@ -7,6 +8,7 @@ export default async function NewProductPage() {
   const categories = Array.from(new Set((data || []).map((r: { category: string }) => r.category)));
   return (
     <div className="space-y-6">
+      <BackLink href="/admin/products" label="Back to products" />
       <h1 className="text-2xl font-extrabold">Add product</h1>
       <ProductForm categories={categories} />
     </div>
