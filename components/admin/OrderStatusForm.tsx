@@ -55,14 +55,14 @@ export default function OrderStatusForm({ order }: { order: Order }) {
       </div>
       <div>
         <label className="label" htmlFor="courier">Courier</label>
-        <input id="courier" name="courier" list="couriers" defaultValue={order.courier || ""} className="input" placeholder="e.g. TCS, Leopards, PostEx" />
+        <input id="courier" name="courier" list="couriers" defaultValue={order.courier || ""} readOnly={order.courier === "PostEx"} className="input read-only:bg-gray-50 read-only:text-gray-500" placeholder="e.g. TCS, Leopards, PostEx" />
         <datalist id="couriers">
           {["TCS", "Leopards", "PostEx", "M&P", "Trax", "Call Courier", "BlueEx", "Pakistan Post"].map((c) => <option key={c} value={c} />)}
         </datalist>
       </div>
       <div>
         <label className="label" htmlFor="tracking_number">Tracking number</label>
-        <input id="tracking_number" name="tracking_number" defaultValue={order.tracking_number || ""} className="input" />
+        <input id="tracking_number" name="tracking_number" defaultValue={order.tracking_number || ""} readOnly={order.courier === "PostEx"} className="input read-only:bg-gray-50 read-only:text-gray-500" />
       </div>
       <label className="flex items-start gap-3 rounded-xl bg-brand-50 p-3 text-sm">
         <input type="checkbox" name="notify" defaultChecked className="mt-0.5 h-4 w-4 accent-brand-600" />

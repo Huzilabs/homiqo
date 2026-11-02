@@ -40,6 +40,14 @@ export interface Order {
   total: number;
   created_at: string;
   updated_at: string;
+  postex_status?: string | null;
+  postex_synced_at?: string | null;
+  postex_history?: {
+    transactionStatus?: string;
+    transactionStatusHistory?: { transactionStatusMessage: string; transactionStatusMessageCode?: string; updatedAt?: string }[];
+  } | null;
+  postex_error?: string | null;
+  postex_city?: string | null;
 }
 
 export interface OrderItem {

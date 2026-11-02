@@ -7,8 +7,10 @@ import ProductImage from "@/components/ProductImage";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
+import { createClient } from "@/lib/supabase/client";
 
-const CITIES = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
+const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
+const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function CheckoutPage() {
   const { items, ready, subtotal, shipping, total, clear } = useCart();
@@ -16,6 +18,18 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const placed = useRef(false);
+  const [cities, setCities] = useState<string[]>(POPULAR);
+
+  useEffect(() => {
+    createClient()
+      .from("postex_cities")
+      .select("name")
+      .eq("is_delivery", true)
+      .order("name")
+      .then(({ data }) => {
+        if (data?.length) setCities(Array.from(new Set([...POPULAR, ...data.map((c) => titleCase(c.name))])));
+      });
+  }, []);
   const tracked = useRef(false);
 
   useEffect(() => {
@@ -36,6 +50,13 @@ export default function CheckoutPage() {
     const customer = Object.fromEntries(
       ["customer_name", "phone", "email", "address", "city", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
     );
+    // Use the courier's spelling of the city so the parcel can be booked without edits
+    const match = cities.find((c) => c.toLowerCase() === String(customer.city).toLowerCase());
+    if (cities.length > POPULAR.length && !match) {
+      setError("We couldn’t find that city. Please choose your city from the suggestions as you type.");
+      return;
+    }
+    if (match) customer.city = match;
     setSubmitting(true);
     let data: { order_number: string; total: number; error?: string } | null = null;
     try {
@@ -78,7 +99,7 @@ export default function CheckoutPage() {
               <div>
                 <label className="label" htmlFor="city">City *</label>
                 <input id="city" name="city" list="cities" required className="input" autoComplete="address-level2" />
-                <datalist id="cities">{CITIES.map((c) => <option key={c} value={c} />)}</datalist>
+                <datalist id="cities">{cities.map((c) => <option key={c} value={c} />)}</datalist>
               </div>
               <div className="sm:col-span-2">
                 <label className="label" htmlFor="notes">Order notes (optional)</label>

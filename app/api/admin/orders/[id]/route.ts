@@ -19,15 +19,29 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
-  const { data: before } = await supabase.from("orders").select("status").eq("id", id).maybeSingle();
+  const { data: before } = await supabase.from("orders").select("status, courier, tracking_number, postex_status").eq("id", id).maybeSingle();
   if (!before) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  const onPostEx = before.courier === "PostEx" && Boolean(before.tracking_number);
+
+  // Website → PostEx: cancelling a booked order cancels the shipment first
+  if (onPostEx && body.status === "cancelled" && before.status !== "cancelled" && !/^(returned|cancel)/i.test(before.postex_status || "")) {
+    const { data: res, error: cancelError } = await supabase.rpc("postex_cancel_order", { p_order_id: id });
+    const r = res as { ok: boolean; error?: string } | null;
+    if (cancelError || !r?.ok) {
+      return NextResponse.json(
+        { error: `${cancelError?.message || r?.error || "PostEx cancellation failed"} — the parcel may already be picked up. Use PostEx's portal to request a return.` },
+        { status: 400 },
+      );
+    }
+  }
 
   const { data: order, error } = await supabase
     .from("orders")
     .update({
       status: body.status,
-      courier: body.courier?.trim() || null,
-      tracking_number: body.tracking_number?.trim() || null,
+      // PostEx-booked orders keep the courier & tracking number PostEx issued
+      courier: onPostEx ? before.courier : body.courier?.trim() || null,
+      tracking_number: onPostEx ? before.tracking_number : body.tracking_number?.trim() || null,
     })
     .eq("id", id)
     .select("*")

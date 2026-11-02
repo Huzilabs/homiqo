@@ -65,6 +65,16 @@ Add these environment variables (in `.env.local` and in Vercel → Settings → 
 
 If SMTP is not configured the store still works; emails are simply skipped.
 
+### PostEx courier (two-way sync)
+Setup lives in `supabase/postex.sql` (run once in the SQL Editor). The API token is stored **encrypted in Supabase Vault**, never in code:
+```sql
+select vault.create_secret('<POSTEX_TOKEN>', 'postex_api_token', 'PostEx merchant API token');
+```
+- **Website → PostEx:** in *Admin → Orders → (order)*, after calling the customer click **Confirm & book on PostEx**. The shipment is created on PostEx, the order is confirmed, the PostEx tracking number is saved and the customer is emailed. Cancelling a booked order also cancels it on PostEx.
+- **PostEx → website:** a database job (`pg_cron`) pulls every active shipment's status every 15 minutes (Picked / Out for delivery → *shipped*, Delivered → *delivered*, Returned → *cancelled* with stock restored). **Sync now** does it instantly and emails customers when parcels ship or arrive.
+- Checkout suggests PostEx's own city names so orders can be booked without edits; the PostEx city list refreshes daily.
+- Print the PostEx **airway bill** from the order page.
+
 ### Visitor analytics (built in)
 `/admin/analytics` shows visitors, sessions, page views, bounce rate, conversion and add-to-cart rates, live visitors (last 5 minutes), traffic sources (UTM / referrer), devices, countries, top pages, top products and a shopping funnel. Visits are recorded by the store itself (`/api/track` → `analytics_events` table); admin pages and bots are excluded. Nothing to configure.
 

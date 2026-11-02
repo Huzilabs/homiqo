@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, MessageCircle, Phone } from "lucide-react";
 import OrderStatusForm from "@/components/admin/OrderStatusForm";
+import PostExPanel from "@/components/admin/PostExPanel";
 import PrintButton from "@/components/admin/PrintButton";
 import StatusBadge from "@/components/admin/StatusBadge";
 import ProductImage from "@/components/ProductImage";
@@ -19,6 +20,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
   ]);
   if (!order) notFound();
   const o = order as Order;
+  const { data: suggestedCity } = await supabase.rpc("postex_match_city", { p_city: o.city });
   const digits = o.phone.replace(/\D/g, "");
   const waNumber = digits.startsWith("0") ? "92" + digits.slice(1) : digits;
 
@@ -80,7 +82,8 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
         </div>
 
         <div className="space-y-6 print:hidden">
-          <OrderStatusForm order={o} />
+          <PostExPanel order={o} suggestedCity={(suggestedCity as string | null) ?? null} />
+          <OrderStatusForm key={`${o.status}-${o.updated_at}`} order={o} />
           <div className="card p-6">
             <h2 className="font-bold">History</h2>
             <ol className="mt-4 space-y-3 border-l-2 border-gray-100 pl-4 text-sm">

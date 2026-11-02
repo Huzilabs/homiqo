@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
+import PostExSyncButton from "@/components/admin/PostExSyncButton";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { createClient } from "@/lib/supabase/server";
 import { ORDER_STATUSES } from "@/lib/config";
@@ -39,7 +40,10 @@ export default async function AdminOrders({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-extrabold">Orders <span className="text-base font-medium text-gray-400">({count || 0})</span></h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-extrabold">Orders <span className="text-base font-medium text-gray-400">({count || 0})</span></h1>
+        <PostExSyncButton />
+      </div>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:px-0">
@@ -71,6 +75,7 @@ export default async function AdminOrders({
               <th className="px-4 py-3">City</th>
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">PostEx</th>
               <th className="px-4 py-3 text-right">Total</th>
             </tr>
           </thead>
@@ -87,11 +92,20 @@ export default async function AdminOrders({
                 <td className="px-4 py-3">{o.city}</td>
                 <td className="px-4 py-3 text-gray-500">{formatDate(o.created_at)}</td>
                 <td className="px-4 py-3"><StatusBadge status={o.status} /></td>
+                <td className="px-4 py-3 text-xs">
+                  {o.courier === "PostEx" && o.tracking_number ? (
+                    <span><span className="font-mono">{o.tracking_number}</span><span className="block text-gray-500">{o.postex_status || "Booked"}</span></span>
+                  ) : o.status === "pending" ? (
+                    <span className="font-semibold text-amber-700">Call &amp; approve</span>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-right font-semibold">{formatPrice(o.total)}</td>
               </tr>
             ))}
             {orders.length === 0 && (
-              <tr><td colSpan={6} className="p-10 text-center text-gray-500">No orders found.</td></tr>
+              <tr><td colSpan={7} className="p-10 text-center text-gray-500">No orders found.</td></tr>
             )}
           </tbody>
         </table>
