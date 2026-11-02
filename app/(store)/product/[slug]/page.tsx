@@ -64,7 +64,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           <span className="truncate text-ink/80">{product.name}</span>
         </nav>
 
-        <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
           <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} />
 
           <div className="lg:pt-6">

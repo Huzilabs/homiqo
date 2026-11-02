@@ -24,7 +24,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
       <div
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        className="relative aspect-[4/5] overflow-hidden bg-sand"
+        className="relative aspect-square max-h-[min(540px,calc(100svh-300px))] w-full overflow-hidden bg-sand"
       >
         {!current ? (
           <ProductImage alt={name} />
@@ -70,7 +70,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
       </div>
 
       {media.length > 1 && (
-        <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-5">
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {media.map((m, i) => {
             const yt = m.kind === "video" ? youTubeId(m.url) : null;
             return (
@@ -78,7 +78,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
                 key={m.url + i}
                 onClick={() => setIndex(i)}
                 aria-label={`Show ${m.kind} ${i + 1}`}
-                className={`relative aspect-[4/5] w-full overflow-hidden border-2 bg-sand transition ${
+                className={`relative h-20 w-20 shrink-0 overflow-hidden border-2 bg-sand transition sm:h-24 sm:w-24 ${
                   i === index ? "border-ink" : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
@@ -90,8 +90,9 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
                   <video src={m.url} muted preload="metadata" className="absolute inset-0 h-full w-full object-cover" />
                 )}
                 {m.kind === "video" && (
-                  <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-white">
-                    <CirclePlay className="h-7 w-7" />
+                  <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-black/35 text-white">
+                    <CirclePlay className="h-6 w-6" />
+                    <span className="text-[9px] font-medium uppercase tracking-[.15em]">Video</span>
                   </span>
                 )}
               </button>
