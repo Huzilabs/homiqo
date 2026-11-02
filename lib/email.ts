@@ -92,10 +92,14 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
       </tr>`,
     )
     .join("");
+  // Tracking box on confirmed/shipped emails; PostEx parcels get a one-click tracking link
+  const isPostEx = /postex/i.test(o.courier || "");
+  const trackUrl = isPostEx && o.tracking_number ? `https://postex.pk/tracking?cn=${encodeURIComponent(o.tracking_number)}` : "";
   const shipping =
-    kind === "shipped" && (o.courier || o.tracking_number)
-      ? `<div style="margin:20px 0;padding:16px;border-radius:14px;background:#E8F3F2;font-size:14px;color:#0D5B58">
-          ${o.courier ? `Courier: <b>${esc(o.courier)}</b><br>` : ""}${o.tracking_number ? `Tracking number: <b>${esc(o.tracking_number)}</b>` : ""}
+    (kind === "shipped" || kind === "confirmed") && o.tracking_number
+      ? `<div style="margin:20px 0;padding:16px;border-radius:14px;background:#E8F3F2;font-size:14px;line-height:1.6;color:#0D5B58">
+          ${o.courier ? `Courier: <b>${esc(o.courier)}</b><br>` : ""}Tracking number: <b>${esc(o.tracking_number)}</b>
+          ${trackUrl ? `<br><a href="${trackUrl}" style="display:inline-block;margin-top:10px;padding:10px 18px;border-radius:999px;background:#0D5B58;color:#ffffff;text-decoration:none;font-weight:600">Track your parcel on PostEx</a>` : ""}
         </div>`
       : "";
   const html = `<!doctype html><html><body style="margin:0;background:#FFF4E6;font-family:Poppins,Segoe UI,Arial,sans-serif">
@@ -123,7 +127,9 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
   </td></tr></table></body></html>`;
   const text = `${c.title}\n\nHi ${o.customer_name}, ${c.intro}\n\nOrder ${o.order_number}\n${o.items
     .map((i) => `- ${i.product_name} x${i.quantity}: ${formatPrice(i.line_total)}`)
-    .join("\n")}\nTotal (COD): ${formatPrice(o.total)}\n\n${site}`;
+    .join("\n")}\nTotal (${o.payment_method === "bank_transfer" ? "Bank Transfer" : "COD"}): ${formatPrice(o.total)}${
+    shipping && o.tracking_number ? `\n\nTracking number: ${o.tracking_number}${trackUrl ? `\nTrack your parcel: ${trackUrl}` : ""}` : ""
+  }\n\n${site}`;
   return { subject: c.subject(o.order_number), html, text };
 }
 
