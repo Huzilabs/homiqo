@@ -20,17 +20,21 @@ export interface EmailOrder {
   items: { product_name: string; quantity: number; unit_price: number; line_total: number; product_image?: string | null }[];
 }
 
-export const emailConfigured = () => Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+// Default sender: the store Gmail. Only SMTP_PASS (a Gmail App Password) has to be set; the rest can be overridden by env vars.
+const SMTP_HOST = () => process.env.SMTP_HOST || "smtp.gmail.com";
+const SMTP_USER = () => process.env.SMTP_USER || "homiqo.offical@gmail.com";
+
+export const emailConfigured = () => Boolean(process.env.SMTP_PASS);
 
 let transporter: nodemailer.Transporter | null = null;
 function getTransport() {
   if (!transporter) {
     const port = Number(process.env.SMTP_PORT || 465);
     transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: SMTP_HOST(),
       port,
       secure: port === 465,
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      auth: { user: SMTP_USER(), pass: process.env.SMTP_PASS?.replace(/\s+/g, "") },
     });
   }
   return transporter;
@@ -43,7 +47,7 @@ export const adminRecipients = () =>
     .map((e) => e.trim())
     .filter(Boolean);
 
-const from = () => process.env.SMTP_FROM || `${STORE.name} <${process.env.SMTP_USER}>`;
+const from = () => process.env.SMTP_FROM || `${STORE.name} <${SMTP_USER()}>`;
 
 const COPY: Record<OrderEmailKind, { subject: (n: string) => string; title: string; intro: string }> = {
   received: {
