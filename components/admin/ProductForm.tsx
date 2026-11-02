@@ -13,6 +13,9 @@ import type { Product } from "@/lib/types";
 const MAX_IMAGE_MB = 8;
 const MAX_VIDEO_MB = 50; // Supabase free plan per-file limit
 
+/** Tell the storefront cache that products changed, so customers see edits immediately. */
+const refreshStore = () => fetch("/api/revalidate", { method: "POST" }).catch(() => {});
+
 export default function ProductForm({ product, categories, cost }: { product?: Product; categories: string[]; cost?: number | null }) {
   const router = useRouter();
   const supabase = createClient();
@@ -125,6 +128,7 @@ export default function ProductForm({ product, categories, cost }: { product?: P
         ? await supabase.from("product_costs").delete().eq("product_id", saved.id)
         : await supabase.from("product_costs").upsert({ product_id: saved.id, cost: costValue, updated_at: new Date().toISOString() });
     setSaving(false);
+    await refreshStore();
     if (costError) return setError(`Product saved, but buying price failed: ${costError.message}`);
     router.push("/admin/products");
     router.refresh();
@@ -136,6 +140,7 @@ export default function ProductForm({ product, categories, cost }: { product?: P
     const { error } = await supabase.from("products").delete().eq("id", product.id);
     setSaving(false);
     if (error) return setError(error.message);
+    await refreshStore();
     router.push("/admin/products");
     router.refresh();
   }

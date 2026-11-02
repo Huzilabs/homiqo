@@ -1,5 +1,13 @@
-import { createClient, supabaseConfigured } from "./supabase/server";
+import { unstable_cache } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
 import type { Product } from "./types";
+
+export const supabaseConfigured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+);
+
+/** Cache tag for the storefront catalog — revalidated when admins save products or orders change stock. */
+export const PRODUCTS_TAG = "products";
 
 const normalize = (p: Product): Product => ({
   ...p,
@@ -7,44 +15,58 @@ const normalize = (p: Product): Product => ({
   compare_at_price: p.compare_at_price == null ? null : Number(p.compare_at_price),
 });
 
+/**
+ * The whole active catalog in one query, cached across requests (no cookies → cacheable).
+ * The catalog is small, so filtering/sorting happens in memory.
+ */
+const getCatalog = unstable_cache(
+  async (): Promise<Product[]> => {
+    if (!supabaseConfigured) return [];
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+      auth: { persistSession: false },
+    });
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(`getCatalog: ${error.message}`); // don't cache a failed read
+    return ((data as Product[]) || []).map(normalize);
+  },
+  ["catalog-v1"],
+  { tags: [PRODUCTS_TAG], revalidate: 300 },
+);
+
 export async function getProducts(opts: { featured?: boolean; category?: string; q?: string; sort?: string } = {}) {
-  if (!supabaseConfigured) return [];
-  const supabase = await createClient();
-  let query = supabase.from("products").select("*").eq("is_active", true);
-  if (opts.featured) query = query.eq("is_featured", true);
-  if (opts.category) query = query.eq("category", opts.category);
-  if (opts.q) {
-    const term = opts.q.replace(/[%,()]/g, " ").trim();
-    if (term) query = query.or(`name.ilike.%${term}%,short_description.ilike.%${term}%,category.ilike.%${term}%`);
+  let list = await getCatalog().catch((e) => {
+    console.error(e);
+    return [] as Product[];
+  });
+  if (opts.featured) list = list.filter((p) => p.is_featured);
+  if (opts.category) list = list.filter((p) => p.category === opts.category);
+  const term = opts.q?.trim().toLowerCase();
+  if (term) {
+    list = list.filter((p) =>
+      [p.name, p.short_description, p.category].some((s) => (s || "").toLowerCase().includes(term)),
+    );
   }
   switch (opts.sort) {
     case "price-asc":
-      query = query.order("price", { ascending: true });
-      break;
+      return [...list].sort((a, b) => a.price - b.price);
     case "price-desc":
-      query = query.order("price", { ascending: false });
-      break;
+      return [...list].sort((a, b) => b.price - a.price);
     case "newest":
-      query = query.order("created_at", { ascending: false });
-      break;
+      return [...list].sort((a, b) => b.created_at.localeCompare(a.created_at));
     default:
-      query = query.order("sort_order").order("created_at", { ascending: false });
+      return list;
   }
-  const { data, error } = await query;
-  if (error) console.error("getProducts", error.message);
-  return ((data as Product[]) || []).map(normalize);
 }
 
 export async function getProductBySlug(slug: string) {
-  if (!supabaseConfigured) return null;
-  const supabase = await createClient();
-  const { data } = await supabase.from("products").select("*").eq("slug", slug).eq("is_active", true).maybeSingle();
-  return data ? normalize(data as Product) : null;
+  return (await getProducts()).find((p) => p.slug === slug) ?? null;
 }
 
 export async function getCategories() {
-  if (!supabaseConfigured) return [];
-  const supabase = await createClient();
-  const { data } = await supabase.from("products").select("category").eq("is_active", true);
-  return Array.from(new Set((data || []).map((r: { category: string }) => r.category))).sort();
+  return Array.from(new Set((await getProducts()).map((p) => p.category))).sort();
 }

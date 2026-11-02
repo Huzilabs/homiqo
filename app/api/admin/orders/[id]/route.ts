@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
+import { PRODUCTS_TAG } from "@/lib/products";
 import { createClient } from "@/lib/supabase/server";
 import { sendOrderEmail, type OrderEmailKind } from "@/lib/email";
 import { ORDER_STATUSES } from "@/lib/config";
@@ -47,6 +49,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     .select("*")
     .single();
   if (error || !order) return NextResponse.json({ error: error?.message || "Update failed" }, { status: 400 });
+
+  if (before.status !== body.status) revalidateTag(PRODUCTS_TAG); // cancelling returns stock
 
   let emailed = false;
   const changed = before.status !== body.status;

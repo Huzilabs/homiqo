@@ -15,7 +15,8 @@ import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
 import { LIFESTYLE_IMAGE } from "@/lib/media";
 import type { Product } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
+// Static page served from Vercel's edge cache; refreshed when products change (see /api/revalidate) or every 5 minutes
+export const revalidate = 300;
 
 const faqs = [
   { q: "How does Cash on Delivery work?", a: "Place your order online without paying anything. Our rider delivers to your door and you pay in cash after receiving the parcel." },

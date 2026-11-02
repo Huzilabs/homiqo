@@ -6,7 +6,6 @@ import SortSelect from "@/components/SortSelect";
 import { getCategories, getProducts } from "@/lib/products";
 import { supabaseConfigured } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Shop all products" };
 
 type Params = Promise<{ category?: string; q?: string; sort?: string }>;

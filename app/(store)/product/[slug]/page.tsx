@@ -10,7 +10,12 @@ import { getProductBySlug, getProducts } from "@/lib/products";
 import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
 
-export const dynamic = "force-dynamic";
+// Static pages served from Vercel's edge cache; refreshed when products change (see /api/revalidate) or every 5 minutes
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  return (await getProducts()).map((p) => ({ slug: p.slug }));
+}
 
 type Params = Promise<{ slug: string }>;
 

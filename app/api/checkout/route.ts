@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
+import { PRODUCTS_TAG } from "@/lib/products";
 import { createClient } from "@/lib/supabase/server";
 import { sendNewOrderAlert, sendOrderEmail } from "@/lib/email";
 import type { TrackedOrder } from "@/lib/types";
@@ -22,13 +24,17 @@ export async function POST(req: Request) {
 
   const { order_number, total } = data as { order_number: string; total: number };
 
-  // Order details for the emails (server-side lookup; prices come from the database)
-  const { data: details } = await supabase.rpc("track_order", { p_order_number: order_number, p_phone: customer.phone });
-  if (details) {
+  // Stock changed — refresh the cached storefront
+  revalidateTag(PRODUCTS_TAG);
+
+  // Emails go out after the customer already has their confirmation (keeps checkout fast)
+  after(async () => {
+    const { data: details } = await supabase.rpc("track_order", { p_order_number: order_number, p_phone: customer.phone });
+    if (!details) return;
     const o = details as TrackedOrder;
     const emailOrder = { ...o, email, phone: customer.phone, address: customer.address };
     await Promise.all([sendOrderEmail("received", emailOrder), sendNewOrderAlert(emailOrder)]);
-  }
+  });
 
   return NextResponse.json({ order_number, total });
 }
