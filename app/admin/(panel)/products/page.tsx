@@ -9,6 +9,8 @@ export default async function AdminProducts() {
   const supabase = await createClient();
   const { data } = await supabase.from("products").select("*").order("sort_order").order("created_at", { ascending: false });
   const products = (data || []) as Product[];
+  const { data: costRows } = await supabase.from("product_costs").select("product_id, cost");
+  const costs = new Map((costRows || []).map((c) => [c.product_id as string, Number(c.cost)]));
 
   return (
     <div className="space-y-6">
@@ -35,6 +37,13 @@ export default async function AdminProducts() {
                 <div className="hidden text-right sm:block">
                   <p className="font-semibold">{formatPrice(p.price)}</p>
                   <p className={`text-xs ${p.stock <= 5 ? "text-amber-600" : "text-gray-500"}`}>{p.stock} in stock</p>
+                  {costs.has(p.id) ? (
+                    <p className="text-xs text-emerald-700">
+                      Cost {formatPrice(costs.get(p.id)!)} · +{formatPrice(p.price - costs.get(p.id)!)} ({Math.round(((p.price - costs.get(p.id)!) / p.price) * 100)}%)
+                    </p>
+                  ) : (
+                    <p className="text-xs text-amber-600">No buying price</p>
+                  )}
                 </div>
                 <div className="flex w-20 flex-col items-end gap-1">
                   <span className={`badge ${p.is_active ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" : "bg-gray-100 text-gray-600 ring-gray-500/20"}`}>

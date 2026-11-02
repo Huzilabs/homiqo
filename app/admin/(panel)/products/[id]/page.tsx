@@ -11,11 +11,12 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     supabase.from("products").select("category"),
   ]);
   if (!product) notFound();
+  const { data: costRow } = await supabase.from("product_costs").select("cost").eq("product_id", id).maybeSingle();
   const categories = Array.from(new Set((cats || []).map((r: { category: string }) => r.category)));
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold">Edit product</h1>
-      <ProductForm product={product as Product} categories={categories} />
+      <ProductForm product={product as Product} categories={categories} cost={costRow ? Number(costRow.cost) : null} />
     </div>
   );
 }

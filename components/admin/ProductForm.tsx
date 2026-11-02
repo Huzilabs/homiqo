@@ -13,7 +13,7 @@ import type { Product } from "@/lib/types";
 const MAX_IMAGE_MB = 8;
 const MAX_VIDEO_MB = 50; // Supabase free plan per-file limit
 
-export default function ProductForm({ product, categories }: { product?: Product; categories: string[] }) {
+export default function ProductForm({ product, categories, cost }: { product?: Product; categories: string[]; cost?: number | null }) {
   const router = useRouter();
   const supabase = createClient();
   const [name, setName] = useState(product?.name || "");
@@ -111,13 +111,21 @@ export default function ProductForm({ product, categories }: { product?: Product
     if (payload.compare_at_price !== null && payload.compare_at_price <= payload.price) payload.compare_at_price = null;
 
     setSaving(true);
-    const { error } = product
-      ? await supabase.from("products").update(payload).eq("id", product.id)
-      : await supabase.from("products").insert(payload);
-    setSaving(false);
-    if (error) {
-      return setError(error.code === "23505" ? "Another product already uses this URL slug. Change the slug." : error.message);
+    const { data: saved, error } = product
+      ? await supabase.from("products").update(payload).eq("id", product.id).select("id").single()
+      : await supabase.from("products").insert(payload).select("id").single();
+    if (error || !saved) {
+      setSaving(false);
+      return setError(error?.code === "23505" ? "Another product already uses this URL slug. Change the slug." : error?.message || "Save failed");
     }
+    // Buying price lives in an admin-only table so it never reaches the storefront
+    const costValue = num("cost");
+    const { error: costError } =
+      costValue === null
+        ? await supabase.from("product_costs").delete().eq("product_id", saved.id)
+        : await supabase.from("product_costs").upsert({ product_id: saved.id, cost: costValue, updated_at: new Date().toISOString() });
+    setSaving(false);
+    if (costError) return setError(`Product saved, but buying price failed: ${costError.message}`);
     router.push("/admin/products");
     router.refresh();
   }
@@ -256,6 +264,11 @@ export default function ProductForm({ product, categories }: { product?: Product
           <div>
             <label className="label" htmlFor="compare_at_price">Compare-at price (Rs)</label>
             <input id="compare_at_price" name="compare_at_price" type="number" min="0" step="1" defaultValue={product?.compare_at_price ?? ""} className="input" placeholder="Original price, shows discount" />
+          </div>
+          <div>
+            <label className="label" htmlFor="cost">Buying price (Rs) <span className="font-normal normal-case tracking-normal text-gray-400">· private</span></label>
+            <input id="cost" name="cost" type="number" min="0" step="1" defaultValue={cost ?? ""} className="input" placeholder="What you pay per unit" />
+            <p className="mt-1 text-xs text-gray-500">Only admins see this. Used for profit on the dashboard.</p>
           </div>
           <div>
             <label className="label" htmlFor="stock">Stock quantity *</label>

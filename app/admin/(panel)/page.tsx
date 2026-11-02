@@ -8,11 +8,21 @@ import type { Order, Product } from "@/lib/types";
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const since = new Date(Date.now() - 30 * 864e5).toISOString();
-  const [{ data: orders }, { data: recent }, { data: products }] = await Promise.all([
+  const [{ data: orders }, { data: recent }, { data: products }, { data: lines }] = await Promise.all([
     supabase.from("orders").select("status,total,created_at").gte("created_at", since),
     supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(8),
     supabase.from("products").select("id,name,stock,is_active").order("stock"),
+    supabase
+      .from("order_items")
+      .select("line_total, unit_cost, quantity, orders!inner(status, created_at)")
+      .gte("orders.created_at", since)
+      .neq("orders.status", "cancelled"),
   ]);
+
+  // Gross profit = sales − buying cost, for order lines whose product has a buying price set
+  const costed = (lines || []).filter((l) => l.unit_cost != null);
+  const profit = costed.reduce((sum, l) => sum + Number(l.line_total) - Number(l.unit_cost) * l.quantity, 0);
+  const uncosted = (lines || []).length - costed.length;
 
   const list = (orders || []) as Pick<Order, "status" | "total" | "created_at">[];
   const valid = list.filter((o) => o.status !== "cancelled");
@@ -39,7 +49,7 @@ export default async function AdminDashboard() {
   const stats = [
     { label: "Orders (30 days)", value: valid.length.toString(), icon: ShoppingCart },
     { label: "Sales (30 days)", value: formatPrice(revenue), icon: Banknote },
-    { label: "Delivered value", value: formatPrice(delivered), icon: Package },
+    { label: "Gross profit (30 days)", value: formatPrice(profit), icon: Package, hint: uncosted ? `${uncosted} item${uncosted === 1 ? "" : "s"} without a buying price` : `Delivered: ${formatPrice(delivered)}` },
     { label: "Awaiting confirmation", value: pending.toString(), icon: Clock, href: "/admin/orders?status=pending" },
   ];
 
@@ -47,12 +57,13 @@ export default async function AdminDashboard() {
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold">Dashboard</h1>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map(({ label, value, icon: Icon, href }) => {
+        {stats.map(({ label, value, icon: Icon, href, hint }: { label: string; value: string; icon: typeof Package; href?: string; hint?: string }) => {
           const body = (
             <>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Icon className="h-5 w-5" /></div>
               <p className="mt-3 text-xs text-gray-500 sm:text-sm">{label}</p>
               <p className="text-xl font-extrabold sm:text-2xl">{value}</p>
+              {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
             </>
           );
           return href ? (
