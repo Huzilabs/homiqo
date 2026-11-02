@@ -36,6 +36,13 @@ function getTransport() {
   return transporter;
 }
 
+/** Store team inboxes: new-order alerts + a copy of every order confirmation. Override with ADMIN_NOTIFY_EMAIL (comma-separated). */
+export const adminRecipients = () =>
+  (process.env.ADMIN_NOTIFY_EMAIL || "huzaifayaseen306@gmail.com,amirsohail1468@gmail.com")
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
 const from = () => process.env.SMTP_FROM || `${STORE.name} <${process.env.SMTP_USER}>`;
 
 const COPY: Record<OrderEmailKind, { subject: (n: string) => string; title: string; intro: string }> = {
@@ -115,10 +122,20 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
 
 /** Sends a customer email for an order event. Never throws — returns whether it was sent. */
 export async function sendOrderEmail(kind: OrderEmailKind, order: EmailOrder): Promise<boolean> {
-  if (!emailConfigured() || !order.email) return false;
+  // Confirmations are copied to the store team (even when the customer left no email)
+  const team = kind === "confirmed" ? adminRecipients() : [];
+  if (!emailConfigured() || (!order.email && team.length === 0)) return false;
   try {
     const { subject, html, text } = render(kind, order);
-    await getTransport().sendMail({ from: from(), to: order.email, replyTo: process.env.SMTP_REPLY_TO || STORE.email || undefined, subject, html, text });
+    await getTransport().sendMail({
+      from: from(),
+      to: order.email || team,
+      bcc: order.email && team.length ? team : undefined,
+      replyTo: process.env.SMTP_REPLY_TO || STORE.email || undefined,
+      subject,
+      html,
+      text,
+    });
     return true;
   } catch (e) {
     console.error("sendOrderEmail failed", kind, order.order_number, e);
@@ -128,8 +145,8 @@ export async function sendOrderEmail(kind: OrderEmailKind, order: EmailOrder): P
 
 /** Alerts the store owner about a new order. */
 export async function sendNewOrderAlert(order: EmailOrder) {
-  const to = process.env.ADMIN_NOTIFY_EMAIL;
-  if (!emailConfigured() || !to) return false;
+  const to = adminRecipients();
+  if (!emailConfigured() || to.length === 0) return false;
   try {
     const site = STORE.siteUrl.replace(/\/$/, "");
     await getTransport().sendMail({

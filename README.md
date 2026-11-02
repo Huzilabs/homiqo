@@ -61,7 +61,7 @@ Add these environment variables (in `.env.local` and in Vercel → Settings → 
 | `SMTP_USER` | `orders@homiqo.site` |
 | `SMTP_PASS` | mailbox password (Gmail: an App Password) |
 | `SMTP_FROM` | `Homiqo <orders@homiqo.site>` |
-| `ADMIN_NOTIFY_EMAIL` | your inbox for new-order alerts |
+| `ADMIN_NOTIFY_EMAIL` | team inboxes, comma-separated (default: huzaifayaseen306@gmail.com, amirsohail1468@gmail.com) — get new-order alerts and a copy of every confirmation |
 
 If SMTP is not configured the store still works; emails are simply skipped.
 
