@@ -65,6 +65,11 @@ Add these environment variables (in `.env.local` and in Vercel → Settings → 
 
 If SMTP is not configured the store still works; emails are simply skipped.
 
+`CUSTOMER_EMAILS=off` sends order emails to the store team only (customers get none); remove it or set `on` to email customers too.
+
+### Bank transfer
+Customers can choose **Bank Transfer** at checkout for 5% off the products plus free delivery (calculated in `public.place_order`, see `supabase/bank-transfer.sql`; account details live in `BANK` in `lib/config.ts`). They send the payment screenshot on WhatsApp; admin verifies it before confirming. PostEx is told to collect Rs 0 for these orders.
+
 ### PostEx courier (two-way sync)
 Setup lives in `supabase/postex.sql` (run once in the SQL Editor). The API token is stored **encrypted in Supabase Vault**, never in code:
 ```sql
