@@ -42,7 +42,7 @@ function getTransport() {
   return transporter;
 }
 
-/** Store team inboxes: new-order alerts + a copy of every order confirmation. Override with ADMIN_NOTIFY_EMAIL (comma-separated). */
+/** Store owner inboxes: they receive the "new order received" alert only. Override with ADMIN_NOTIFY_EMAIL (comma-separated). */
 export const adminRecipients = () =>
   (process.env.ADMIN_NOTIFY_EMAIL || "huzaifayaseen306@gmail.com,amirsohail1468@gmail.com")
     .split(",")
@@ -129,17 +129,15 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
 
 /** Sends a customer email for an order event. Never throws — returns whether it was sent. */
 export async function sendOrderEmail(kind: OrderEmailKind, order: EmailOrder): Promise<boolean> {
-  // Confirmations are copied to the store team (even when the customer left no email)
-  const team = kind === "confirmed" ? adminRecipients() : [];
-  // CUSTOMER_EMAILS=off → customers get nothing for now; only the store team is emailed
-  if (process.env.CUSTOMER_EMAILS === "off") order = { ...order, email: null };
-  if (!emailConfigured() || (!order.email && team.length === 0)) return false;
+  // Status updates go to the customer only — the store owners just get the new-order alert.
+  // CUSTOMER_EMAILS=off pauses customer emails entirely.
+  if (process.env.CUSTOMER_EMAILS === "off") return false;
+  if (!emailConfigured() || !order.email) return false;
   try {
     const { subject, html, text } = render(kind, order);
     await getTransport().sendMail({
       from: from(),
-      to: order.email || team,
-      bcc: order.email && team.length ? team : undefined,
+      to: order.email,
       replyTo: process.env.SMTP_REPLY_TO || STORE.email || undefined,
       subject,
       html,

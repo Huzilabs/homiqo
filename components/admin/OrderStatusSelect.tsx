@@ -12,7 +12,6 @@ const LABEL: Record<string, string> = {
   delivered: "Delivered",
   cancelled: "Cancelled",
 };
-const BOOK = "__book_postex";
 
 type Props = {
   id: string;
@@ -36,19 +35,13 @@ export default function OrderStatusSelect({ id, orderNumber, status, courier, tr
     setBusy(true);
     setError(null);
     const prev = value;
-    setValue(next === BOOK ? "confirmed" : next);
-    const res =
-      next === BOOK
-        ? await fetch(`/api/admin/orders/${id}/postex`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "book" }),
-          })
-        : await fetch(`/api/admin/orders/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: next, courier, tracking_number: trackingNumber }),
-          });
+    setValue(next);
+    // Confirming books the order on PostEx automatically (server side)
+    const res = await fetch(`/api/admin/orders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: next, courier, tracking_number: trackingNumber }),
+    });
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) {
@@ -72,7 +65,6 @@ export default function OrderStatusSelect({ id, orderNumber, status, courier, tr
           {ORDER_STATUSES.map((s) => (
             <option key={s} value={s}>{LABEL[s]}</option>
           ))}
-          {value === "pending" && !onPostEx && <option value={BOOK}>Confirm + book PostEx</option>}
         </select>
         {busy ? (
           <LoaderCircle className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 animate-spin" />

@@ -59,6 +59,9 @@ export default function OrderStatusForm({ order }: { order: Order }) {
         <datalist id="couriers">
           {["TCS", "Leopards", "PostEx", "M&P", "Trax", "Call Courier", "BlueEx", "Pakistan Post"].map((c) => <option key={c} value={c} />)}
         </datalist>
+        {order.courier !== "PostEx" && (
+          <p className="mt-1 text-xs text-gray-500">Setting the status to <b>Confirmed</b> books the order on PostEx automatically. Type another courier here only if you are not using PostEx.</p>
+        )}
       </div>
       <div>
         <label className="label" htmlFor="tracking_number">Tracking number</label>

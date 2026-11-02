@@ -3,6 +3,7 @@ import { revalidateTag } from "next/cache";
 import { PRODUCTS_TAG } from "@/lib/products";
 import { createClient } from "@/lib/supabase/server";
 import { sendOrderEmail, type OrderEmailKind } from "@/lib/email";
+import { emailOrderStatus } from "@/lib/order-email";
 import { ORDER_STATUSES } from "@/lib/config";
 import type { Order, OrderItem } from "@/lib/types";
 
@@ -24,6 +25,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { data: before } = await supabase.from("orders").select("status, courier, tracking_number, postex_status").eq("id", id).maybeSingle();
   if (!before) return NextResponse.json({ error: "Order not found" }, { status: 404 });
   const onPostEx = before.courier === "PostEx" && Boolean(before.tracking_number);
+
+  // Website → PostEx: confirming an order (after the confirmation call) books it on PostEx automatically.
+  // Skipped only when the admin explicitly enters a different courier.
+  const otherCourier = Boolean(body.courier?.trim()) && !/postex/i.test(body.courier || "");
+  if (body.status === "confirmed" && !onPostEx && !otherCourier) {
+    const { data: res, error: bookError } = await supabase.rpc("postex_book_order", { p_order_id: id, p_city: null, p_pickup_code: null });
+    const r = res as { ok: boolean; error?: string; needs_city?: boolean; tracking_number?: string } | null;
+    if (bookError || !r?.ok) {
+      return NextResponse.json(
+        { error: bookError?.message || r?.error || "PostEx booking failed", needs_city: r?.needs_city },
+        { status: 400 },
+      );
+    }
+    // postex_book_order already set the status to confirmed and saved the tracking number
+    const emailed = body.notify !== false && before.status !== "confirmed" ? await emailOrderStatus(supabase, id, "confirmed") : false;
+    return NextResponse.json({ ok: true, emailed, tracking_number: r.tracking_number });
+  }
 
   // Website → PostEx: cancelling a booked order cancels the shipment first
   if (onPostEx && body.status === "cancelled" && before.status !== "cancelled" && !/^(returned|cancel)/i.test(before.postex_status || "")) {

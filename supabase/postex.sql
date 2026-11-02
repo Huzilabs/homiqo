@@ -115,7 +115,7 @@ begin
     'invoiceDivision', 1,
     'items', greatest(v_items, 1),
     'orderType', 'Normal',
-    'pickupAddressCode', nullif(trim(coalesce(p_pickup_code, '')), '')
+    'pickupAddressCode', coalesce(nullif(trim(coalesce(p_pickup_code, '')), ''), '001')  -- PostEx default pickup address (Kasur)
   ));
 end $$;
 
