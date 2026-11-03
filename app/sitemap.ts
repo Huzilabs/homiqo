@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getProducts } from "@/lib/products";
 import { abs } from "@/lib/seo";
+import { categoryPath } from "@/lib/categories";
 
 export const revalidate = 3600;
 
@@ -11,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: abs("/"), lastModified: latest, changeFrequency: "daily", priority: 1 },
     { url: abs("/shop"), lastModified: latest, changeFrequency: "daily", priority: 0.9 },
-    ...categories.map((c) => ({ url: abs(`/shop?category=${encodeURIComponent(c)}`), lastModified: latest, changeFrequency: "weekly" as const, priority: 0.7 })),
+    ...categories.map((c) => ({ url: abs(categoryPath(c)), lastModified: latest, changeFrequency: "weekly" as const, priority: 0.85 })),
     ...products.map((p) => ({
       url: abs(`/product/${p.slug}`),
       lastModified: p.updated_at,

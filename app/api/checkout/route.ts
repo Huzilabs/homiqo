@@ -13,9 +13,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
   const customer = body.customer || {};
+  // Email is optional (many customers order with phone only); validate it only when given
   const email = String(customer.email || "").trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "Please enter a valid email address" }, { status: 400 });
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return NextResponse.json({ error: "Please enter a valid email address, or leave it empty" }, { status: 400 });
   }
 
   const supabase = await createClient();
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
     const { data: details } = await supabase.rpc("track_order", { p_order_number: order_number, p_phone: customer.phone });
     if (!details) return;
     const o = details as TrackedOrder;
-    const emailOrder = { ...o, email, phone: customer.phone, address: customer.address };
+    const emailOrder = { ...o, email: email || null, phone: customer.phone, address: customer.address };
     await Promise.all([sendOrderEmail("received", emailOrder), sendNewOrderAlert(emailOrder)]);
   });
 

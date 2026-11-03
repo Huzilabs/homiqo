@@ -11,26 +11,29 @@ const rs = (n: number) => `Rs ${Math.round(n).toLocaleString("en-PK")}`;
 /** "Electric Milk Frother – Price in Pakistan Rs 1,399" style title (how Pakistani shoppers search). */
 export const productTitle = (p: Product) => `${p.name} Price in Pakistan – ${rs(p.price)}`;
 
+/** Unique meta description per product, kept within ~158 characters so Google shows it whole. */
 export const productDescription = (p: Product) => {
-  const off = p.compare_at_price && p.compare_at_price > p.price ? ` (was ${rs(p.compare_at_price)})` : "";
-  const base = `Buy ${p.name} online in Pakistan for ${rs(p.price)}${off}. ${p.short_description}`.trim();
-  const tail = " Cash on delivery all over Pakistan, 7-day returns.";
-  return (base.endsWith(".") ? base : base + ".") + tail;
+  const head = `Buy ${p.name} online in Pakistan for ${rs(p.price)}.`;
+  const tail = " Cash on delivery nationwide.";
+  let mid = ` ${p.short_description.trim().replace(/\.?$/, ".")}`;
+  const room = 158 - head.length - tail.length;
+  if (mid.length > room) {
+    const cut = mid.slice(0, Math.max(0, room - 1));
+    mid = cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:—–-]\s*$/, "") + "…";
+  }
+  return head + (room > 20 ? mid : "") + tail;
 };
 
 export const KEYWORDS = [
-  "kitchen gadgets Pakistan",
-  "home appliances online Pakistan",
-  "cash on delivery Pakistan",
-  "online shopping Pakistan",
-  "kitchen accessories",
+  "kitchen gadgets in Pakistan",
+  "kitchen accessories online Pakistan",
+  "home gadgets Pakistan",
   "vegetable chopper price in Pakistan",
-  "electric chopper Pakistan",
-  "qeema maker",
-  "milk frother Pakistan",
-  "coffee maker price in Pakistan",
-  "handheld vacuum cleaner Pakistan",
-  "kitchen sink organizer",
+  "electric chopper price in Pakistan",
+  "coffee beater price in Pakistan",
+  "handheld vacuum cleaner price in Pakistan",
+  "kitchen sink organizer rack",
+  "cash on delivery",
   "Homiqo",
 ];
 

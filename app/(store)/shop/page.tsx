@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
+import { categoryPath } from "@/lib/categories";
+import TrackItemList from "@/components/TrackItemList";
 import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import SetupNotice from "@/components/SetupNotice";
@@ -12,11 +15,10 @@ type Params = Promise<{ category?: string; q?: string; sort?: string }>;
 export async function generateMetadata({ searchParams }: { searchParams: Params }): Promise<Metadata> {
   const { category, q, sort } = await searchParams;
   if (q) return { title: `Search: ${q}`, robots: { index: false, follow: true } };
-  const title = category ? `${category} — Buy Online in Pakistan` : "Shop All Kitchen Gadgets & Home Essentials in Pakistan";
-  const description = category
-    ? `Shop ${category.toLowerCase()} online in Pakistan at the best prices. Cash on delivery nationwide, 2–5 day delivery and 7-day returns.`
-    : "Browse every Homiqo product — vegetable choppers, qeema makers, milk frothers, coffee makers, cordless vacuums, sink organizers and more. Cash on delivery across Pakistan.";
-  const canonical = category ? `/shop?category=${encodeURIComponent(category)}` : "/shop";
+  const title = "Shop Kitchen Gadgets & Home Essentials Online in Pakistan";
+  const description =
+    "Browse all Homiqo products — vegetable choppers, electric choppers, coffee beaters, sink organizers, handheld vacuums and more. Cash on delivery across Pakistan.";
+  const canonical = category ? categoryPath(category) : "/shop";
   return {
     title,
     description,
@@ -30,9 +32,12 @@ export async function generateMetadata({ searchParams }: { searchParams: Params 
 export default async function ShopPage({ searchParams }: { searchParams: Params }) {
   if (!supabaseConfigured) return <SetupNotice />;
   const { category, q, sort } = await searchParams;
+  // Old /shop?category=… links → the category's own page (permanent redirect)
+  if (category && !q) permanentRedirect(categoryPath(category));
   const [products, categories] = await Promise.all([getProducts({ category, q, sort }), getCategories()]);
 
   const href = (c?: string) => {
+    if (c && !q) return categoryPath(c);
     const sp = new URLSearchParams();
     if (c) sp.set("category", c);
     if (q) sp.set("q", q);
@@ -44,12 +49,13 @@ export default async function ShopPage({ searchParams }: { searchParams: Params 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={ld(itemListJsonLd(products))} />
+      <TrackItemList listId={q ? "search" : "shop_all"} listName={q ? `Search: ${q}` : "Shop all"} products={products} />
       <section className="bg-sand">
         <div className="container-x py-16 text-center sm:py-24">
           <p className="eyebrow">{q ? "Search results" : "The collection"}</p>
-          <h1 className="h-display mt-5">{q ? `“${q}”` : category || "Shop all"}</h1>
+          <h1 className="h-display mt-5">{q ? `“${q}”` : "Kitchen gadgets & home essentials"}</h1>
           <p className="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-ink/60">
-            {products.length} {products.length === 1 ? "piece" : "pieces"} · Cash on delivery across Pakistan
+            {products.length} {products.length === 1 ? "product" : "products"} · Cash on delivery across Pakistan · 2–5 day delivery
           </p>
         </div>
       </section>

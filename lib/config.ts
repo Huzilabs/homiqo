@@ -4,7 +4,7 @@ export const STORE = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.homiqoofficial.site",
   phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "923034229001",
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/homiqo.offical/",
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://www.facebook.com/profile.php?id=61595336193707",
   tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "",

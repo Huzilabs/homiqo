@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import ProductImage from "@/components/ProductImage";
+import { BANK } from "@/lib/config";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
@@ -74,7 +75,10 @@ export default function CartPage() {
             <div className="flex justify-between"><dt className="text-ink/65">Delivery</dt><dd className="font-medium">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
             <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
           </dl>
-          <Link href="/checkout" className="btn-primary mt-6 w-full py-3.5 text-base">Proceed to checkout</Link>
+          <p className="mt-4 bg-leaf-100/60 px-3 py-2.5 text-xs text-ink/70">
+            Pay cash on delivery — or save {BANK.discountPct}% + free delivery with bank transfer at checkout.
+          </p>
+          <Link href="/checkout" className="btn-primary mt-4 w-full py-3.5 text-base">Proceed to checkout</Link>
           <Link href="/shop" className="mt-3 block text-center text-sm font-medium text-brand-700 hover:underline">Continue shopping</Link>
         </aside>
       </div>

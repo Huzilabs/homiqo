@@ -9,8 +9,8 @@ const serif = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "500", "6
 
 export const metadata: Metadata = {
   metadataBase: new URL(STORE.siteUrl),
-  title: { default: `${STORE.name} — Kitchen Gadgets & Home Essentials in Pakistan | Cash on Delivery`, template: `%s | ${STORE.name}` },
-  description: `Shop smart kitchen gadgets and home essentials online in Pakistan — vegetable choppers, qeema makers, milk frothers, coffee makers, cordless vacuums and more. Cash on delivery nationwide, 2–5 day delivery, 7-day returns.`,
+  title: { default: `${STORE.name} — Kitchen Gadgets & Home Essentials in Pakistan`, template: `%s | ${STORE.name}` },
+  description: `Shop kitchen gadgets online in Pakistan — vegetable choppers, electric choppers, coffee beaters, sink organizers & handheld vacuums. Cash on delivery nationwide.`,
   keywords: KEYWORDS,
   applicationName: STORE.name,
   openGraph: {

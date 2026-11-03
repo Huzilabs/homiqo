@@ -25,6 +25,7 @@ const cartToItems = (items: CartItem[]): GaItem[] =>
   items.map((i) => ({ item_id: i.product_id, item_name: i.name, price: i.price, quantity: i.quantity }));
 
 const META_EVENTS: Record<string, string> = {
+  add_payment_info: "AddPaymentInfo",
   view_item: "ViewContent",
   add_to_cart: "AddToCart",
   begin_checkout: "InitiateCheckout",
@@ -75,13 +76,13 @@ export const track = {
     event("view_cart", { currency: STORE.currency, value, items: cartToItems(items) }),
   beginCheckout: (items: CartItem[], value: number) =>
     event("begin_checkout", { currency: STORE.currency, value, items: cartToItems(items) }),
-  purchase: (orderNumber: string, items: CartItem[], value: number, shipping: number) => {
+  purchase: (orderNumber: string, items: CartItem[], value: number, shipping: number, paymentType = "cod") => {
     event("purchase", {
       transaction_id: orderNumber,
       currency: STORE.currency,
       value,
       shipping,
-      payment_type: "cod",
+      payment_type: paymentType,
       items: cartToItems(items),
     });
     try {
@@ -89,4 +90,12 @@ export const track = {
     } catch {}
   },
   search: (term: string) => event("search", { search_term: term }),
+  viewItemList: (listId: string, listName: string, products: Product[]) =>
+    event("view_item_list", {
+      item_list_id: listId,
+      item_list_name: listName,
+      items: products.map((p, i) => ({ ...toItem(p), index: i, item_list_id: listId, item_list_name: listName })),
+    }),
+  addPaymentInfo: (items: CartItem[], value: number, paymentType: string) =>
+    event("add_payment_info", { currency: STORE.currency, value, payment_type: paymentType, items: cartToItems(items) }),
 };

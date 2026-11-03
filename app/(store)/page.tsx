@@ -15,7 +15,8 @@ import { BANK, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config
 import { LIFESTYLE_IMAGE } from "@/lib/media";
 import type { Product } from "@/lib/types";
 import type { Metadata } from "next";
-import { itemListJsonLd, ld } from "@/lib/seo";
+import { faqJsonLd, itemListJsonLd, ld } from "@/lib/seo";
+import { categoryPath } from "@/lib/categories";
 
 export const metadata: Metadata = { alternates: { canonical: "/" }, openGraph: { url: "/" } };
 
@@ -27,7 +28,7 @@ const faqs = [
   { q: "Can I pay by bank transfer?", a: `Yes. Choose Bank Transfer at checkout to get ${BANK.discountPct}% off plus free delivery. Transfer the amount to our ${BANK.bank} account and send the payment screenshot on WhatsApp to ${BANK.whatsappDisplay} — we dispatch as soon as it is confirmed.` },
   { q: "How long does delivery take?", a: "Most orders arrive within 2–5 working days anywhere in Pakistan. Karachi, Lahore and Islamabad are usually faster." },
   { q: "How much is delivery?", a: `Delivery is ${formatPrice(SHIPPING_FEE)} per order, and complimentary on orders of ${formatPrice(FREE_SHIPPING_THRESHOLD)} or more.` },
-  { q: "Will I receive a confirmation?", a: "Yes — an email as soon as your order is placed, another when we confirm it, and one more when it ships." },
+  { q: "Will I receive a confirmation?", a: "Yes. We call you to confirm your order before dispatch. If you add your email at checkout, you also get emails when your order is confirmed and shipped, with a PostEx tracking link." },
   { q: "What if something arrives damaged?", a: "Write to us within 7 days of delivery and we’ll replace it or refund you. Please keep the original packaging." },
 ];
 
@@ -50,17 +51,17 @@ export default async function HomePage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={ld(itemListJsonLd(products))} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={ld([itemListJsonLd(products), faqJsonLd(faqs)])} />
       {/* ═════════ HERO — full-screen editorial split ═════════ */}
       <section className="grid lg:h-[calc(100svh-113px)] lg:min-h-[640px] lg:grid-cols-2">
         <div className="relative order-2 flex items-center bg-sand px-6 py-16 sm:px-12 lg:order-1 lg:px-[max(3rem,calc((100vw-1320px)/2+3rem))] lg:py-0">
           <div className="max-w-[560px] animate-fade-in">
-            <p className="eyebrow">The Homiqo Kitchen Edit</p>
+            <p className="eyebrow">Kitchen &amp; home gadgets · Pakistan</p>
             <h1 className="h-display mt-6 text-ink">
-              Clever tools for the <em className="font-serif italic text-brand-600">heart</em> of your home
+              Clever kitchen gadgets for the <em className="font-serif italic text-brand-600">heart</em> of your home
             </h1>
             <p className="mt-7 max-w-md text-base leading-relaxed text-ink/65 sm:text-[17px]">
-              Qeema makers, choppers, coffee makers and cordless vacuums — tested in real kitchens, delivered anywhere in Pakistan. Pay only when it arrives.
+              Electric choppers, vegetable cutters, coffee beaters, sink organizers and cordless vacuums — delivered anywhere in Pakistan. Pay cash when it arrives.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link href="/shop" className="btn-primary">Shop now</Link>
@@ -90,7 +91,7 @@ export default async function HomePage() {
             className="group absolute bottom-5 left-5 right-5 flex items-center gap-4 bg-paper/95 p-3 pr-5 backdrop-blur transition hover:bg-white sm:bottom-8 sm:left-8 sm:right-auto"
           >
             <span className="relative h-16 w-16 shrink-0 overflow-hidden bg-sand">
-              <ProductImage src={hero.images[1] || hero.images[0]} alt="" sizes="64px" />
+              <ProductImage src={hero.images[1] || hero.images[0]} alt={`${hero.name} — another view`} sizes="64px" />
             </span>
             <span className="min-w-0">
               <span className="block text-[10px] uppercase tracking-[.2em] text-accent-600">Now playing</span>
@@ -105,12 +106,12 @@ export default async function HomePage() {
       {/* ═════════ CATEGORIES ═════════ */}
       <section className="container-x pt-24 sm:pt-28">
         <div className="text-center">
-          <p className="eyebrow">Shop by room &amp; ritual</p>
-          <h2 className="h-section mt-4">Find your essentials</h2>
+          <p className="eyebrow">Shop by category</p>
+          <h2 className="h-section mt-4">Find your kitchen essentials</h2>
         </div>
         <div className="mt-14 grid grid-cols-2 gap-x-5 gap-y-12 sm:grid-cols-3 lg:grid-cols-5">
           {categories.map((c) => (
-            <Link key={c.name} href={`/shop?category=${encodeURIComponent(c.name)}`} className="group flex flex-col items-center text-center">
+            <Link key={c.name} href={categoryPath(c.name)} className="group flex flex-col items-center text-center">
               {/* Rounded square (not a circle) so square product photos — and the text on them — show in full */}
               <span className="relative aspect-square w-full max-w-[240px] overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-sm transition duration-500 group-hover:-translate-y-1 group-hover:shadow-md">
                 <ProductImage src={c.image} alt={c.name} sizes="240px" />
@@ -227,13 +228,39 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ═════════ ABOUT HOMIQO (brand intro + category links) ═════════ */}
+      <section className="container-x pt-28 sm:pt-36">
+        <div className="grid gap-10 border-t border-ink/10 pt-14 lg:grid-cols-[1fr_2fr]">
+          <div>
+            <p className="eyebrow">About Homiqo</p>
+            <h2 className="h-section mt-4">Kitchen gadgets &amp; home essentials, delivered across Pakistan</h2>
+          </div>
+          <div className="space-y-5 text-[15px] leading-relaxed text-ink/70">
+            <p>
+              Homiqo is an online store for practical kitchen and home gadgets — the small tools that save time every day. Browse{" "}
+              {categories.map((c, i) => (
+                <span key={c.name}>
+                  <Link href={categoryPath(c.name)} className="text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink">{c.name.toLowerCase()}</Link>
+                  {i < categories.length - 2 ? ", " : i === categories.length - 2 ? " and " : ""}
+                </span>
+              ))}
+              , or see <Link href="/shop" className="text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink">all products</Link>.
+            </p>
+            <p>
+              Order online and pay cash when your parcel arrives, or pay by bank transfer for {BANK.discountPct}% off and free delivery. Orders are delivered across Pakistan in 2–5 working days, and delivery is free on orders over {formatPrice(FREE_SHIPPING_THRESHOLD)}. If something arrives damaged or faulty, contact us within 7 days — see our{" "}
+              <Link href="/policies" className="text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink">shipping &amp; returns policy</Link>.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ═════════ FAQ ═════════ */}
       <section className="container-x pt-28 sm:pt-36">
         <div className="grid gap-12 lg:grid-cols-[1fr_2fr]">
           <div>
             <p className="eyebrow">Questions</p>
             <h2 className="h-section mt-4">Good to know</h2>
-            <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink/60">Can’t find what you’re looking for? Our team usually replies within the hour.</p>
+            <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink/60">Can’t find what you’re looking for? Message us on WhatsApp and we’ll help you choose.</p>
             <div className="mt-8 flex flex-col items-start gap-4">
               {STORE.whatsapp && <a href={`https://wa.me/${STORE.whatsapp}`} target="_blank" rel="noopener noreferrer" className="btn-primary">WhatsApp us</a>}
               <Link href="/contact" className="link-arrow">Contact support <ArrowRight className="h-3.5 w-3.5" /></Link>
@@ -245,7 +272,7 @@ export default async function HomePage() {
 
       {/* ═════════ CLOSING BANNER ═════════ */}
       <section className="relative mt-28 overflow-hidden sm:mt-36">
-        <Image src={LIFESTYLE_IMAGE} alt="" fill sizes="100vw" className="object-cover" />
+        <Image src={LIFESTYLE_IMAGE} alt="" role="presentation" fill sizes="100vw" loading="lazy" className="object-cover" />
         <div className="absolute inset-0 bg-ink/55" />
         <div className="container-x relative flex min-h-[520px] flex-col items-center justify-center py-24 text-center text-white">
           <p className="eyebrow text-accent-400">No advance payment, ever</p>

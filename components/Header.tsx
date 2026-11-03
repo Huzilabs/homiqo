@@ -11,9 +11,10 @@ import { track } from "@/lib/analytics";
 
 const nav = [
   { href: "/shop", label: "Shop all", match: (p: string, c: string | null) => p === "/shop" && !c },
-  { href: "/shop?category=Kitchen%20Appliances", label: "Appliances", match: (p: string, c: string | null) => c === "Kitchen Appliances" },
-  { href: "/shop?category=Kitchen%20Tools", label: "Kitchen tools", match: (p: string, c: string | null) => c === "Kitchen Tools" },
-  { href: "/shop?category=Home%20Cleaning", label: "Cleaning", match: (p: string, c: string | null) => c === "Home Cleaning" },
+  { href: "/category/kitchen-appliances", label: "Appliances", match: (p: string) => p === "/category/kitchen-appliances" },
+  { href: "/category/kitchen-tools", label: "Kitchen tools", match: (p: string) => p === "/category/kitchen-tools" },
+  { href: "/category/kitchen-storage", label: "Sink organizers", match: (p: string) => p === "/category/kitchen-storage" },
+  { href: "/category/home-cleaning", label: "Cleaning", match: (p: string) => p === "/category/home-cleaning" },
   { href: "/contact", label: "Contact", match: (p: string) => p === "/contact" },
 ];
 

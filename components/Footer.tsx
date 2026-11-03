@@ -34,7 +34,7 @@ export default function Footer() {
             )}
           </div>
         </div>
-        <FooterCol title="Shop" links={[["All products", "/shop"], ["Appliances", "/shop?category=Kitchen%20Appliances"], ["Kitchen tools", "/shop?category=Kitchen%20Tools"], ["Home cleaning", "/shop?category=Home%20Cleaning"]]} />
+        <FooterCol title="Shop" links={[["All products", "/shop"], ["Kitchen appliances", "/category/kitchen-appliances"], ["Kitchen tools", "/category/kitchen-tools"], ["Sink organizers", "/category/kitchen-storage"], ["Home cleaning", "/category/home-cleaning"], ["Health & care", "/category/health-care"]]} />
         <FooterCol title="Help" links={[["Contact us", "/contact"], ["Shipping & returns", "/policies"], ["Your cart", "/cart"]]} />
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[.24em] text-white">Get in touch</p>

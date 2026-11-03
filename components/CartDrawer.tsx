@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/config";
+import { BANK, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/config";
 import ProductImage from "./ProductImage";
 
 export default function CartDrawer() {
@@ -94,7 +94,7 @@ export default function CartDrawer() {
                 <span>Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
-              <p className="text-xs text-ink/55">Delivery calculated at checkout. Pay cash when your order arrives.</p>
+              <p className="text-xs text-ink/55">Delivery {subtotal >= FREE_SHIPPING_THRESHOLD ? "is free" : `${formatPrice(SHIPPING_FEE)} (free over ${formatPrice(FREE_SHIPPING_THRESHOLD)})`}. Pay cash when your order arrives — or {BANK.discountPct}% off with bank transfer.</p>
               <Link href="/checkout" onClick={() => setDrawerOpen(false)} className="btn-primary w-full">
                 Checkout
               </Link>

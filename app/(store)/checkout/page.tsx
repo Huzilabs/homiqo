@@ -8,7 +8,7 @@ import ProductImage from "@/components/ProductImage";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
-import { BANK, bankDiscount } from "@/lib/config";
+import { BANK, STORE, bankDiscount } from "@/lib/config";
 import { createClient } from "@/lib/supabase/client";
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
@@ -16,7 +16,11 @@ const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpp
 
 export default function CheckoutPage() {
   const { items, ready, subtotal, shipping: codShipping, clear } = useCart();
-  const [payment, setPayment] = useState<"cod" | "bank_transfer">("cod");
+  const [payment, setPaymentState] = useState<"cod" | "bank_transfer">("cod");
+  const setPayment = (p: "cod" | "bank_transfer") => {
+    setPaymentState(p);
+    track.addPaymentInfo(items, p === "bank_transfer" ? subtotal - bankDiscount(subtotal) : subtotal + codShipping, p);
+  };
   const isBank = payment === "bank_transfer";
   // Must match public.place_order(): bank transfer = 10% off products + free delivery
   const discount = isBank ? bankDiscount(subtotal) : 0;
@@ -83,7 +87,7 @@ export default function CheckoutPage() {
     }
     const { order_number, total: serverTotal } = data!;
     placed.current = true;
-    track.purchase(order_number, items, Number(serverTotal), Number(serverTotal) - subtotal);
+    track.purchase(order_number, items, Number(serverTotal), shipping, payment);
     try {
       sessionStorage.setItem("homecart.lastOrder", JSON.stringify({ order_number, phone: customer.phone }));
     } catch {}
@@ -102,8 +106,13 @@ export default function CheckoutPage() {
             <h2 className="font-serif text-2xl font-medium">Contact & delivery details</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <Field label="Full name" name="customer_name" required autoComplete="name" className="sm:col-span-2" />
-              <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" pattern="[0-9+\-\s]{10,16}" />
-              <Field label="Email (for order updates)" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
+              <div>
+                <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" inputMode="tel" pattern="[0-9+\-\s]{10,16}" />
+                <p className="mt-1 text-xs text-ink/50">We’ll call this number to confirm your order.</p>
+              </div>
+              <div>
+                <Field label="Email (optional)" name="email" type="email" autoComplete="email" placeholder="For order updates & tracking link" />
+              </div>
               <Field label="Complete address" name="address" required placeholder="House #, street, area" autoComplete="street-address" className="sm:col-span-2" />
               <div>
                 <label className="label" htmlFor="city">City *</label>
@@ -163,6 +172,16 @@ export default function CheckoutPage() {
             {submitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Lock className="h-4 w-4" />}
             {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
           </button>
+          <ul className="mt-4 space-y-1.5 text-xs text-ink/60">
+            <li>✓ {isBank ? "Pay by bank transfer — details shown after you place the order" : "No advance payment — pay cash when the parcel arrives"}</li>
+            <li>✓ We call to confirm before dispatch · delivered in 2–5 working days</li>
+            <li>✓ Damaged or faulty? Replacement or refund within 7 days</li>
+          </ul>
+          {STORE.whatsapp && (
+            <a href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent("Assalam o Alaikum, I need help placing an order.")}`} target="_blank" rel="noopener noreferrer" className="mt-3 block text-center text-xs font-medium text-[#128C7E] hover:underline">
+              Need help? Order on WhatsApp
+            </a>
+          )}
           <p className="mt-3 text-center text-xs text-ink/55">
             By placing your order you agree to our <Link href="/policies" className="underline">shipping & return policy</Link>.
           </p>

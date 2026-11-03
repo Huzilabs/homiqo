@@ -30,7 +30,12 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
           <ProductImage alt={name} />
         ) : current.kind === "image" ? (
           <>
-            <ProductImage src={current.url} alt={name} priority sizes="(max-width:1024px) 100vw, 50vw" />
+            <ProductImage
+              src={current.url}
+              alt={images.length > 1 ? `${name} — photo ${images.indexOf(current.url) + 1} of ${images.length}` : name}
+              priority={index === 0}
+              sizes="(max-width:1024px) 100vw, 50vw"
+            />
             <HoverVideo url={videos[0]} active={hover} />
             {videos.length > 0 && !hover && (
               <span className="pointer-events-none absolute bottom-5 left-5 bg-paper/95 px-4 py-2.5 text-[10px] font-medium uppercase tracking-[.2em] text-ink">
@@ -83,9 +88,9 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
                 }`}
               >
                 {m.kind === "image" ? (
-                  <Image src={m.url} alt="" fill sizes="140px" className="bg-white object-contain" />
+                  <Image src={m.url} alt={`${name} thumbnail ${i + 1}`} fill sizes="140px" className="bg-white object-contain" />
                 ) : yt ? (
-                  <Image src={`https://img.youtube.com/vi/${yt}/mqdefault.jpg`} alt="" fill sizes="140px" className="object-cover" />
+                  <Image src={`https://img.youtube.com/vi/${yt}/mqdefault.jpg`} alt={`${name} video`} fill sizes="140px" className="object-cover" />
                 ) : (
                   <video src={m.url} muted preload="metadata" className="absolute inset-0 h-full w-full object-cover" />
                 )}
