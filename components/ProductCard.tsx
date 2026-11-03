@@ -34,14 +34,14 @@ export default function ProductCard({ product, priority }: { product: Product; p
           <HoverVideo url={video} active={playing} />
         </Link>
 
-        <div className="pointer-events-none absolute left-3 top-3 flex flex-col items-start gap-1.5">
+        <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
           {soldOut ? (
-            <span className="bg-ink px-2.5 py-1 text-[10px] font-medium uppercase tracking-[.16em] text-white">Sold out</span>
+            <span className="bg-ink px-2 py-0.5 text-[9px] font-medium uppercase tracking-[.14em] text-white sm:px-2.5 sm:py-1 sm:text-[10px]">Sold out</span>
           ) : off > 0 ? (
-            <span className="bg-accent-600 px-2.5 py-1 text-[10px] font-medium tracking-[.12em] text-white">−{off}%</span>
+            <span className="bg-accent-600 px-2 py-0.5 text-[9px] font-medium tracking-[.1em] text-white sm:px-2.5 sm:py-1 sm:text-[10px]">−{off}%</span>
           ) : null}
           {product.is_featured && !soldOut && (
-            <span className="bg-white px-2.5 py-1 text-[10px] font-medium uppercase tracking-[.16em] text-ink">Bestseller</span>
+            <span className="hidden bg-white px-2.5 py-1 text-[10px] font-medium uppercase tracking-[.16em] text-ink lg:inline-block">Bestseller</span>
           )}
         </div>
 
@@ -50,7 +50,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
             type="button"
             onClick={() => setPlaying((v) => !v)}
             aria-label={playing ? "Stop preview" : "Play preview"}
-            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm transition hover:bg-white sm:right-3 sm:top-3 sm:h-9 sm:w-9"
           >
             <Play className={`h-3.5 w-3.5 fill-current ${playing ? "opacity-40" : ""}`} />
           </button>
@@ -60,7 +60,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
           type="button"
           disabled={soldOut}
           onClick={() => add(product, 1)}
-          className="absolute inset-x-3 bottom-3 translate-y-[calc(100%+12px)] bg-white py-3.5 text-[11px] font-medium uppercase tracking-[.2em] text-ink opacity-0 transition duration-300 hover:bg-ink hover:text-white group-hover:translate-y-0 group-hover:opacity-100 disabled:hidden max-lg:translate-y-0 max-lg:opacity-100 max-lg:py-2.5 max-lg:text-[10px]"
+          className="absolute inset-x-3 bottom-3 hidden translate-y-[calc(100%+12px)] bg-white py-3.5 text-[11px] font-medium uppercase tracking-[.2em] text-ink opacity-0 transition duration-300 hover:bg-ink hover:text-white group-hover:translate-y-0 group-hover:opacity-100 disabled:hidden lg:block"
         >
           Add to cart
         </button>
@@ -68,13 +68,22 @@ export default function ProductCard({ product, priority }: { product: Product; p
 
       <div className="pt-4">
         <p className="text-[10px] font-medium uppercase tracking-[.2em] text-ink/50 sm:text-[11px]">{product.category}</p>
-        <Link href={`/product/${product.slug}`} className="h-card mt-1.5 block text-ink transition hover:text-brand-600">
+        <Link href={`/product/${product.slug}`} className="h-card mt-1.5 block text-ink transition hover:text-brand-600 max-sm:text-[1.05rem] max-sm:leading-snug">
           {product.name}
         </Link>
         <p className="mt-1.5 flex items-baseline gap-2.5 text-sm">
           <span className={`font-medium ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
           {off > 0 && <span className="text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price!)}</span>}
         </p>
+        {!soldOut && (
+          <button
+            type="button"
+            onClick={() => add(product, 1)}
+            className="mt-3 w-full border border-ink/80 py-2.5 text-[10px] font-medium uppercase tracking-[.18em] text-ink transition active:bg-ink active:text-white lg:hidden"
+          >
+            Add to cart
+          </button>
+        )}
       </div>
     </div>
   );

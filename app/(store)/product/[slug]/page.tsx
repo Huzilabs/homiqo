@@ -180,12 +180,12 @@ export default async function ProductPage({ params }: { params: Params }) {
 
       {related.length > 0 && (
         <section className="container-x pt-28">
-          <div className="mb-12 flex items-end justify-between gap-6">
+          <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
             <div>
               <p className="eyebrow">Complete the kitchen</p>
               <h2 className="h-section mt-4">{sameCategory.length ? `More ${product.category.toLowerCase()}` : "You may also like"}</h2>
             </div>
-            <Link href={categoryPath(product.category)} className="link-arrow shrink-0 pb-2">All {product.category.toLowerCase()} →</Link>
+            <Link href={categoryPath(product.category)} className="link-arrow self-start sm:shrink-0 sm:self-auto sm:pb-2">All {product.category.toLowerCase()} →</Link>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-7 lg:grid-cols-4">
             {related.map((p) => <ProductCard key={p.id} product={p} />)}

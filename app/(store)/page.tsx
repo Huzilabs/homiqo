@@ -322,13 +322,13 @@ function Spotlight({ product }: { product: Product }) {
 
 function SectionHead({ eyebrow, title, href }: { eyebrow: string; title: string; href?: string }) {
   return (
-    <div className="mb-12 flex items-end justify-between gap-6">
+    <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
       <div>
         <p className="eyebrow">{eyebrow}</p>
         <h2 className="h-section mt-4">{title}</h2>
       </div>
       {href && (
-        <Link href={href} className="link-arrow shrink-0 pb-2">
+        <Link href={href} className="link-arrow self-start sm:shrink-0 sm:self-auto sm:pb-2">
           View all <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       )}

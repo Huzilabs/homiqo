@@ -13,9 +13,11 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className="fixed bottom-20 right-4 z-30 lg:bottom-6 lg:right-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lift transition hover:scale-105"
+      className={`fixed right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lift transition hover:scale-105 lg:bottom-6 lg:right-6 lg:h-14 lg:w-14 ${
+        pathname.startsWith("/product/") ? "bottom-28" : "bottom-6"
+      }`}
     >
-      <MessageCircle className="h-7 w-7" />
+      <MessageCircle className="h-6 w-6 lg:h-7 lg:w-7" />
     </a>
   );
 }
