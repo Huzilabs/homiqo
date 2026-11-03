@@ -27,7 +27,7 @@ const faqs = [
   { q: "How does Cash on Delivery work?", a: "Place your order online without paying anything. Our rider delivers to your door and you pay in cash after receiving the parcel." },
   { q: "Can I pay by bank transfer?", a: `Yes. Choose Bank Transfer at checkout to get ${BANK.discountPct}% off plus free delivery. Transfer the amount to our ${BANK.bank} account and send the payment screenshot on WhatsApp to ${BANK.whatsappDisplay} — we dispatch as soon as it is confirmed.` },
   { q: "How long does delivery take?", a: "Most orders arrive within 2–5 working days anywhere in Pakistan. Karachi, Lahore and Islamabad are usually faster." },
-  { q: "How much is delivery?", a: `Delivery is ${formatPrice(SHIPPING_FEE)} per order, and complimentary on orders of ${formatPrice(FREE_SHIPPING_THRESHOLD)} or more.` },
+  { q: "How much is delivery?", a: `Delivery is ${formatPrice(SHIPPING_FEE)} for a single item, and free when you order 2 or more items, spend ${formatPrice(FREE_SHIPPING_THRESHOLD)} or more, or pay by bank transfer.` },
   { q: "Will I receive a confirmation?", a: "Yes. We call you to confirm your order before dispatch. If you add your email at checkout, you also get emails when your order is confirmed and shipped, with a PostEx tracking link." },
   { q: "What if something arrives damaged?", a: "Write to us within 7 days of delivery and we’ll replace it or refund you. Please keep the original packaging." },
 ];
@@ -139,7 +139,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-2 border-y border-ink/10 lg:grid-cols-4">
           {[
             { icon: Banknote, t: "Cash on delivery", d: "Pay at your doorstep" },
-            { icon: Truck, t: "Delivered in 2–5 days", d: `Free over ${formatPrice(FREE_SHIPPING_THRESHOLD)}` },
+            { icon: Truck, t: "Delivered in 2–5 days", d: "Free on 2+ items" },
             { icon: RotateCcw, t: "7-day returns", d: "Simple replacements" },
             { icon: PackageCheck, t: "Quality checked", d: "Tested before dispatch" },
           ].map(({ icon: Icon, t, d }, i) => (
@@ -247,7 +247,7 @@ export default async function HomePage() {
               , or see <Link href="/shop" className="text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink">all products</Link>.
             </p>
             <p>
-              Order online and pay cash when your parcel arrives, or pay by bank transfer for {BANK.discountPct}% off and free delivery. Orders are delivered across Pakistan in 2–5 working days, and delivery is free on orders over {formatPrice(FREE_SHIPPING_THRESHOLD)}. If something arrives damaged or faulty, contact us within 7 days — see our{" "}
+              Order online and pay cash when your parcel arrives, or pay by bank transfer for {BANK.discountPct}% off and free delivery. Orders are delivered across Pakistan in 2–5 working days, and delivery is free when you order 2 or more items or spend over {formatPrice(FREE_SHIPPING_THRESHOLD)}. If something arrives damaged or faulty, contact us within 7 days — see our{" "}
               <Link href="/policies" className="text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink">shipping &amp; returns policy</Link>.
             </p>
           </div>

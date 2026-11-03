@@ -16,6 +16,7 @@ declare
   v_subtotal   numeric(12,2) := 0;
   v_shipping   numeric(12,2);
   v_discount   numeric(12,2) := 0;
+  v_units      integer := 0;
   v_item       jsonb;
   v_qty        integer;
   v_product    products%rowtype;
@@ -66,13 +67,15 @@ begin
     values (v_order_id, v_product.id, v_product.name, v_product.images[1], v_product.price, v_qty, v_product.price * v_qty);
 
     v_subtotal := v_subtotal + v_product.price * v_qty;
+    v_units := v_units + v_qty;
   end loop;
 
   if v_payment = 'bank_transfer' then
     v_discount := round(v_subtotal * 0.05);   -- 5% off
     v_shipping := 0;                          -- free delivery
   else
-    v_shipping := case when v_subtotal >= 5000 then 0 else 250 end;
+    -- free delivery on 2+ items or Rs 5,000+
+    v_shipping := case when v_subtotal >= 5000 or v_units >= 2 then 0 else 250 end;
   end if;
 
   update orders set subtotal = v_subtotal, shipping_fee = v_shipping, discount = v_discount,

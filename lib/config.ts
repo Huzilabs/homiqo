@@ -15,8 +15,10 @@ export const STORE = {
 export const SHIPPING_FEE = 250;
 export const FREE_SHIPPING_THRESHOLD = 5000;
 
-export const shippingFor = (subtotal: number) =>
-  subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+/** Free delivery on 2+ items, or on orders of Rs 5,000+. Keep in sync with public.place_order(). */
+export const FREE_DELIVERY_MIN_ITEMS = 2;
+export const shippingFor = (subtotal: number, units = 1) =>
+  subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD || units >= FREE_DELIVERY_MIN_ITEMS ? 0 : SHIPPING_FEE;
 
 /** Bank transfer (prepaid) — 5% off the products + free delivery. Keep in sync with public.place_order(). */
 export const BANK = {

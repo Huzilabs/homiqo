@@ -80,6 +80,11 @@ export default function CartPage() {
             <div className="flex justify-between"><dt className="text-ink/65">Delivery</dt><dd className="font-medium">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
             <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
           </dl>
+          {shipping > 0 && (
+            <p className="mt-4 border border-accent-500/40 bg-accent-50 px-3 py-2.5 text-xs font-medium text-accent-700">
+              Add 1 more item to get <b>free delivery</b> (save {formatPrice(shipping)})
+            </p>
+          )}
           <p className="mt-4 bg-leaf-100/60 px-3 py-2.5 text-xs text-ink/70">
             Pay cash on delivery — or save {BANK.discountPct}% + free delivery with bank transfer at checkout.
           </p>

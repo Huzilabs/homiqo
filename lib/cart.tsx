@@ -89,7 +89,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(() => {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const shipping = shippingFor(subtotal);
+    const shipping = shippingFor(subtotal, items.reduce((n, i) => n + i.quantity, 0));
     return {
       items,
       ready,
