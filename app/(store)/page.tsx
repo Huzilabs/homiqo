@@ -55,7 +55,7 @@ export default async function HomePage() {
       {/* ═════════ HERO — full-screen editorial split ═════════ */}
       <section className="grid lg:h-[calc(100svh-113px)] lg:min-h-[640px] lg:grid-cols-2">
         <div className="relative order-2 flex items-center bg-sand px-6 py-16 sm:px-12 lg:order-1 lg:px-[max(3rem,calc((100vw-1320px)/2+3rem))] lg:py-0">
-          <div className="max-w-[560px] animate-fade-in">
+          <div className="max-w-[560px]">
             <p className="eyebrow">Kitchen &amp; home gadgets · Pakistan</p>
             <h1 className="h-display mt-6 text-ink">
               Clever kitchen gadgets for the <em className="font-serif italic text-brand-600">heart</em> of your home
@@ -84,7 +84,7 @@ export default async function HomePage() {
 
         <div className="relative order-1 aspect-[4/5] overflow-hidden bg-brand-900 sm:aspect-[16/11] lg:order-2 lg:aspect-auto">
           <ProductImage src={hero.images[0]} alt={hero.name} priority sizes="(max-width:1024px) 100vw, 50vw" />
-          <InViewVideo url={previewVideo(hero.videos)} />
+          <InViewVideo url={previewVideo(hero.videos)} deferUntilLoad minWidth={768} />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent" />
           <Link
             href={`/product/${hero.slug}`}
