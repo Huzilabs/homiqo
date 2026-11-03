@@ -22,5 +22,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: abs("/contact"), changeFrequency: "yearly", priority: 0.3 },
     { url: abs("/policies"), changeFrequency: "yearly", priority: 0.3 },
+    { url: abs("/privacy"), changeFrequency: "yearly", priority: 0.2 },
   ];
 }

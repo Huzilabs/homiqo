@@ -35,7 +35,7 @@ export default function Footer() {
           </div>
         </div>
         <FooterCol title="Shop" links={[["All products", "/shop"], ["Kitchen appliances", "/category/kitchen-appliances"], ["Kitchen tools", "/category/kitchen-tools"], ["Sink organizers", "/category/kitchen-storage"], ["Home cleaning", "/category/home-cleaning"], ["Health & care", "/category/health-care"]]} />
-        <FooterCol title="Help" links={[["Contact us", "/contact"], ["Shipping & returns", "/policies"], ["Your cart", "/cart"]]} />
+        <FooterCol title="Help" links={[["Contact us", "/contact"], ["Shipping & returns", "/policies"], ["Privacy policy", "/privacy"], ["Your cart", "/cart"]]} />
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[.24em] text-white">Get in touch</p>
           <ul className="mt-6 space-y-3 text-sm">
