@@ -30,7 +30,7 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 | Payment | **Cash on Delivery** all over Pakistan · or **Bank Transfer: 5% off + FREE delivery** |
 | Delivery | 2–5 working days · Rs 250 delivery (free on orders over Rs 5,000 or with bank transfer) |
 | Returns | Damaged / faulty / not as described → replacement or refund within **7 days** |
-| WhatsApp support | +92 303 4229001 |
+| WhatsApp support | +92 305 4471454 |
 
 **Verified product points (from the product listing):**
 - Froths milk into thick foam in **15–20 seconds**
@@ -100,4 +100,4 @@ Tip: Pakistanis search **"coffee beater rechargeable"**, so use "rechargeable" i
 - [ ] Landing page opens fine on mobile: https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater
 - [ ] URL parameters pasted at the Ad level
 - [ ] Optimisation event = Purchase, pixel 1461422069206467
-- [ ] Someone is ready to answer WhatsApp (+92 303 4229001) and confirm orders
+- [ ] Someone is ready to answer WhatsApp (+92 305 4471454) and confirm orders

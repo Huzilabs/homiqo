@@ -4,7 +4,7 @@ export const STORE = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.homiqoofficial.site",
   phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "923034229001",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "923054471454",
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/homiqo.offical/",
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://www.facebook.com/profile.php?id=61595336193707",
   tiktok: process.env.NEXT_PUBLIC_TIKTOK_URL || "",
@@ -25,8 +25,8 @@ export const BANK = {
   account: "10010111768253",
   iban: "PK84MEZN0010010111768253",
   branch: "Kasur Branch",
-  whatsapp: "923034229001", // payment screenshots go here
-  whatsappDisplay: "+92 303 4229001",
+  whatsapp: "923054471454", // payment screenshots go here
+  whatsappDisplay: "+92 305 4471454",
   discountPct: 5,
 };
 export const bankDiscount = (subtotal: number) => Math.round(subtotal * BANK.discountPct / 100);

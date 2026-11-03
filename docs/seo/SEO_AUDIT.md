@@ -16,7 +16,7 @@
 | 2 | **High** | Product names didn't match how Pakistanis search (e.g. people search **"coffee beater"**, not "milk frother"; **"mandoline slicer"**, **"sink rack"**, **"nebulizer machine"**) | Google autocomplete (PK) | ✅ Fixed: names updated; URLs unchanged |
 | 3 | **High** | `homiqo.vercel.app` served a full duplicate of the site (200 OK) | Crawl | ✅ Fixed: permanent redirect to `www.homiqoofficial.site` (canonical tags were already pointing correctly) |
 | 4 | **High** | Checkout required an email address, which many Pakistani COD customers don't use | `app/api/checkout/route.ts` | ✅ Fixed: email optional |
-| 5 | **High** | No WhatsApp support link anywhere (number not configured) | `STORE.whatsapp` empty | ✅ Fixed: +92 303 4229001 shown site-wide (floating button, product page, checkout, contact, FAQ) |
+| 5 | **High** | No WhatsApp support link anywhere (number not configured) | `STORE.whatsapp` empty | ✅ Fixed: +92 305 4471454 shown site-wide (floating button, product page, checkout, contact, FAQ) |
 | 6 | Medium | Home H1 "Clever tools for the heart of your home" carried no search terms; hero copy mentioned products no longer sold ("qeema makers", "coffee makers") | Crawl + code | ✅ Fixed: "Clever kitchen gadgets for the heart of your home" + accurate copy |
 | 7 | Medium | Home title 77 chars and description 220 chars (truncated in Google) | Crawl | ✅ Fixed: 55 / 158 chars |
 | 8 | Medium | Product meta descriptions up to 254 chars and included the "was" price | Crawl | ✅ Fixed: generated, unique, ≤158 chars, no strike-through price |

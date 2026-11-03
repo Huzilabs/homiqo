@@ -8,7 +8,7 @@ Everything below was deployed to production and **verified by re-crawling the li
 
 | Area | Change |
 |---|---|
-| **WhatsApp support** | Number +92 303 4229001 is now live: floating chat button on every page, "Questions? Ask us on WhatsApp" on every product (message pre-filled with the product and price), "Need help? Order on WhatsApp" at checkout, plus the contact page and home FAQ |
+| **WhatsApp support** | Number +92 305 4471454 is now live: floating chat button on every page, "Questions? Ask us on WhatsApp" on every product (message pre-filled with the product and price), "Need help? Order on WhatsApp" at checkout, plus the contact page and home FAQ |
 | **Checkout friction** | Email is now **optional** (phone-only ordering, common for COD); phone field says "We'll call this number to confirm"; mobile numeric keyboard for the phone |
 | **Trust at the point of purchase** | Under "Place order": no advance payment for COD (or bank-transfer note), "we call to confirm before dispatch · 2–5 working days", "damaged or faulty? replacement or refund within 7 days" |
 | **Pricing clarity** | Product pages show **"You save Rs X"** under the price; the mobile sticky bar shows the struck-through price and "Cash on delivery" |
