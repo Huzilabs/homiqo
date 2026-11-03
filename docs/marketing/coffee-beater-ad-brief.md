@@ -36,10 +36,11 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 - Froths milk into thick foam in **15–20 seconds**
 - Also **beats eggs**, whips **cream**, mixes **shakes**
 - **Stainless steel** whisk head
+- **Rechargeable**: no batteries to buy or replace (confirmed by the owner)
 - **One-button** operation
 - Compact, easy to rinse clean
 
-⚠️ **Power source: confirm before writing ads.** The website listing says *battery powered*, but the box photo shows *USB charging / adjustable speed*. Use "rechargeable" or "USB" **only if the product actually is**. Tell the developer so the website gets corrected too.
+Tip: Pakistanis search **"coffee beater rechargeable"**, so use "rechargeable" in headlines.
 
 ❌ **Do not claim:** "No.1 / best in Pakistan", any number of customers, star ratings, warranty periods, wattage or RPM, or "free delivery" for COD orders under Rs 5,000. None of these are verified.
 
@@ -57,7 +58,7 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 
 **Primary text: English**
 > Café-style coffee at home in 15 seconds ☕
-> Thick, creamy foam for cappuccino, latte and phenti hui coffee — plus beaten eggs, cream and shakes. One button, stainless steel whisk, rinses clean in seconds.
+> Thick, creamy foam for cappuccino, latte and phenti hui coffee — plus beaten eggs, cream and shakes. Rechargeable — no batteries needed. One button, stainless steel whisk, rinses clean in seconds.
 > ✅ Rs 1,399 only
 > 🚚 Cash on Delivery all over Pakistan
 > 💳 5% OFF + free delivery on bank transfer
@@ -65,7 +66,7 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 
 **Primary text: Roman Urdu**
 > Ghar par café jaisi coffee — sirf 15 seconds mein! ☕
-> Haath se coffee phent'ne ki zaroorat nahi. Cappuccino, phenti hui coffee, anday phentna, cream aur shakes — sab ek button se.
+> Haath se coffee phent'ne ki zaroorat nahi. Cappuccino, phenti hui coffee, anday phentna, cream aur shakes — sab ek button se. Rechargeable — cells ki zaroorat nahi!
 > ✅ Sirf Rs 1,399
 > 🚚 Cash on Delivery poore Pakistan mein
 > 💳 Bank transfer par 5% OFF + free delivery
@@ -76,6 +77,7 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 - Café Coffee at Home — Rs 1,399
 - No More Beating Coffee by Hand
 - Coffee • Eggs • Cream • Shakes
+- Rechargeable Coffee Beater — Rs 1,399
 - Cash on Delivery All Over Pakistan
 
 **Description:** Rs 1,399 · Cash on Delivery · 2–5 day delivery
@@ -95,7 +97,6 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 - Confirm every order by phone or WhatsApp before dispatch. Refused COD parcels are the biggest hidden cost.
 
 ## 8. Before you press Publish (checklist)
-- [ ] Power source (battery vs USB rechargeable) confirmed, and ad copy matches
 - [ ] Landing page opens fine on mobile: https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater
 - [ ] URL parameters pasted at the Ad level
 - [ ] Optimisation event = Purchase, pixel 1461422069206467
