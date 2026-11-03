@@ -118,6 +118,7 @@ export function siteJsonLd() {
       "@type": "WebSite",
       "@id": `${SITE}/#website`,
       name: STORE.name,
+      alternateName: ["Homiqo Official", "homiqoofficial.site"],
       url: SITE,
       inLanguage: "en-PK",
       publisher: { "@id": `${SITE}/#organization` },

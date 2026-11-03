@@ -34,7 +34,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
           <HoverVideo url={video} active={playing} />
         </Link>
 
-        <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
+        <div data-nosnippet className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
           {soldOut ? (
             <span className="bg-ink px-2 py-0.5 text-[9px] font-medium uppercase tracking-[.14em] text-white sm:px-2.5 sm:py-1 sm:text-[10px]">Sold out</span>
           ) : off > 0 ? (
@@ -58,6 +58,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
 
         <button
           type="button"
+          data-nosnippet
           disabled={soldOut}
           onClick={() => add(product, 1)}
           className="absolute inset-x-3 bottom-3 hidden translate-y-[calc(100%+12px)] bg-white py-3.5 text-[11px] font-medium uppercase tracking-[.2em] text-ink opacity-0 transition duration-300 hover:bg-ink hover:text-white group-hover:translate-y-0 group-hover:opacity-100 disabled:hidden lg:block"
@@ -73,11 +74,12 @@ export default function ProductCard({ product, priority }: { product: Product; p
         </Link>
         <p className="mt-1.5 flex items-baseline gap-2.5 text-sm">
           <span className={`font-medium ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
-          {off > 0 && <span className="text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price!)}</span>}
+          {off > 0 && <span data-nosnippet className="text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price!)}</span>}
         </p>
         {!soldOut && (
           <button
             type="button"
+            data-nosnippet
             onClick={() => add(product, 1)}
             className="mt-3 w-full border border-ink/80 py-2.5 text-[10px] font-medium uppercase tracking-[.18em] text-ink transition active:bg-ink active:text-white lg:hidden"
           >
