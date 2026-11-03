@@ -60,7 +60,7 @@ export default function CheckoutPage() {
     setError(null);
     const f = new FormData(e.currentTarget);
     const customer: Record<string, string> = Object.fromEntries(
-      ["customer_name", "phone", "email", "address", "city", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
+      ["customer_name", "phone", "email", "address", "city", "postal_code", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
     );
     customer.payment_method = payment;
     // Use the courier's spelling of the city so the parcel can be booked without edits
@@ -118,6 +118,10 @@ export default function CheckoutPage() {
                 <label className="label" htmlFor="city">City *</label>
                 <input id="city" name="city" list="cities" required className="input" autoComplete="address-level2" />
                 <datalist id="cities">{cities.map((c) => <option key={c} value={c} />)}</datalist>
+              </div>
+              <div>
+                <label className="label" htmlFor="postal_code">Postal code</label>
+                <input id="postal_code" name="postal_code" className="input" inputMode="numeric" autoComplete="postal-code" pattern="[0-9]{5}" maxLength={5} placeholder="e.g. 54000" title="5-digit postal code" />
               </div>
               <div className="sm:col-span-2">
                 <label className="label" htmlFor="notes">Order notes (optional)</label>

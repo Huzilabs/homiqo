@@ -2,6 +2,7 @@
 -- screenshot on WhatsApp; admin verifies it before confirming / booking the courier.
 
 alter table public.orders add column if not exists discount numeric(12,2) not null default 0;
+alter table public.orders add column if not exists postal_code text;
 
 create or replace function public.place_order(customer jsonb, items jsonb)
 returns jsonb
@@ -40,9 +41,10 @@ begin
   end loop;
 
   insert into orders (order_number, customer_name, phone, email, address, city, notes,
-                      payment_method, subtotal, shipping_fee, total)
+                      payment_method, postal_code, subtotal, shipping_fee, total)
   values (v_number, v_name, v_phone, nullif(trim(customer->>'email'), ''), v_address, v_city,
-          nullif(trim(customer->>'notes'), ''), v_payment, 0, 0, 0)
+          nullif(trim(customer->>'notes'), ''), v_payment,
+          nullif(left(regexp_replace(coalesce(customer->>'postal_code', ''), '\D', '', 'g'), 5), ''), 0, 0, 0)
   returning id into v_order_id;
 
   for v_item in select * from jsonb_array_elements(items) loop

@@ -87,6 +87,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               <div><dt className="text-gray-500">Phone</dt><dd className="font-medium">{o.phone}</dd></div>
               <div><dt className="text-gray-500">Email</dt><dd className="font-medium">{o.email || "—"}</dd></div>
               <div><dt className="text-gray-500">City</dt><dd className="font-medium">{o.city}</dd></div>
+              <div><dt className="text-gray-500">Postal code</dt><dd className="font-medium">{o.postal_code || "—"}</dd></div>
               <div className="sm:col-span-2"><dt className="text-gray-500">Address</dt><dd className="font-medium">{o.address}</dd></div>
               {o.notes && <div className="sm:col-span-2"><dt className="text-gray-500">Notes</dt><dd className="whitespace-pre-line font-medium">{o.notes}</dd></div>}
             </dl>

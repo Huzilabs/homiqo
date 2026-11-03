@@ -12,6 +12,7 @@ export interface EmailOrder {
   phone?: string;
   address?: string;
   city: string;
+  postal_code?: string | null;
   subtotal: number;
   shipping_fee: number;
   total: number;
@@ -166,7 +167,7 @@ export async function sendNewOrderAlert(order: EmailOrder) {
       from: from(),
       to,
       subject: `🛒 New order ${order.order_number} — ${formatPrice(order.total)}`,
-      text: `New order ${order.order_number}\n\n${order.customer_name}\n${order.phone || ""}\n${order.email || ""}\n${order.address || ""}, ${order.city}\n\n${order.items
+      text: `New order ${order.order_number}\n\n${order.customer_name}\n${order.phone || ""}\n${order.email || ""}\n${order.address || ""}, ${order.city}${order.postal_code ? ` ${order.postal_code}` : ""}\n\n${order.items
         .map((i) => `- ${i.product_name} x${i.quantity}: ${formatPrice(i.line_total)}`)
         .join("\n")}\n\nTotal (${order.payment_method === "bank_transfer" ? "BANK TRANSFER — check WhatsApp for the screenshot" : "COD"}): ${formatPrice(order.total)}\n\nManage: ${site}/admin/orders`,
     });

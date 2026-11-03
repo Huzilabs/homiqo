@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const { data: details } = await supabase.rpc("track_order", { p_order_number: order_number, p_phone: customer.phone });
     if (!details) return;
     const o = details as TrackedOrder;
-    const emailOrder = { ...o, email: email || null, phone: customer.phone, address: customer.address };
+    const emailOrder = { ...o, email: email || null, phone: customer.phone, address: customer.address, postal_code: customer.postal_code || null };
     await Promise.all([sendOrderEmail("received", emailOrder), sendNewOrderAlert(emailOrder)]);
   });
 

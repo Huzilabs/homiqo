@@ -31,6 +31,7 @@ export interface Order {
   email: string | null;
   address: string;
   city: string;
+  postal_code?: string | null;
   notes: string | null;
   payment_method: string;
   status: OrderStatus;

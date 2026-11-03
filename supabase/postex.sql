@@ -109,7 +109,7 @@ begin
     'orderDetail', left(coalesce(v_detail, ''), 250),
     'customerName', o.customer_name,
     'customerPhone', private.postex_phone(o.phone),
-    'deliveryAddress', o.address,
+    'deliveryAddress', o.address || coalesce(', Postal code ' || o.postal_code, ''),
     'transactionNotes', nullif(left(coalesce(o.notes, ''), 250), ''),
     'cityName', v_city,
     'invoiceDivision', 1,
