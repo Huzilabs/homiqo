@@ -23,6 +23,8 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Short links for ads / social / WhatsApp (query strings such as UTM tags are passed through)
+      { source: "/coffee-beater", destination: "/product/electric-milk-frother-egg-beater", permanent: false },
       // The Vercel default domain duplicates the whole site — send it to the real domain
       {
         source: "/:path*",
