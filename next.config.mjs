@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    // Serve modern formats (AVIF first, then WebP) at responsive sizes; originals are never altered.
-    formats: ["image/avif", "image/webp"],
+    // WebP at responsive sizes: much faster to generate on first request than AVIF (better LCP), originals untouched.
+    formats: ["image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     // Product images come from Supabase Storage, but admins may also paste image URLs from other hosts.
     remotePatterns: [
@@ -11,6 +11,15 @@ const nextConfig = {
       { protocol: "http", hostname: "127.0.0.1" },
       { protocol: "http", hostname: "localhost" },
     ],
+  },
+  async headers() {
+    // Product photos, videos and logos in /public are versioned by filename — let browsers & the CDN cache them
+    const longCache = [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }];
+    return [
+      { source: "/products/:path*", headers: longCache },
+      { source: "/videos/:path*", headers: longCache },
+      { source: "/:file(logo[^/]*\\.png)", headers: longCache },
+    ];
   },
   async redirects() {
     return [
