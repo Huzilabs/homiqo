@@ -100,8 +100,8 @@ export default function CheckoutPage() {
   return (
     <div className="container-x py-10">
       <h1 className="font-serif text-4xl font-medium sm:text-5xl">Checkout</h1>
-      <form onSubmit={onSubmit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
-        <div className="space-y-6">
+      <form onSubmit={onSubmit} className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="min-w-0 space-y-6">
           <section className="card p-6">
             <h2 className="font-serif text-2xl font-medium">Contact & delivery details</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -151,7 +151,7 @@ export default function CheckoutPage() {
           </section>
         </div>
 
-        <aside className="card h-fit p-6 lg:sticky lg:top-28">
+        <aside className="card h-fit min-w-0 p-5 sm:p-6 lg:sticky lg:top-28">
           <h2 className="font-serif text-2xl font-medium">Your order</h2>
           <ul className="mt-4 max-h-72 space-y-4 overflow-y-auto">
             {items.map((i) => (
@@ -160,8 +160,8 @@ export default function CheckoutPage() {
                   <ProductImage src={i.image} alt={i.name} sizes="56px" />
                   <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-800 px-1 text-[11px] font-bold text-white">{i.quantity}</span>
                 </div>
-                <p className="line-clamp-2 flex-1 text-sm font-medium">{i.name}</p>
-                <p className="text-sm font-semibold">{formatPrice(i.price * i.quantity)}</p>
+                <p className="line-clamp-2 min-w-0 flex-1 break-words text-sm font-medium">{i.name}</p>
+                <p className="shrink-0 whitespace-nowrap text-sm font-semibold">{formatPrice(i.price * i.quantity)}</p>
               </li>
             ))}
           </ul>

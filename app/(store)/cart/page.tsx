@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import ProductImage from "@/components/ProductImage";
-import { BANK } from "@/lib/config";
+import { BANK, STORE } from "@/lib/config";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
@@ -37,20 +37,25 @@ export default function CartPage() {
   return (
     <div className="container-x py-10">
       <h1 className="font-serif text-4xl font-medium sm:text-5xl">Shopping cart</h1>
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
-        <ul className="card divide-y">
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <ul className="card min-w-0 divide-y">
           {items.map((i) => (
-            <li key={i.product_id} className="flex gap-4 p-4 sm:p-5">
-              <Link href={`/product/${i.slug}`} className="relative h-24 w-24 shrink-0 overflow-hidden bg-sand">
+            <li key={i.product_id} className="flex gap-3 p-4 sm:gap-4 sm:p-5">
+              <Link href={`/product/${i.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden bg-white sm:h-24 sm:w-24">
                 <ProductImage src={i.image} alt={i.name} sizes="96px" />
               </Link>
-              <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="flex-1">
-                  <Link href={`/product/${i.slug}`} className="font-semibold hover:text-brand-700">{i.name}</Link>
-                  <p className="text-sm text-ink/55">{formatPrice(i.price)} each</p>
+              <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <Link href={`/product/${i.slug}`} className="line-clamp-2 break-words font-semibold leading-snug hover:text-brand-700">{i.name}</Link>
+                    <p className="mt-1 text-sm text-ink/55">{formatPrice(i.price)} each</p>
+                  </div>
+                  <button onClick={() => remove(i.product_id)} className="-mr-2 -mt-1 shrink-0 p-2 text-ink/40 hover:text-rose-600 sm:hidden" aria-label="Remove">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
-                <div className="flex items-center justify-between gap-6">
-                  <div className="flex items-center border">
+                <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-6">
+                  <div className="flex shrink-0 items-center border">
                     <button className="p-2" onClick={() => setQty(i.product_id, i.quantity - 1)} aria-label="Decrease">
                       <Minus className="h-4 w-4" />
                     </button>
@@ -59,8 +64,8 @@ export default function CartPage() {
                       <Plus className="h-4 w-4" />
                     </button>
                   </div>
-                  <p className="w-24 text-right font-bold">{formatPrice(i.price * i.quantity)}</p>
-                  <button onClick={() => remove(i.product_id)} className="p-2 text-ink/40 hover:text-rose-600" aria-label="Remove">
+                  <p className="whitespace-nowrap text-right font-bold sm:w-24">{formatPrice(i.price * i.quantity)}</p>
+                  <button onClick={() => remove(i.product_id)} className="hidden p-2 text-ink/40 hover:text-rose-600 sm:block" aria-label="Remove">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -68,7 +73,7 @@ export default function CartPage() {
             </li>
           ))}
         </ul>
-        <aside className="card h-fit p-6 lg:sticky lg:top-28">
+        <aside className="card h-fit min-w-0 p-5 sm:p-6 lg:sticky lg:top-28">
           <h2 className="font-serif text-2xl font-medium">Order summary</h2>
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-ink/65">Subtotal</dt><dd className="font-medium">{formatPrice(subtotal)}</dd></div>
@@ -80,6 +85,11 @@ export default function CartPage() {
           </p>
           <Link href="/checkout" className="btn-primary mt-4 w-full py-3.5 text-base">Proceed to checkout</Link>
           <Link href="/shop" className="mt-3 block text-center text-sm font-medium text-brand-700 hover:underline">Continue shopping</Link>
+          {STORE.whatsapp && (
+            <a href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent("Assalam o Alaikum, I have a question about my cart.")}`} target="_blank" rel="noopener noreferrer" className="mt-3 block text-center text-xs font-medium text-[#128C7E] hover:underline">
+              Questions? Chat on WhatsApp
+            </a>
+          )}
         </aside>
       </div>
     </div>

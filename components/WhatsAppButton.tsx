@@ -1,8 +1,12 @@
+"use client";
+import { usePathname } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import { STORE } from "@/lib/config";
 
 export default function WhatsAppButton() {
-  if (!STORE.whatsapp) return null;
+  const pathname = usePathname();
+  // Cart and checkout show their own WhatsApp link; the floating button would cover the totals there
+  if (!STORE.whatsapp || pathname === "/cart" || pathname === "/checkout") return null;
   return (
     <a
       href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(`Hi ${STORE.name}, I have a question.`)}`}
