@@ -19,12 +19,12 @@ export default function CheckoutPage() {
   const [payment, setPaymentState] = useState<"cod" | "bank_transfer">("cod");
   const setPayment = (p: "cod" | "bank_transfer") => {
     setPaymentState(p);
-    track.addPaymentInfo(items, p === "bank_transfer" ? subtotal - bankDiscount(subtotal) : subtotal + codShipping, p);
+    track.addPaymentInfo(items, (p === "bank_transfer" ? subtotal - bankDiscount(subtotal) : subtotal) + codShipping, p);
   };
   const isBank = payment === "bank_transfer";
-  // Must match public.place_order(): bank transfer = 10% off products + free delivery
+  // Must match public.place_order(): bank transfer = 5% off products; delivery follows the normal rule
   const discount = isBank ? bankDiscount(subtotal) : 0;
-  const shipping = isBank ? 0 : codShipping;
+  const shipping = codShipping;
   const total = subtotal - discount + shipping;
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -138,8 +138,8 @@ export default function CheckoutPage() {
                 onSelect={() => setPayment("bank_transfer")}
                 icon={<Landmark className="h-5 w-5 text-brand-600" />}
                 title="Bank Transfer"
-                badge={`${BANK.discountPct}% OFF + FREE DELIVERY`}
-                text={`Pay in advance to our ${BANK.bank} account and save ${BANK.discountPct}% plus delivery charges.`}
+                badge={`${BANK.discountPct}% OFF`}
+                text={`Pay in advance to our ${BANK.bank} account and save ${BANK.discountPct}% on your products.`}
               />
             </div>
             {isBank && (

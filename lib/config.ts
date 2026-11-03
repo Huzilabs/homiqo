@@ -20,7 +20,7 @@ export const FREE_DELIVERY_MIN_ITEMS = 2;
 export const shippingFor = (subtotal: number, units = 1) =>
   subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD || units >= FREE_DELIVERY_MIN_ITEMS ? 0 : SHIPPING_FEE;
 
-/** Bank transfer (prepaid) — 5% off the products + free delivery. Keep in sync with public.place_order(). */
+/** Bank transfer (prepaid) — 5% off the products (delivery charged as normal). Keep in sync with public.place_order(). */
 export const BANK = {
   bank: "Meezan Bank",
   title: "AMIR SOHAIL",

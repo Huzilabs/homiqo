@@ -86,7 +86,7 @@ export default function CartPage() {
             </p>
           )}
           <p className="mt-4 bg-leaf-100/60 px-3 py-2.5 text-xs text-ink/70">
-            Pay cash on delivery — or save {BANK.discountPct}% + free delivery with bank transfer at checkout.
+            Pay cash on delivery — or save {BANK.discountPct}% with bank transfer at checkout.
           </p>
           <Link href="/checkout" className="btn-primary mt-4 w-full py-3.5 text-base">Proceed to checkout</Link>
           <Link href="/shop" className="mt-3 block text-center text-sm font-medium text-brand-700 hover:underline">Continue shopping</Link>

@@ -15,7 +15,7 @@ export default function PoliciesPage() {
       <div className="mt-8 space-y-8 leading-relaxed text-ink/75">
         <section>
           <h2 className="text-xl font-bold text-ink">Delivery</h2>
-          <p className="mt-2">We deliver all over Pakistan. Orders are usually delivered within 2–5 working days. Delivery costs {formatPrice(SHIPPING_FEE)} for a single item, and is free when you order 2 or more items (any combination), on orders of {formatPrice(FREE_SHIPPING_THRESHOLD)} or more, or when you pay by bank transfer.</p>
+          <p className="mt-2">We deliver all over Pakistan. Orders are usually delivered within 2–5 working days. Delivery costs {formatPrice(SHIPPING_FEE)} for a single item, and is free when you order 2 or more items (any combination) or on orders of {formatPrice(FREE_SHIPPING_THRESHOLD)} or more.</p>
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Cash on Delivery</h2>
@@ -23,7 +23,7 @@ export default function PoliciesPage() {
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Bank transfer</h2>
-          <p className="mt-2">Prefer to pay in advance? Choose Bank Transfer at checkout to get {BANK.discountPct}% off your products and free delivery. Transfer the amount to our {BANK.bank} account shown after you place the order, then send the payment screenshot on WhatsApp to {BANK.whatsappDisplay}. We dispatch once the payment is confirmed.</p>
+          <p className="mt-2">Prefer to pay in advance? Choose Bank Transfer at checkout to get {BANK.discountPct}% off your products (normal delivery charges apply). Transfer the amount to our {BANK.bank} account shown after you place the order, then send the payment screenshot on WhatsApp to {BANK.whatsappDisplay}. We dispatch once the payment is confirmed.</p>
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Returns & exchanges</h2>

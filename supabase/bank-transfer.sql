@@ -1,4 +1,4 @@
--- Bank transfer payment: 5% off the products + free delivery. Customer sends the payment
+-- Bank transfer payment: 5% off the products (delivery charged as normal). Customer sends the payment
 -- screenshot on WhatsApp; admin verifies it before confirming / booking the courier.
 
 alter table public.orders add column if not exists discount numeric(12,2) not null default 0;
@@ -72,7 +72,7 @@ begin
 
   if v_payment = 'bank_transfer' then
     v_discount := round(v_subtotal * 0.05);   -- 5% off
-    v_shipping := 0;                          -- free delivery
+    v_shipping := case when v_subtotal >= 5000 or v_units >= 2 then 0 else 250 end;
   else
     -- free delivery on 2+ items or Rs 5,000+
     v_shipping := case when v_subtotal >= 5000 or v_units >= 2 then 0 else 250 end;

@@ -27,8 +27,8 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 | Product name | Electric Coffee Beater & Milk Frother |
 | Price | **Rs 1,399** (shown on site as 25% off Rs 1,869) |
 | Stock | 80 units |
-| Payment | **Cash on Delivery** all over Pakistan · or **Bank Transfer: 5% off + FREE delivery** |
-| Delivery | 2–5 working days · Rs 250 delivery (free on orders over Rs 5,000 or with bank transfer) |
+| Payment | **Cash on Delivery** all over Pakistan · or **Bank Transfer: 5% off** |
+| Delivery | 2–5 working days · Rs 250 delivery · **free on 2+ items** or orders over Rs 5,000 |
 | Returns | Damaged / faulty / not as described → replacement or refund within **7 days** |
 | WhatsApp support | +92 305 4471454 |
 
@@ -42,7 +42,7 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 
 Tip: Pakistanis search **"coffee beater rechargeable"**, so use "rechargeable" in headlines.
 
-❌ **Do not claim:** "No.1 / best in Pakistan", any number of customers, star ratings, warranty periods, wattage or RPM, or "free delivery" for COD orders under Rs 5,000. None of these are verified.
+❌ **Do not claim:** "No.1 / best in Pakistan", any number of customers, star ratings, warranty periods, wattage or RPM, or "free delivery" on single-item orders under Rs 5,000 (free delivery is only for 2+ items or Rs 5,000+). None of these are verified.
 
 ## 4. Creative assets
 | Asset | Link |
@@ -61,7 +61,8 @@ Tip: Pakistanis search **"coffee beater rechargeable"**, so use "rechargeable" i
 > Thick, creamy foam for cappuccino, latte and phenti hui coffee — plus beaten eggs, cream and shakes. Rechargeable — no batteries needed. One button, stainless steel whisk, rinses clean in seconds.
 > ✅ Rs 1,399 only
 > 🚚 Cash on Delivery all over Pakistan
-> 💳 5% OFF + free delivery on bank transfer
+> 💳 5% OFF on bank transfer
+> 🎁 Free delivery on 2+ items
 > Order now 👇
 
 **Primary text: Roman Urdu**
@@ -69,7 +70,8 @@ Tip: Pakistanis search **"coffee beater rechargeable"**, so use "rechargeable" i
 > Haath se coffee phent'ne ki zaroorat nahi. Cappuccino, phenti hui coffee, anday phentna, cream aur shakes — sab ek button se. Rechargeable — cells ki zaroorat nahi!
 > ✅ Sirf Rs 1,399
 > 🚚 Cash on Delivery poore Pakistan mein
-> 💳 Bank transfer par 5% OFF + free delivery
+> 💳 Bank transfer par 5% OFF
+> 🎁 2 ya zyada items par free delivery
 > Abhi order karein 👇
 
 **Headlines** (use 3–5 variations):

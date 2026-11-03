@@ -64,7 +64,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   const productFaqs = (product.faqs || []).filter((f) => f?.q && f?.a);
   const faqs = [
     ...productFaqs,
-    { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. ${formatPrice(SHIPPING_FEE)} delivery for a single item — free when you order 2 or more items (any products), on orders over ${formatPrice(FREE_SHIPPING_THRESHOLD)}, or with bank transfer.` },
+    { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. ${formatPrice(SHIPPING_FEE)} delivery for a single item — free when you order 2 or more items (any products) or on orders over ${formatPrice(FREE_SHIPPING_THRESHOLD)}. Pay by bank transfer to get ${BANK.discountPct}% off.` },
     { q: "Cash on delivery", a: "No advance payment — pay the rider in cash when your parcel arrives." },
     { q: "Returns & warranty", a: "Damaged or faulty? Contact us within 7 days of delivery for a free replacement or refund." },
   ];
@@ -112,7 +112,7 @@ export default async function ProductPage({ params }: { params: Params }) {
               <p className="mt-2 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
             )}
             <p className="mt-2 text-sm text-ink/60">
-              Delivery {formatPrice(SHIPPING_FEE)} · <span className="font-medium text-ink">free when you order 2 or more items</span> · or pay by bank transfer for {BANK.discountPct}% off + free delivery
+              Delivery {formatPrice(SHIPPING_FEE)} · <span className="font-medium text-ink">free when you order 2 or more items</span> · or pay by bank transfer for {BANK.discountPct}% off
             </p>
             <p className={`mt-3 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
               {product.stock > 10 ? "In stock · ready to ship" : product.stock > 0 ? `Only ${product.stock} left in stock` : "Out of stock"}

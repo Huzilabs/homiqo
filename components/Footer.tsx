@@ -49,7 +49,7 @@ export default function Footer() {
             <li>Cash on delivery</li>
             <li>
               Bank transfer ({BANK.bank}) —{" "}
-              <span className="font-medium text-accent-400">{BANK.discountPct}% off + free delivery</span>
+              <span className="font-medium text-accent-400">{BANK.discountPct}% off</span>
             </li>
           </ul>
         </div>
