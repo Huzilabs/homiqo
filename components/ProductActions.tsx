@@ -5,6 +5,7 @@ import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
+import { FREE_DELIVERY_MIN_ITEMS } from "@/lib/config";
 import type { Product } from "@/lib/types";
 
 export default function ProductActions({ product }: { product: Product }) {
@@ -40,6 +41,22 @@ export default function ProductActions({ product }: { product: Product }) {
             Add to cart
           </button>
         </div>
+        {!soldOut && (
+          <p className={`text-sm ${qty >= FREE_DELIVERY_MIN_ITEMS ? "font-medium text-leaf-600" : "text-ink/65"}`}>
+            {qty >= FREE_DELIVERY_MIN_ITEMS ? (
+              "✓ FREE delivery on this order"
+            ) : (
+              <>
+                🎁 Buy {FREE_DELIVERY_MIN_ITEMS} or more and get <b className="text-ink">FREE delivery</b>{" "}
+                {max >= FREE_DELIVERY_MIN_ITEMS && (
+                  <button type="button" onClick={() => setQty(FREE_DELIVERY_MIN_ITEMS)} className="font-medium text-brand-700 underline underline-offset-2">
+                    make it {FREE_DELIVERY_MIN_ITEMS}
+                  </button>
+                )}
+              </>
+            )}
+          </p>
+        )}
         <button disabled={soldOut} onClick={buyNow} className="btn-primary h-[56px] w-full">
           {soldOut ? "Sold out" : "Buy now — cash on delivery"}
         </button>

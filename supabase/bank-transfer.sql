@@ -17,6 +17,8 @@ declare
   v_shipping   numeric(12,2);
   v_discount   numeric(12,2) := 0;
   v_units      integer := 0;
+  v_offer_disc numeric(12,2) := 0;
+  v_offer_id   uuid;
   v_item       jsonb;
   v_qty        integer;
   v_product    products%rowtype;
@@ -72,18 +74,32 @@ begin
 
   if v_payment = 'bank_transfer' then
     v_discount := round(v_subtotal * 0.05);   -- 5% off
-    v_shipping := case when v_subtotal >= 5000 or v_units >= 2 then 0 else 250 end;
+    v_shipping := case when v_subtotal >= 2199 or v_units >= 2 then 0 else 250 end;
   else
-    -- free delivery on 2+ items or Rs 5,000+
-    v_shipping := case when v_subtotal >= 5000 or v_units >= 2 then 0 else 250 end;
+    -- free delivery on 2+ items or Rs 2,199+
+    v_shipping := case when v_subtotal >= 2199 or v_units >= 2 then 0 else 250 end;
   end if;
 
-  update orders set subtotal = v_subtotal, shipping_fee = v_shipping, discount = v_discount,
+  -- Meta ad offer: extra 5% if ordered before the offer expires (1 min grace), single use, once per phone number
+  if coalesce(customer->>'flash_offer', '') ~ '^[0-9a-fA-F-]{36}$' then
+    select id into v_offer_id from flash_offers
+    where id = (customer->>'flash_offer')::uuid and used_at is null and expires_at + interval '1 minute' > now()
+    for update;
+    if v_offer_id is not null and not exists (
+      select 1 from orders where offer_discount > 0 and status <> 'cancelled' and id <> v_order_id
+        and right(regexp_replace(phone, '\D', '', 'g'), 10) = right(regexp_replace(v_phone, '\D', '', 'g'), 10)) then
+      v_offer_disc := round(v_subtotal * 0.05);
+      update flash_offers set used_at = now(), order_id = v_order_id where id = v_offer_id;
+    end if;
+  end if;
+  v_discount := v_discount + v_offer_disc;
+
+  update orders set subtotal = v_subtotal, shipping_fee = v_shipping, discount = v_discount, offer_discount = v_offer_disc,
                     total = v_subtotal - v_discount + v_shipping
   where id = v_order_id;
 
   return jsonb_build_object('order_number', v_number, 'total', v_subtotal - v_discount + v_shipping,
-                            'payment_method', v_payment);
+                            'payment_method', v_payment, 'offer_discount', v_offer_disc);
 end $function$;
 
 create or replace function public.track_order(p_order_number text, p_phone text)

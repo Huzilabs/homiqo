@@ -28,7 +28,8 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 | Price | **Rs 1,399** (shown on site as 25% off Rs 1,869) |
 | Stock | 80 units |
 | Payment | **Cash on Delivery** all over Pakistan · or **Bank Transfer: 5% off** |
-| Delivery | 2–5 working days · Rs 250 delivery · **free on 2+ items** or orders over Rs 5,000 |
+| Delivery | 2–5 working days · Rs 250 delivery · **free on 2+ items** or orders of Rs 2,199+ |
+| Meta visitor offer | People who arrive from a Facebook/Instagram ad get **an extra 5% off if they order within 10 minutes** (countdown shows on the site, applied automatically at checkout, once per customer). Ad copy can say: *"Extra 5% off for the next 10 minutes when you order from this ad"* |
 | Returns | Damaged / faulty / not as described → replacement or refund within **7 days** |
 | WhatsApp support | +92 305 4471454 |
 
@@ -42,7 +43,7 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 
 Tip: Pakistanis search **"coffee beater rechargeable"**, so use "rechargeable" in headlines.
 
-❌ **Do not claim:** "No.1 / best in Pakistan", any number of customers, star ratings, warranty periods, wattage or RPM, or "free delivery" on single-item orders under Rs 5,000 (free delivery is only for 2+ items or Rs 5,000+). None of these are verified.
+❌ **Do not claim:** "No.1 / best in Pakistan", any number of customers, star ratings, warranty periods, wattage or RPM, or "free delivery" on single-item orders under Rs 2,199 (free delivery is only for 2+ items or Rs 2,199+). None of these are verified.
 
 ## 4. Creative assets
 | Asset | Link |

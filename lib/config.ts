@@ -13,9 +13,9 @@ export const STORE = {
 
 // Keep in sync with public.place_order() in supabase/schema.sql
 export const SHIPPING_FEE = 250;
-export const FREE_SHIPPING_THRESHOLD = 5000;
+export const FREE_SHIPPING_THRESHOLD = 2199;
 
-/** Free delivery on 2+ items, or on orders of Rs 5,000+. Keep in sync with public.place_order(). */
+/** Free delivery on 2+ items, or on orders of Rs 2,199+. Keep in sync with public.place_order(). */
 export const FREE_DELIVERY_MIN_ITEMS = 2;
 export const shippingFor = (subtotal: number, units = 1) =>
   subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD || units >= FREE_DELIVERY_MIN_ITEMS ? 0 : SHIPPING_FEE;
@@ -31,6 +31,10 @@ export const BANK = {
   whatsappDisplay: "+92 305 4471454",
   discountPct: 5,
 };
+/** Meta-ad visitor offer: extra % off if they order within N minutes of arriving. Keep in sync with start_flash_offer() / place_order(). */
+export const FLASH_OFFER = { minutes: 10, pct: 5 };
+export const flashDiscount = (subtotal: number) => Math.round(subtotal * FLASH_OFFER.pct / 100);
+
 export const bankDiscount = (subtotal: number) => Math.round(subtotal * BANK.discountPct / 100);
 
 export const MEDIA_BUCKET = "product-media";

@@ -4,7 +4,7 @@ import { formatPrice } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Shipping & returns",
-  description: "Homiqo delivery and returns policy: cash on delivery across Pakistan, 2–5 working day delivery, free delivery over Rs 5,000 and 7-day replacements.",
+  description: "Homiqo delivery and returns policy: cash on delivery across Pakistan, 2–5 working day delivery, free delivery on orders of Rs 2,199+ or 2+ items and 7-day replacements.",
   alternates: { canonical: "/policies" },
 };
 

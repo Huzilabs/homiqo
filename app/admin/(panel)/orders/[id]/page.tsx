@@ -81,7 +81,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
             </ul>
             <dl className="mt-3 space-y-2 border-t pt-4 text-sm">
               <div className="flex justify-between"><dt className="text-gray-600">Subtotal</dt><dd>{formatPrice(o.subtotal)}</dd></div>
-              {Number(o.discount) > 0 && <div className="flex justify-between text-emerald-700"><dt>Bank transfer discount</dt><dd>−{formatPrice(Number(o.discount))}</dd></div>}
+              {Number(o.discount) > 0 && <div className="flex justify-between text-emerald-700"><dt>Discount{Number(o.offer_discount) > 0 ? ` (incl. Meta offer ${formatPrice(Number(o.offer_discount))})` : ""}</dt><dd>−{formatPrice(Number(o.discount))}</dd></div>}
               <div className="flex justify-between"><dt className="text-gray-600">Delivery</dt><dd>{formatPrice(o.shipping_fee)}</dd></div>
               {o.payment_method === "bank_transfer" ? (
                 <div className="flex justify-between text-base font-bold"><dt>Total paid by bank transfer</dt><dd>{formatPrice(o.total)}</dd></div>

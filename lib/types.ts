@@ -14,6 +14,7 @@ export interface Product {
   price: number;
   compare_at_price: number | null;
   stock: number;
+  sale_ends_at?: string | null;
   images: string[];
   videos: string[];
   is_active: boolean;
@@ -40,6 +41,7 @@ export interface Order {
   subtotal: number;
   shipping_fee: number;
   discount?: number;
+  offer_discount?: number;
   total: number;
   created_at: string;
   updated_at: string;

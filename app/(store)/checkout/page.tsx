@@ -8,7 +8,8 @@ import ProductImage from "@/components/ProductImage";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
-import { BANK, STORE, bankDiscount } from "@/lib/config";
+import { BANK, FLASH_OFFER, STORE, bankDiscount, flashDiscount } from "@/lib/config";
+import { markFlashUsed, mmss, useFlashOffer } from "@/lib/flash";
 import { createClient } from "@/lib/supabase/client";
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
@@ -23,7 +24,9 @@ export default function CheckoutPage() {
   };
   const isBank = payment === "bank_transfer";
   // Must match public.place_order(): bank transfer = 5% off products; delivery follows the normal rule
-  const discount = isBank ? bankDiscount(subtotal) : 0;
+  const { offer, msLeft } = useFlashOffer();
+  const offerDiscount = offer ? flashDiscount(subtotal) : 0;
+  const discount = (isBank ? bankDiscount(subtotal) : 0) + offerDiscount;
   const shipping = codShipping;
   const total = subtotal - discount + shipping;
   const router = useRouter();
@@ -63,6 +66,7 @@ export default function CheckoutPage() {
       ["customer_name", "phone", "email", "address", "city", "postal_code", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
     );
     customer.payment_method = payment;
+    if (offer) customer.flash_offer = offer.id;
     // Use the courier's spelling of the city so the parcel can be booked without edits
     const match = cities.find((c) => c.toLowerCase() === String(customer.city).toLowerCase());
     if (cities.length > POPULAR.length && !match) {
@@ -92,6 +96,7 @@ export default function CheckoutPage() {
       sessionStorage.setItem("homecart.lastOrder", JSON.stringify({ order_number, phone: customer.phone }));
     } catch {}
     clear();
+    if (offer) markFlashUsed();
     router.push(`/order/${order_number}?phone=${encodeURIComponent(customer.phone)}`);
   }
 
@@ -167,7 +172,13 @@ export default function CheckoutPage() {
           </ul>
           <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
             <div className="flex justify-between"><dt className="text-ink/65">Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div>
-            {discount > 0 && <div className="flex justify-between text-leaf-600"><dt>Bank transfer discount ({BANK.discountPct}%)</dt><dd>−{formatPrice(discount)}</dd></div>}
+            {isBank && <div className="flex justify-between text-leaf-600"><dt>Bank transfer discount ({BANK.discountPct}%)</dt><dd>−{formatPrice(bankDiscount(subtotal))}</dd></div>}
+            {offerDiscount > 0 && (
+              <div className="flex justify-between text-accent-700">
+                <dt>Special offer ({FLASH_OFFER.pct}%) · <span className="tabular-nums">{mmss(msLeft)}</span> left</dt>
+                <dd>−{formatPrice(offerDiscount)}</dd>
+              </div>
+            )}
             <div className="flex justify-between"><dt className="text-ink/65">Delivery</dt><dd>{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
             <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>{isBank ? "Total (bank transfer)" : "Total (COD)"}</dt><dd>{formatPrice(total)}</dd></div>
           </dl>

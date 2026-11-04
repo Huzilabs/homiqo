@@ -123,7 +123,7 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
         ${shipping}${review}
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">${rows}
           <tr><td style="padding:10px 0 0;font-size:14px;color:#6B6B6B">Subtotal</td><td style="padding:10px 0 0;font-size:14px;text-align:right">${formatPrice(o.subtotal)}</td></tr>
-          ${Number(o.discount) > 0 ? `<tr><td style="padding:6px 0;font-size:14px;color:#3B9468">Bank transfer discount</td><td style="padding:6px 0;font-size:14px;color:#3B9468;text-align:right">−${formatPrice(Number(o.discount))}</td></tr>` : ""}
+          ${Number(o.discount) > 0 ? `<tr><td style="padding:6px 0;font-size:14px;color:#3B9468">Discount</td><td style="padding:6px 0;font-size:14px;color:#3B9468;text-align:right">−${formatPrice(Number(o.discount))}</td></tr>` : ""}
           <tr><td style="padding:6px 0;font-size:14px;color:#6B6B6B">Delivery</td><td style="padding:6px 0;font-size:14px;text-align:right">${Number(o.shipping_fee) === 0 ? "Free" : formatPrice(o.shipping_fee)}</td></tr>
           <tr><td style="padding:10px 0;font-size:16px;font-weight:700;color:#0D5B58">Total (${o.payment_method === "bank_transfer" ? "Bank Transfer" : "Cash on Delivery"})</td><td style="padding:10px 0;font-size:16px;font-weight:700;color:#0D5B58;text-align:right">${formatPrice(o.total)}</td></tr>
         </table>

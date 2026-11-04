@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import Analytics from "@/components/Analytics";
+import FlashOfferInit from "@/components/FlashOfferInit";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -11,6 +13,9 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     <CartProvider>
       <Analytics />
       <VisitTracker />
+      <Suspense>
+        <FlashOfferInit />
+      </Suspense>
       <Header />
       <main className="min-h-[60vh]">{children}</main>
       <Footer />

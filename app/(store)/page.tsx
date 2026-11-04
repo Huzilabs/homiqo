@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Banknote, PackageCheck, RotateCcw, Truck } from "lucide-react";
-import Countdown from "@/components/Countdown";
+import { BigCountdown } from "@/components/UrgencyBox";
 import Faq from "@/components/Faq";
 import InViewVideo from "@/components/InViewVideo";
 import ProductCard from "@/components/ProductCard";
@@ -177,19 +177,18 @@ export default async function HomePage() {
             <Link href={`/product/${deal.slug}`} className="group relative block aspect-square overflow-hidden bg-white">
               <ProductImage src={deal.images[0]} alt={deal.name} sizes="(max-width:1024px) 100vw, 50vw" />
               <span className="absolute left-5 top-5 bg-accent-600 px-3 py-1.5 text-[11px] font-medium tracking-[.14em] text-white">
-                −{discountPercent(deal.price, deal.compare_at_price)}% TODAY
+                −{discountPercent(deal.price, deal.compare_at_price)}%
               </span>
             </Link>
             <div className="flex flex-col justify-center px-6 py-14 sm:px-14 lg:px-20">
-              <p className="eyebrow">Deal of the day</p>
+              <p className="eyebrow">Best deal</p>
               <h2 className="h-section mt-4">{deal.name}</h2>
               <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/65">{deal.short_description}</p>
               <p className="mt-8 flex items-baseline gap-4">
                 <span className="font-serif text-5xl text-accent-700">{formatPrice(deal.price)}</span>
                 {deal.compare_at_price && <span className="text-lg text-ink/40 line-through">{formatPrice(deal.compare_at_price)}</span>}
               </p>
-              <p className="mb-4 mt-10 text-[11px] uppercase tracking-[.22em] text-ink/50">Offer ends in</p>
-              <Countdown />
+              <div className="mt-10"><BigCountdown endsAt={deal.sale_ends_at && new Date(deal.sale_ends_at) > new Date() ? deal.sale_ends_at : null} /></div>
               <div className="mt-10"><Link href={`/product/${deal.slug}`} className="btn-primary">Shop the deal</Link></div>
             </div>
           </div>

@@ -5,6 +5,8 @@ import { Banknote, MessageCircle, RotateCcw, Truck } from "lucide-react";
 import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
 import Stars from "@/components/Stars";
+import UrgencyBox from "@/components/UrgencyBox";
+import { recentOrders } from "@/lib/recent";
 import { getProductReviews } from "@/lib/reviews";
 import { categoryPath } from "@/lib/categories";
 import MediaGallery from "@/components/MediaGallery";
@@ -63,7 +65,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   const off = discountPercent(product.price, product.compare_at_price);
   const preview = previewVideo(product.videos);
 
-  const rv = await getProductReviews(product.id);
+  const [rv, recent] = await Promise.all([getProductReviews(product.id), recentOrders(product.id)]);
   const productFaqs = (product.faqs || []).filter((f) => f?.q && f?.a);
   const faqs = [
     ...productFaqs,
@@ -123,13 +125,15 @@ export default async function ProductPage({ params }: { params: Params }) {
               Delivery {formatPrice(SHIPPING_FEE)} · <span className="font-medium text-ink">free when you order 2 or more items</span> · or pay by bank transfer for {BANK.discountPct}% off
             </p>
             <p className={`mt-3 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
-              {product.stock > 10 ? "In stock · ready to ship" : product.stock > 0 ? `Only ${product.stock} left in stock` : "Out of stock"}
+              {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
             </p>
+
+            <UrgencyBox stock={product.stock} saleEndsAt={product.sale_ends_at} hasDiscount={off > 0} recentOrders={recent} />
 
             <ProductActions product={product} />
 
             <p className="mt-6 text-sm text-ink/65">
-              Order today — arrives <span className="font-medium text-ink">{deliveryWindow()}</span>. No advance payment: pay the rider in cash when it arrives.
+              Estimated delivery <span className="font-medium text-ink">{deliveryWindow()}</span>. No advance payment: pay the rider in cash when it arrives.
             </p>
             {STORE.whatsapp && (
               <a
