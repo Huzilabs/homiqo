@@ -9,7 +9,7 @@ import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
 import { BANK, FLASH_OFFER, STORE, bankDiscount, flashDiscount } from "@/lib/config";
-import { markFlashUsed, mmss, useFlashOffer } from "@/lib/flash";
+import { claimFlash, markFlashUsed, mmss, useFlashOffer } from "@/lib/flash";
 import { createClient } from "@/lib/supabase/client";
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
@@ -25,7 +25,10 @@ export default function CheckoutPage() {
   const isBank = payment === "bank_transfer";
   // Must match public.place_order(): bank transfer = 5% off products; delivery follows the normal rule
   const { offer, msLeft } = useFlashOffer();
-  const offerDiscount = offer ? flashDiscount(subtotal) : 0;
+  useEffect(() => {
+    claimFlash(); // reached checkout: lock the Meta offer in if still within the 2 minutes
+  }, []);
+  const offerDiscount = offer?.claimed ? flashDiscount(subtotal) : 0;
   const discount = (isBank ? bankDiscount(subtotal) : 0) + offerDiscount;
   const shipping = codShipping;
   const total = subtotal - discount + shipping;
@@ -66,7 +69,7 @@ export default function CheckoutPage() {
       ["customer_name", "phone", "email", "address", "city", "postal_code", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
     );
     customer.payment_method = payment;
-    if (offer) customer.flash_offer = offer.id;
+    if (offer?.claimed) customer.flash_offer = offer.id;
     // Use the courier's spelling of the city so the parcel can be booked without edits
     const match = cities.find((c) => c.toLowerCase() === String(customer.city).toLowerCase());
     if (cities.length > POPULAR.length && !match) {

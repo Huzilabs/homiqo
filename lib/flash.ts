@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export type FlashOfferState = { id: string; expires_at: string } | null;
+export type FlashOfferState = { id: string; expires_at: string; claimed?: boolean } | null;
 const KEY = "hq.flash";
 const EVT = "hq-flash";
 
 export function readFlash(): FlashOfferState {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) || "null") as (FlashOfferState & { used?: boolean }) | null;
-    return v && !v.used ? { id: v.id, expires_at: v.expires_at } : null;
+    return v && !v.used ? { id: v.id, expires_at: v.expires_at, claimed: Boolean(v.claimed) } : null;
   } catch {
     return null;
   }
@@ -58,3 +58,20 @@ export const mmss = (ms: number) => {
   const s = Math.max(0, Math.floor(ms / 1000));
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
+
+/** Called when the visitor opens checkout: locks the offer in if they got there within the 2 minutes. */
+export async function claimFlash(): Promise<FlashOfferState> {
+  const cur = readFlash();
+  if (!cur || cur.claimed) return cur;
+  try {
+    const res = await fetch("/api/flash/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: cur.id }) });
+    const d = await res.json();
+    if (d?.ok) {
+      const next = { id: cur.id, expires_at: d.expires_at as string, claimed: true };
+      writeFlash(next);
+      return next;
+    }
+    writeFlash({ ...cur, used: true }); // too late — the offer is gone
+  } catch {}
+  return null;
+}

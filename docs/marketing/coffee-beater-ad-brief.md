@@ -29,7 +29,7 @@ https://www.homiqoofficial.site/product/electric-milk-frother-egg-beater?utm_sou
 | Stock | 80 units |
 | Payment | **Cash on Delivery** all over Pakistan · or **Bank Transfer: 5% off** |
 | Delivery | 2–5 working days · Rs 250 delivery · **free on 2+ items** or orders of Rs 2,199+ |
-| Meta visitor offer | People who arrive from a Facebook/Instagram ad get **an extra 5% off if they order within 10 minutes** (countdown shows on the site, applied automatically at checkout, once per customer). Ad copy can say: *"Extra 5% off for the next 10 minutes when you order from this ad"* |
+| Meta visitor offer | People who arrive from a Facebook/Instagram ad get **an extra 5% off if they reach checkout within 2 minutes** (countdown shows on the site; once at checkout the discount is locked in for 30 minutes to finish the order; once per customer). Ad copy can say: *"Tap Buy Now within 2 minutes for an extra 5% off"* |
 | Returns | Damaged / faulty / not as described → replacement or refund within **7 days** |
 | WhatsApp support | +92 305 4471454 |
 
