@@ -79,21 +79,23 @@ export default function Header() {
       </div>
 
       <header className={`sticky top-0 z-40 border-b transition-colors duration-300 ${scrolled ? "border-ink/10 bg-paper/95 backdrop-blur" : "border-ink/5 bg-paper"}`}>
-        <div className="container-x grid h-[76px] grid-cols-[1fr_auto_1fr] items-center gap-4">
-          <div className="flex items-center gap-8">
-            <button className="-ml-1 p-1 xl:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
+        <div className="container-x grid h-[76px] grid-cols-[1fr_auto_1fr] items-center gap-4 xl:grid-cols-[auto_1fr_auto] xl:gap-10">
+          {/* Mobile/tablet: menu button (left) · Desktop: logo (left) */}
+          <div className="flex items-center xl:hidden">
+            <button className="-ml-1 p-1" onClick={() => setOpen(true)} aria-label="Open menu">
               <Menu className="h-6 w-6" strokeWidth={1.5} />
             </button>
-            <nav className="hidden items-center gap-7 xl:flex">
-              <Suspense>
-                <NavLinks />
-              </Suspense>
-            </nav>
           </div>
-
-          <Link href="/" aria-label={`${STORE.name} home`} className="justify-self-center">
+          <Link href="/" aria-label={`${STORE.name} home`} className="justify-self-center xl:justify-self-start">
             <Image src="/logo.png" alt={STORE.name} width={357} height={97} priority className="h-9 w-auto sm:h-11" />
           </Link>
+
+          {/* Desktop: menu centred */}
+          <nav className="hidden items-center justify-center gap-9 xl:flex">
+            <Suspense>
+              <NavLinks />
+            </Suspense>
+          </nav>
 
           <div className="flex items-center justify-end gap-2 sm:gap-4">
             <button onClick={() => setSearchOpen((v) => !v)} className="p-2 text-ink transition hover:text-brand-600" aria-label="Search">
@@ -118,7 +120,7 @@ export default function Header() {
                 autoFocus
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search for choppers, coffee makers, vacuums…"
+                placeholder="Search for choppers, coffee beaters, sink racks…"
                 className="w-full bg-transparent font-serif text-2xl text-ink outline-none placeholder:text-ink/30 sm:text-3xl"
               />
               <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search" className="p-1">
