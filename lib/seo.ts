@@ -43,7 +43,9 @@ const priceValidUntil = () => {
   return d.toISOString().slice(0, 10);
 };
 
-export function productJsonLd(p: Product) {
+type ReviewSummary = { count: number; average: number; reviews: { name: string; rating: number; comment: string; created_at: string }[] };
+
+export function productJsonLd(p: Product, rv?: ReviewSummary) {
   const url = abs(`/product/${p.slug}`);
   return {
     "@context": "https://schema.org",
@@ -56,6 +58,19 @@ export function productJsonLd(p: Product) {
     category: p.category,
     brand: { "@type": "Brand", name: STORE.name },
     url,
+    // Ratings only from real, approved customer reviews — never added when there are none
+    ...(rv && rv.count > 0
+      ? {
+          aggregateRating: { "@type": "AggregateRating", ratingValue: rv.average, reviewCount: rv.count, bestRating: 5, worstRating: 1 },
+          review: rv.reviews.slice(0, 10).map((r) => ({
+            "@type": "Review",
+            author: { "@type": "Person", name: r.name },
+            datePublished: r.created_at.slice(0, 10),
+            reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+            ...(r.comment ? { reviewBody: r.comment } : {}),
+          })),
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       url,

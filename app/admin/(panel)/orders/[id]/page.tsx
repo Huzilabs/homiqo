@@ -1,7 +1,8 @@
-import { BANK } from "@/lib/config";
+import { BANK, STORE } from "@/lib/config";
+import { reviewLink } from "@/lib/reviews";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MessageCircle, Phone } from "lucide-react";
+import { ChevronLeft, MessageCircle, Phone, Star } from "lucide-react";
 import OrderStatusForm from "@/components/admin/OrderStatusForm";
 import PostExPanel from "@/components/admin/PostExPanel";
 import PrintButton from "@/components/admin/PrintButton";
@@ -46,6 +47,16 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
           <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name}, regarding your order ${o.order_number}`)}`} target="_blank" rel="noopener noreferrer" className="btn-secondary px-4 py-2">
             <MessageCircle className="h-4 w-4" /> WhatsApp
           </a>
+          {o.status === "delivered" && (
+            <a
+              href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name.split(" ")[0]}! Thank you for shopping with ${STORE.name}. We hope you're enjoying your order ${o.order_number}. Could you take a minute to leave a quick review? It really helps us: ${reviewLink(o.order_number, o.phone)}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary px-4 py-2"
+            >
+              <Star className="h-4 w-4" /> Ask for a review
+            </a>
+          )}
           <PrintButton />
         </div>
       </div>

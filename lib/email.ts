@@ -2,6 +2,7 @@ import "server-only";
 import nodemailer from "nodemailer";
 import { STORE } from "./config";
 import { formatPrice } from "./format";
+import { reviewLink } from "./reviews";
 
 export type OrderEmailKind = "received" | "confirmed" | "shipped" | "delivered" | "cancelled";
 
@@ -96,6 +97,14 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
   // Tracking box on confirmed/shipped emails; PostEx parcels get a one-click tracking link
   const isPostEx = /postex/i.test(o.courier || "");
   const trackUrl = isPostEx && o.tracking_number ? `https://postex.pk/tracking?cn=${encodeURIComponent(o.tracking_number)}` : "";
+  // Delivered: ask for a review (verified buyers only — the link carries the order number + phone)
+  const reviewUrl = kind === "delivered" && o.phone ? reviewLink(o.order_number, o.phone) : "";
+  const review = reviewUrl
+    ? `<div style="margin:20px 0;padding:18px;border-radius:14px;background:#FFF4E6;font-size:14px;line-height:1.6;color:#10302E">
+        <b>How did we do?</b><br>Your honest review helps other customers choose.
+        <br><a href="${reviewUrl}" style="display:inline-block;margin-top:10px;padding:10px 18px;border-radius:999px;background:#E67A00;color:#ffffff;text-decoration:none;font-weight:600">★ Leave a review</a>
+      </div>`
+    : "";
   const shipping =
     (kind === "shipped" || kind === "confirmed") && o.tracking_number
       ? `<div style="margin:20px 0;padding:16px;border-radius:14px;background:#E8F3F2;font-size:14px;line-height:1.6;color:#0D5B58">
@@ -111,7 +120,7 @@ function render(kind: OrderEmailKind, o: EmailOrder) {
         <h1 style="margin:0 0 8px;font-size:24px;color:#0D5B58">${c.title}</h1>
         <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#4A5A58">Hi ${esc(o.customer_name.split(" ")[0])}, ${c.intro}</p>
         <div style="display:inline-block;padding:8px 14px;border-radius:999px;background:#FFF4E6;color:#C26700;font-weight:700;font-size:13px">Order ${esc(o.order_number)}</div>
-        ${shipping}
+        ${shipping}${review}
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">${rows}
           <tr><td style="padding:10px 0 0;font-size:14px;color:#6B6B6B">Subtotal</td><td style="padding:10px 0 0;font-size:14px;text-align:right">${formatPrice(o.subtotal)}</td></tr>
           ${Number(o.discount) > 0 ? `<tr><td style="padding:6px 0;font-size:14px;color:#3B9468">Bank transfer discount</td><td style="padding:6px 0;font-size:14px;color:#3B9468;text-align:right">−${formatPrice(Number(o.discount))}</td></tr>` : ""}

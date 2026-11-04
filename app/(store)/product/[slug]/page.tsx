@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { Banknote, MessageCircle, RotateCcw, Truck } from "lucide-react";
 import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
+import Stars from "@/components/Stars";
+import { getProductReviews } from "@/lib/reviews";
 import { categoryPath } from "@/lib/categories";
 import MediaGallery from "@/components/MediaGallery";
 import ProductActions from "@/components/ProductActions";
@@ -61,6 +63,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   const off = discountPercent(product.price, product.compare_at_price);
   const preview = previewVideo(product.videos);
 
+  const rv = await getProductReviews(product.id);
   const productFaqs = (product.faqs || []).filter((f) => f?.q && f?.a);
   const faqs = [
     ...productFaqs,
@@ -70,7 +73,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   ];
 
   const jsonLd = [
-    productJsonLd(product),
+    productJsonLd(product, rv),
     faqJsonLd(faqs),
     breadcrumbJsonLd([
       { name: "Home", path: "/" },
@@ -97,6 +100,11 @@ export default async function ProductPage({ params }: { params: Params }) {
           <div className="lg:pt-6">
             <p className="eyebrow">{product.category}</p>
             <h1 className="mt-4 font-serif text-[2.6rem] font-medium leading-[1.05] text-ink sm:text-[3.4rem]">{product.name}</h1>
+            {rv.count > 0 && (
+              <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink">
+                <Stars rating={rv.average} /> <span className="font-medium text-ink">{rv.average.toFixed(1)}</span> · {rv.count} review{rv.count === 1 ? "" : "s"}
+              </a>
+            )}
             <p className="mt-5 text-[17px] leading-relaxed text-ink/65">{product.short_description}</p>
 
             <div className="mt-8 flex flex-wrap items-baseline gap-4 border-t border-ink/10 pt-8">
@@ -175,6 +183,56 @@ export default async function ProductPage({ params }: { params: Params }) {
             <h2 className="eyebrow mb-6">{product.name} — questions, answered</h2>
             <Faq items={faqs} />
           </div>
+        </div>
+      </section>
+
+      <section id="reviews" className="container-x scroll-mt-28 pt-24">
+        <div className="grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
+          <div>
+            <p className="eyebrow">Verified customers</p>
+            <h2 className="h-section mt-4">Customer reviews</h2>
+            {rv.count > 0 ? (
+              <div className="mt-6">
+                <p className="flex items-center gap-3">
+                  <span className="font-serif text-5xl text-ink">{rv.average.toFixed(1)}</span>
+                  <span>
+                    <Stars rating={rv.average} size="h-5 w-5" />
+                    <span className="mt-1 block text-sm text-ink/60">Based on {rv.count} review{rv.count === 1 ? "" : "s"}</span>
+                  </span>
+                </p>
+                <ul className="mt-6 space-y-1.5">
+                  {[5, 4, 3, 2, 1].map((n) => {
+                    const c = rv.reviews.filter((r) => r.rating === n).length;
+                    return (
+                      <li key={n} className="flex items-center gap-3 text-xs text-ink/60">
+                        <span className="w-3">{n}</span>
+                        <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/10"><span className="block h-full rounded-full bg-accent-500" style={{ width: `${(c / rv.count) * 100}%` }} /></span>
+                        <span className="w-5 text-right tabular-nums">{c}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ) : (
+              <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink/60">No reviews yet. Reviews come only from customers who received this product — after delivery we send you a link to share yours.</p>
+            )}
+          </div>
+          {rv.count > 0 && (
+            <ul className="divide-y divide-ink/10 border-y border-ink/10">
+              {rv.reviews.slice(0, 20).map((r) => (
+                <li key={r.id} className="py-6">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <Stars rating={r.rating} />
+                    <span className="text-sm font-semibold text-ink">{r.name}</span>
+                    {r.city && <span className="text-sm text-ink/50">{r.city}</span>}
+                    {r.verified && <span className="text-[11px] font-medium uppercase tracking-wider text-leaf-600">✓ Verified purchase</span>}
+                    <span className="ml-auto text-xs text-ink/40">{new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  </div>
+                  {r.comment && <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-ink/75">{r.comment}</p>}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
