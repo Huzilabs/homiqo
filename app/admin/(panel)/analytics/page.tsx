@@ -8,6 +8,18 @@ import { eachDay, pkBounds, resolveRange } from "@/lib/date-range";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Analytics" };
 
+interface CheckoutVisit {
+  session_id: string;
+  started_at: string;
+  device: string;
+  source: string;
+  campaign: string | null;
+  cart_value: number | null;
+  secs_on_checkout: number;
+  ordered: boolean;
+  last_path: string;
+}
+
 interface Summary {
   visitors: number;
   sessions: number;
@@ -43,11 +55,14 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const { from, to } = pkBounds(since, until);
   const supabase = await createClient();
 
-  const [{ data, error }, { data: orderRows }] = await Promise.all([
+  const [{ data, error }, { data: orderRows }, { data: coRows }] = await Promise.all([
     supabase.rpc("analytics_summary", { p_from: from, p_to: to }),
     supabase.from("orders").select("total").gte("created_at", from).lt("created_at", to).neq("status", "cancelled"),
+    supabase.rpc("analytics_checkout_sessions", { p_from: from, p_to: to }),
   ]);
   const s = (data || {}) as Summary;
+  const checkouts = (coRows || []) as CheckoutVisit[];
+  const coOrdered = checkouts.filter((c) => c.ordered).length;
   const orders = orderRows?.length || 0;
   const revenue = (orderRows || []).reduce((a, o) => a + Number(o.total), 0);
 
@@ -61,6 +76,8 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
     { label: "Bounce rate", value: pct(s.bounce_sessions || 0, s.sessions || 0), hint: "Visits that viewed one page" },
     { label: "Conversion rate", value: pct(s.funnel?.purchase || 0, s.sessions || 0), hint: "Visits that placed an order" },
     { label: "Add-to-cart rate", value: pct(s.funnel?.add_to_cart || 0, s.sessions || 0), hint: "Visits with an add to cart" },
+    { label: "Reached checkout", value: num(checkouts.length), hint: `${pct(checkouts.length, s.sessions || 0)} of visits` },
+    { label: "Checkout → order", value: pct(coOrdered, checkouts.length), hint: `${num(checkouts.length - coOrdered)} left without ordering` },
     { label: "Orders", value: num(orders), hint: "Excluding cancelled" },
     { label: "Revenue", value: rs(revenue), hint: orders ? `${rs(revenue / orders)} average order` : "—" },
   ];
@@ -92,7 +109,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
       {error && <div className="border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">Could not load analytics: {error.message}</div>}
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden border border-gray-200 bg-gray-200 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-px overflow-hidden border border-gray-200 bg-gray-200 lg:grid-cols-5">
         {kpis.map((k) => (
           <div key={k.label} className="bg-white p-5">
             <p className="text-xs font-medium uppercase tracking-[.14em] text-gray-500">{k.label}</p>
@@ -165,6 +182,34 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
             ])}
           />
         </div>
+      </div>
+
+      <div className="card overflow-hidden">
+        <div className="border-b p-5">
+          <p className="font-bold">Checkout visits</p>
+          <p className="text-xs text-gray-500">
+            Everyone who opened the checkout page, newest first. Pakistan time. Use the session ID to find the recording in Clarity (filter <b>hq_session</b>).
+          </p>
+        </div>
+        <Table
+          empty="Nobody reached checkout in this period."
+          head={["Time", "Device", "Came from", "Cart", "Time on checkout", "Result", "Session"]}
+          rows={checkouts.map((c) => [
+            <span key="t">{new Date(c.started_at).toLocaleString("en-PK", { timeZone: "Asia/Karachi", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</span>,
+            c.device ? c.device[0].toUpperCase() + c.device.slice(1) : "—",
+            <span key="s" className="capitalize">{c.source}{c.campaign && <span className="block text-xs normal-case text-gray-500">{c.campaign}</span>}</span>,
+            c.cart_value ? rs(Number(c.cart_value)) : "—",
+            c.ordered ? "—" : c.secs_on_checkout > 0 ? `${c.secs_on_checkout >= 60 ? `${Math.floor(c.secs_on_checkout / 60)}m ` : ""}${c.secs_on_checkout % 60}s` : "Left right away",
+            c.ordered ? (
+              <span key="r" className="bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">Ordered</span>
+            ) : (
+              <span key="r" className="bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700">
+                Left{c.last_path && !c.last_path.startsWith("/checkout") ? ` → ${PAGE_NAME(c.last_path)}` : ""}
+              </span>
+            ),
+            <code key="id" className="select-all text-[11px] text-gray-500">{c.session_id}</code>,
+          ])}
+        />
       </div>
 
       <div className="card overflow-hidden">
