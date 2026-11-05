@@ -96,10 +96,10 @@ export default async function ProductPage({ params }: { params: Params }) {
           <span className="truncate text-ink/80">{product.name}</span>
         </nav>
 
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} />
 
-          <div className="lg:pt-6">
+          <div className="min-w-0 lg:pt-6">
             <p className="eyebrow">{product.category}</p>
             <h1 className="mt-4 font-serif text-[2.6rem] font-medium leading-[1.05] text-ink sm:text-[3.4rem]">{product.name}</h1>
             {rv.count > 0 && (

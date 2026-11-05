@@ -20,7 +20,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
   const go = (d: number) => setIndex((i) => (i + d + media.length) % media.length);
 
   return (
-    <div className="lg:sticky lg:top-24 lg:self-start">
+    <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
       <div
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
@@ -75,7 +75,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
       </div>
 
       {media.length > 1 && (
-        <div className="mt-3 flex max-w-[min(560px,calc(100svh-250px))] gap-2 overflow-x-auto pb-1">
+        <div className="mt-3 flex w-full min-w-0 max-w-[min(560px,calc(100svh-250px))] gap-2 overflow-x-auto pb-1">
           {media.map((m, i) => {
             const yt = m.kind === "video" ? youTubeId(m.url) : null;
             return (

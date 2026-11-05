@@ -82,13 +82,16 @@ export default function UrgencyBox({
 
       {/* Real daily cut-off */}
       {!soldOut && (
-        <p className="flex items-center gap-2.5 text-sm text-ink/70">
-          <Truck className="h-4 w-4 shrink-0 text-brand-600" />
+        <div className="flex items-center gap-3 border border-brand-600/25 bg-brand-50 px-4 py-3 text-sm text-ink/75">
+          <Truck className="h-5 w-5 shrink-0 text-brand-600" />
           <span>
-            Order in the next <b className="tabular-nums text-ink">{now == null ? "…" : fmt(msToCutoff(now))}</b> and we confirm &amp; book it with the courier
-            {now == null || beforeCutoff(now) ? " today" : " by tomorrow"}.
+            Order within{" "}
+            <b className="inline-block rounded bg-ink px-2 py-0.5 font-semibold tabular-nums text-white">
+              {now == null ? "--h --m --s" : fmt(msToCutoff(now), true)}
+            </b>{" "}
+            and we book it with the courier {now == null || beforeCutoff(now) ? "today" : "by tomorrow"}.
           </span>
-        </p>
+        </div>
       )}
     </div>
   );
