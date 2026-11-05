@@ -1,5 +1,5 @@
 import { getProducts } from "@/lib/products";
-import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
+import { STORE } from "@/lib/config";
 import { abs } from "@/lib/seo";
 
 // Google Merchant Center product feed (RSS 2.0). Submit https://www.homiqoofficial.site/feed.xml in Merchant Center.
@@ -29,7 +29,7 @@ export async function GET() {
       <g:shipping>
         <g:country>PK</g:country>
         <g:service>Standard (2–5 working days)</g:service>
-        <g:price>${(Number(p.price) >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE).toFixed(2)} ${STORE.currency}</g:price>
+        <g:price>${(0).toFixed(2)} ${STORE.currency}</g:price>
       </g:shipping>
     </item>`;
     })

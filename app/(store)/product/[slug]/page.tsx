@@ -14,7 +14,7 @@ import ProductActions from "@/components/ProductActions";
 import ProductCard from "@/components/ProductCard";
 import { getProductBySlug, getProducts } from "@/lib/products";
 import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
-import { BANK, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "@/lib/config";
+import { BANK, STORE } from "@/lib/config";
 import { abs, breadcrumbJsonLd, faqJsonLd, ld, productDescription, productJsonLd, productTitle } from "@/lib/seo";
 
 // Static pages served from Vercel's edge cache; refreshed when products change (see /api/revalidate) or every 5 minutes
@@ -69,7 +69,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   const productFaqs = (product.faqs || []).filter((f) => f?.q && f?.a);
   const faqs = [
     ...productFaqs,
-    { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. ${formatPrice(SHIPPING_FEE)} delivery for a single item — free when you order 2 or more items (any products) or on orders over ${formatPrice(FREE_SHIPPING_THRESHOLD)}. Pay by bank transfer to get ${BANK.discountPct}% off.` },
+    { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. Delivery is free on every order. Pay by bank transfer to get ${BANK.discountPct}% off.` },
     { q: "Cash on delivery", a: "No advance payment — pay the rider in cash when your parcel arrives." },
     { q: "Returns & warranty", a: "Damaged or faulty? Contact us within 7 days of delivery for a free replacement or refund." },
   ];
@@ -122,7 +122,7 @@ export default async function ProductPage({ params }: { params: Params }) {
               <p className="mt-2 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
             )}
             <p className="mt-2 text-sm text-ink/60">
-              Delivery {formatPrice(SHIPPING_FEE)} · <span className="font-medium text-ink">free when you order 2 or more items</span> · or pay by bank transfer for {BANK.discountPct}% off
+              <span className="font-medium text-leaf-600">✓ Free delivery all over Pakistan</span> · or pay by bank transfer for {BANK.discountPct}% off
             </p>
             <p className={`mt-3 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
               {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
@@ -149,7 +149,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             <div className="mt-8 grid grid-cols-3 border-y border-ink/10">
               {[
                 { icon: Banknote, t: "Cash on delivery" },
-                { icon: Truck, t: "Free delivery on 2+ items" },
+                { icon: Truck, t: "Free delivery" },
                 { icon: RotateCcw, t: "7-day returns" },
               ].map(({ icon: Icon, t }, i) => (
                 <div key={t} className={`flex flex-col items-center gap-2 px-2 py-5 text-center ${i ? "border-l border-ink/10" : ""}`}>

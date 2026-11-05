@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { BANK, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/config";
+import { BANK } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Shipping & returns",
-  description: "Homiqo delivery and returns policy: cash on delivery across Pakistan, 2–5 working day delivery, free delivery on orders of Rs 2,199+ or 2+ items and 7-day replacements.",
+  description: "Homiqo delivery and returns policy: cash on delivery across Pakistan, 2–5 working day delivery, free delivery on every order and 7-day replacements.",
   alternates: { canonical: "/policies" },
 };
 
@@ -15,7 +15,7 @@ export default function PoliciesPage() {
       <div className="mt-8 space-y-8 leading-relaxed text-ink/75">
         <section>
           <h2 className="text-xl font-bold text-ink">Delivery</h2>
-          <p className="mt-2">We deliver all over Pakistan. Orders are usually delivered within 2–5 working days. Delivery costs {formatPrice(SHIPPING_FEE)} for a single item, and is free when you order 2 or more items (any combination) or on orders of {formatPrice(FREE_SHIPPING_THRESHOLD)} or more.</p>
+          <p className="mt-2">We deliver all over Pakistan. Orders are usually delivered within 2–5 working days. Delivery is free on every order, with no minimum.</p>
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Cash on Delivery</h2>

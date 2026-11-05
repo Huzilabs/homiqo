@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
-import { BANK, FREE_DELIVERY_MIN_ITEMS, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/config";
+import { BANK } from "@/lib/config";
 import ProductImage from "./ProductImage";
 
 export default function CartDrawer() {
@@ -18,10 +18,6 @@ export default function CartDrawer() {
   }, [drawerOpen, setDrawerOpen]);
 
   if (!drawerOpen) return null;
-  const units = items.reduce((n, i) => n + i.quantity, 0);
-  const freeDelivery = units >= FREE_DELIVERY_MIN_ITEMS || subtotal >= FREE_SHIPPING_THRESHOLD;
-  const moreItems = Math.max(0, FREE_DELIVERY_MIN_ITEMS - units);
-  const progress = freeDelivery ? 100 : Math.min(100, (units / FREE_DELIVERY_MIN_ITEMS) * 100);
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Shopping cart">
@@ -47,16 +43,7 @@ export default function CartDrawer() {
         ) : (
           <>
             <div className="border-b bg-brand-50/60 px-5 py-3 text-sm">
-              {!freeDelivery ? (
-                <p>
-                  Add <b>{moreItems} more item{moreItems > 1 ? "s" : ""}</b> for <b>free delivery</b>
-                </p>
-              ) : (
-                <p className="font-medium text-brand-700">🎉 You’ve unlocked free delivery!</p>
-              )}
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-brand-100">
-                <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${progress}%` }} />
-              </div>
+              <p className="font-medium text-brand-700">🚚 Free delivery on your order — anywhere in Pakistan</p>
             </div>
             <ul className="flex-1 divide-y overflow-y-auto px-5">
               {items.map((i) => (
@@ -96,7 +83,7 @@ export default function CartDrawer() {
                 <span>Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
-              <p className="text-xs text-ink/55">Delivery {freeDelivery ? "is free" : `${formatPrice(SHIPPING_FEE)} — free on 2+ items`}. Pay cash when your order arrives — or {BANK.discountPct}% off with bank transfer.</p>
+              <p className="text-xs text-ink/55">Delivery is free. Pay cash when your order arrives — or {BANK.discountPct}% off with bank transfer.</p>
               <Link href="/checkout" onClick={() => setDrawerOpen(false)} className="btn-primary w-full">
                 Checkout
               </Link>

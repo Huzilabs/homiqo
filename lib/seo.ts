@@ -1,4 +1,4 @@
-import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE, STORE } from "./config";
+import { STORE } from "./config";
 import type { Product } from "./types";
 
 export const SITE = STORE.siteUrl.replace(/\/$/, "");
@@ -83,7 +83,7 @@ export function productJsonLd(p: Product, rv?: ReviewSummary) {
       acceptedPaymentMethod: "https://schema.org/COD",
       shippingDetails: {
         "@type": "OfferShippingDetails",
-        shippingRate: { "@type": "MonetaryAmount", value: p.price >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE, currency: STORE.currency },
+        shippingRate: { "@type": "MonetaryAmount", value: 0, currency: STORE.currency },
         shippingDestination: { "@type": "DefinedRegion", addressCountry: "PK" },
         deliveryTime: {
           "@type": "ShippingDeliveryTime",

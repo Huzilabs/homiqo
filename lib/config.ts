@@ -11,14 +11,12 @@ export const STORE = {
   currency: "PKR",
 };
 
-// Keep in sync with public.place_order() in supabase/schema.sql
-export const SHIPPING_FEE = 250;
-export const FREE_SHIPPING_THRESHOLD = 2199;
-
-/** Free delivery on 2+ items, or on orders of Rs 2,199+. Keep in sync with public.place_order(). */
-export const FREE_DELIVERY_MIN_ITEMS = 2;
-export const shippingFor = (subtotal: number, units = 1) =>
-  subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD || units >= FREE_DELIVERY_MIN_ITEMS ? 0 : SHIPPING_FEE;
+// Free delivery on every order, all over Pakistan. Keep in sync with public.place_order().
+export const SHIPPING_FEE = 0;
+export const FREE_SHIPPING_THRESHOLD = 0;
+export const FREE_DELIVERY_MIN_ITEMS = 1;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const shippingFor = (_subtotal: number, _units = 1) => 0;
 
 /** Bank transfer (prepaid) — 5% off the products (delivery charged as normal). Keep in sync with public.place_order(). */
 export const BANK = {

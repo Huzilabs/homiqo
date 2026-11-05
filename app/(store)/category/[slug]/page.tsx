@@ -6,7 +6,6 @@ import ProductCard from "@/components/ProductCard";
 import TrackItemList from "@/components/TrackItemList";
 import { getProducts } from "@/lib/products";
 import { categoryInfo, categoryPath } from "@/lib/categories";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
 import { abs, breadcrumbJsonLd, ld } from "@/lib/seo";
 
@@ -92,7 +91,7 @@ export default async function CategoryPage({ params }: { params: Params }) {
           <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-ink/65 sm:text-base">{info.intro}</p>
           <p className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-[.18em] text-ink/55">
             <span className="inline-flex items-center gap-2"><Banknote className="h-4 w-4 text-brand-600" strokeWidth={1.5} /> Cash on delivery</span>
-            <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4 text-brand-600" strokeWidth={1.5} /> 2–5 day delivery · free on 2+ items</span>
+            <span className="inline-flex items-center gap-2"><Truck className="h-4 w-4 text-brand-600" strokeWidth={1.5} /> Free delivery · 2–5 days</span>
             <span className="inline-flex items-center gap-2"><RotateCcw className="h-4 w-4 text-brand-600" strokeWidth={1.5} /> 7-day returns</span>
           </p>
         </div>

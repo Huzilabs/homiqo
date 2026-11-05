@@ -74,11 +74,8 @@ begin
 
   if v_payment = 'bank_transfer' then
     v_discount := round(v_subtotal * 0.05);   -- 5% off
-    v_shipping := case when v_subtotal >= 2199 or v_units >= 2 then 0 else 250 end;
-  else
-    -- free delivery on 2+ items or Rs 2,199+
-    v_shipping := case when v_subtotal >= 2199 or v_units >= 2 then 0 else 250 end;
   end if;
+  v_shipping := 0;   -- free delivery on every order
 
   -- Meta ad offer: extra 5% if ordered before the offer expires (1 min grace), single use, once per phone number
   if coalesce(customer->>'flash_offer', '') ~ '^[0-9a-fA-F-]{36}$' then
