@@ -4,7 +4,7 @@
 
 @layer base {
   html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; overflow-x: clip; }
-  body { @apply bg-paper font-sans text-ink antialiased; font-feature-settings: "kern"; overflow-x: clip; }
+  body { @apply bg-paper font-sans text-ink antialiased; font-feature-settings: "kern", "lnum"; font-variant-numeric: lining-nums; overflow-x: clip; }
   h1, h2, h3 { text-wrap: balance; }
   ::selection { @apply bg-accent-200 text-ink; }
 }
