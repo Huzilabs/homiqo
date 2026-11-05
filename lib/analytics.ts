@@ -90,6 +90,12 @@ export const track = {
     } catch {}
   },
   search: (term: string) => event("search", { search_term: term }),
+  whatsappOrder: (p: Product, qty: number) => {
+    event("whatsapp_order", { currency: STORE.currency, value: Number(p.price) * qty, items: [toItem(p, qty)] });
+    try {
+      window.fbq?.("track", "Contact", { content_ids: [p.id], content_type: "product", value: Number(p.price) * qty, currency: STORE.currency });
+    } catch {}
+  },
   viewItemList: (listId: string, listName: string, products: Product[]) =>
     event("view_item_list", {
       item_list_id: listId,
