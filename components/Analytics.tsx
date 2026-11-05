@@ -44,7 +44,10 @@ gtag('config', '${GA_ID}');`}
 c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
 t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
 y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "${CLARITY_ID}");`}
+})(window, document, "clarity", "script", "${CLARITY_ID}");
+try{var s=JSON.parse(localStorage.getItem("hq.sess")||"null")||{},v=localStorage.getItem("hq.vid"),u=s.src||{};
+if(v)clarity("set","hq_visitor",v);if(s.id)clarity("set","hq_session",s.id);
+if(u.us)clarity("set","utm_source",u.us);if(u.uc)clarity("set","utm_campaign",u.uc);}catch(e){}`}
         </Script>
       )}
       {META_PIXEL_ID && (
