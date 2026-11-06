@@ -28,10 +28,10 @@ const nextConfig = {
       // Health products removed (Meta blocks pixel data for health-related sites)
       { source: "/category/health-care", destination: "/shop", permanent: false },
       { source: "/product/portable-mesh-nebulizer", destination: "/shop", permanent: false },
-      // The Vercel default domain duplicates the whole site — send it to the real domain
+      // The Vercel default domain and the old homiqo.site domain duplicate the site — 301 them to the real domain
       {
         source: "/:path*",
-        has: [{ type: "host", value: "homiqo.vercel.app" }],
+        has: [{ type: "host", value: "(?<host>homiqo\\.vercel\\.app|homiqo\\.site|www\\.homiqo\\.site)" }],
         destination: "https://www.homiqoofficial.site/:path*",
         permanent: true,
       },
