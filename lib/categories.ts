@@ -86,22 +86,6 @@ export const CATEGORIES: CategoryInfo[] = [
       },
     ],
   },
-  {
-    name: "Health & Care",
-    slug: "health-care",
-    title: "Portable Nebulizer Machines in Pakistan",
-    description:
-      "Portable, rechargeable mesh nebulizer machines for home and travel. Order online in Pakistan with cash on delivery. Use as prescribed by your doctor.",
-    h1: "Health & care",
-    intro:
-      "Compact personal-care devices for home and travel. Always use medical devices with medication and guidance from your doctor.",
-    sections: [
-      {
-        heading: "Mesh vs compressor nebulizers",
-        body: "Mesh nebulizers are small, quiet and USB rechargeable, which makes them easier to use with children, at night or while travelling. Compressor nebulizers are larger and need a plug point.",
-      },
-    ],
-  },
 ];
 
 export const slugifyCategory = (name: string) =>

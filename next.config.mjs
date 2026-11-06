@@ -25,6 +25,9 @@ const nextConfig = {
     return [
       // Short links for ads / social / WhatsApp (query strings such as UTM tags are passed through)
       { source: "/coffee-beater", destination: "/product/electric-milk-frother-egg-beater", permanent: false },
+      // Health products removed (Meta blocks pixel data for health-related sites)
+      { source: "/category/health-care", destination: "/shop", permanent: false },
+      { source: "/product/portable-mesh-nebulizer", destination: "/shop", permanent: false },
       // The Vercel default domain duplicates the whole site — send it to the real domain
       {
         source: "/:path*",
