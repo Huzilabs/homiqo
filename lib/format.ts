@@ -2,7 +2,7 @@ export const formatPrice = (n: number | string) =>
   "Rs " + Number(n).toLocaleString("en-PK", { maximumFractionDigits: 0 });
 
 export const formatDate = (d: string) =>
-  new Date(d).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short" });
+  new Date(d).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Karachi" });
 
 export const discountPercent = (price: number, compareAt: number | null) =>
   compareAt && compareAt > price ? Math.round(((compareAt - price) / compareAt) * 100) : 0;

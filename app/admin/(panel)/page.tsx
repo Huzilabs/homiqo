@@ -90,7 +90,7 @@ export default async function AdminDashboard() {
           ))}
         </div>
         <div className="mt-2 flex justify-between text-[11px] text-gray-400">
-          <span>{days[0].toLocaleDateString("en-PK", { day: "numeric", month: "short" })}</span>
+          <span>{days[0].toLocaleDateString("en-PK", { day: "numeric", month: "short", timeZone: "Asia/Karachi" })}</span>
           <span>Today</span>
         </div>
       </div>

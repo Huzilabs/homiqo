@@ -5,7 +5,7 @@ import { LoaderCircle, PackageCheck, Printer, RefreshCw, Truck } from "lucide-re
 import { createClient } from "@/lib/supabase/client";
 import type { Order } from "@/lib/types";
 
-const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short" }) : "—");
+const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Karachi" }) : "—");
 
 export default function PostExPanel({ order, suggestedCity }: { order: Order; suggestedCity: string | null }) {
   const router = useRouter();
