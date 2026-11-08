@@ -90,34 +90,34 @@ end $$;
 create or replace function public.postex_order_payload(p_order_id uuid, p_city text default null, p_pickup_code text default null)
 returns jsonb
 language plpgsql
-stable
-security definer
-set search_path = public
-as $$
-declare o orders%rowtype; v_city text; v_detail text; v_items int;
+stable security definer
+set search_path to 'public'
+as $function$
+declare o orders%rowtype; v_city text; v_detail text; v_items int; v_note text;
 begin
-  if not public.is_admin() then raise exception 'not allowed'; end if;
+  if not public.is_admin() and current_user not in ('postgres', 'supabase_admin') then raise exception 'not allowed'; end if;
   select * into o from orders where id = p_order_id;
   if not found then raise exception 'Order not found'; end if;
   v_city := coalesce(nullif(trim(p_city), ''), o.postex_city, public.postex_match_city(o.city));
   select string_agg(product_name || ' x' || quantity, ', ' order by product_name), coalesce(sum(quantity), 0)
     into v_detail, v_items from order_items where order_id = o.id;
+  -- Every parcel: customer may open and check it before paying
+  v_note := 'Parcel open allowed - customer can open and check before payment.' || coalesce(' ' || nullif(trim(o.notes), ''), '');
   return jsonb_strip_nulls(jsonb_build_object(
     'orderRefNumber', o.order_number,
-    -- bank transfers are prepaid: nothing to collect on delivery
     'invoicePayment', case when o.payment_method = 'bank_transfer' then 0 else o.total end,
     'orderDetail', left(coalesce(v_detail, ''), 250),
     'customerName', o.customer_name,
     'customerPhone', private.postex_phone(o.phone),
     'deliveryAddress', o.address || coalesce(', Postal code ' || o.postal_code, ''),
-    'transactionNotes', nullif(left(coalesce(o.notes, ''), 250), ''),
+    'transactionNotes', left(v_note, 250),
     'cityName', v_city,
     'invoiceDivision', 1,
     'items', greatest(v_items, 1),
     'orderType', 'Normal',
-    'pickupAddressCode', coalesce(nullif(trim(coalesce(p_pickup_code, '')), ''), '001')  -- PostEx default pickup address (Kasur)
+    'pickupAddressCode', coalesce(nullif(trim(coalesce(p_pickup_code, '')), ''), '001')
   ));
-end $$;
+end $function$;
 
 -- Admin approves the order (after calling the customer) → booked on PostEx, order confirmed
 create or replace function public.postex_book_order(p_order_id uuid, p_city text default null, p_pickup_code text default null)
