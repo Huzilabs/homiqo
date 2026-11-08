@@ -23,7 +23,7 @@ export default function PoliciesPage() {
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Bank transfer</h2>
-          <p className="mt-2">Prefer to pay in advance? Choose Bank Transfer at checkout to get {BANK.discountPct}% off your products (normal delivery charges apply). Transfer the amount to our {BANK.bank} account shown after you place the order, then send the payment screenshot on WhatsApp to {BANK.whatsappDisplay}. We dispatch once the payment is confirmed.</p>
+          <p className="mt-2">Prefer to pay in advance? Choose Bank Transfer at checkout to get {BANK.discountPct}% off your products (delivery is still free). Transfer the amount to our {BANK.bank} account shown after you place the order, then send the payment screenshot on WhatsApp to {BANK.whatsappDisplay}. We dispatch once the payment is confirmed.</p>
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Returns & exchanges</h2>

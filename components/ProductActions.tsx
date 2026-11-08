@@ -14,6 +14,8 @@ export default function ProductActions({ product }: { product: Product }) {
   const [qty, setQty] = useState(1);
   const soldOut = product.stock <= 0;
   const max = Math.min(product.stock, 20);
+  const bundleSave = Number(product.bundle_save || 0);
+  const lineTotal = Number(product.price) * qty - Math.floor(qty / 2) * bundleSave;
 
   useEffect(() => {
     track.viewItem(product);
@@ -23,7 +25,7 @@ export default function ProductActions({ product }: { product: Product }) {
     const url = `${STORE.siteUrl.replace(/\/$/, "")}/product/${product.slug}`;
     const msg =
       `Assalam o Alaikum! I want to order:\n\n` +
-      `*${product.name}*\nQuantity: ${qty}\nPrice: ${formatPrice(product.price * qty)} (free delivery, cash on delivery)\n${url}\n\n` +
+      `*${product.name}*\nQuantity: ${qty}\nPrice: ${formatPrice(lineTotal)} (free delivery, cash on delivery)\n${url}\n\n` +
       `My name:\nPhone:\nFull address:\nCity:`;
     return `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(msg)}`;
   };
@@ -52,6 +54,24 @@ export default function ProductActions({ product }: { product: Product }) {
         </div>
         {!soldOut && (
           <p className="text-sm font-medium text-leaf-600">🚚 FREE delivery on this order — anywhere in Pakistan</p>
+        )}
+        {!soldOut && bundleSave > 0 && max >= 2 && (
+          <div className="flex items-center justify-between gap-3 border border-accent-500/40 bg-accent-50 px-4 py-3 text-sm">
+            {qty >= 2 ? (
+              <p className="font-medium text-accent-700">
+                ✓ You save {formatPrice(Math.floor(qty / 2) * bundleSave)} — {qty} for {formatPrice(lineTotal)}
+              </p>
+            ) : (
+              <>
+                <p className="text-ink/80">
+                  🎁 <b className="text-accent-700">Buy 2, save {formatPrice(bundleSave)}</b> — 2 for {formatPrice(Number(product.price) * 2 - bundleSave)}
+                </p>
+                <button type="button" onClick={() => setQty(2)} className="shrink-0 bg-accent-600 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[.14em] text-white hover:bg-accent-700">
+                  Get 2
+                </button>
+              </>
+            )}
+          </div>
         )}
         <button disabled={soldOut} onClick={buyNow} className="btn-primary h-[56px] w-full">
           {soldOut ? "Sold out" : "Buy now — cash on delivery"}

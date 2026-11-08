@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CartItem, Product } from "./types";
-import { shippingFor } from "./config";
+import { bundleDiscount, shippingFor } from "./config";
 import { track } from "./analytics";
 
 const KEY = "homecart.cart.v1";
@@ -11,6 +11,7 @@ interface CartCtx {
   ready: boolean;
   count: number;
   subtotal: number;
+  bundle: number;
   shipping: number;
   total: number;
   drawerOpen: boolean;
@@ -49,7 +50,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const max = Math.max(1, Math.min(p.stock, 20));
       if (existing) {
         return prev.map((i) =>
-          i.product_id === p.id ? { ...i, quantity: Math.min(i.quantity + qty, max), stock: p.stock, price: Number(p.price) } : i,
+          i.product_id === p.id ? { ...i, quantity: Math.min(i.quantity + qty, max), stock: p.stock, price: Number(p.price), bundle_save: Number(p.bundle_save || 0) } : i,
         );
       }
       return [
@@ -62,6 +63,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           image: p.images[0] || null,
           quantity: Math.min(qty, max),
           stock: p.stock,
+          bundle_save: Number(p.bundle_save || 0),
         },
       ];
     });
@@ -89,14 +91,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(() => {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const bundle = bundleDiscount(items);
     const shipping = shippingFor(subtotal, items.reduce((n, i) => n + i.quantity, 0));
     return {
       items,
       ready,
       count: items.reduce((s, i) => s + i.quantity, 0),
       subtotal,
+      bundle,
       shipping,
-      total: subtotal + shipping,
+      total: subtotal - bundle + shipping,
       drawerOpen,
       setDrawerOpen,
       add,

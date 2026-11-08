@@ -8,7 +8,7 @@ import { BANK } from "@/lib/config";
 import ProductImage from "./ProductImage";
 
 export default function CartDrawer() {
-  const { items, drawerOpen, setDrawerOpen, setQty, remove, subtotal } = useCart();
+  const { items, drawerOpen, setDrawerOpen, setQty, remove, subtotal, bundle } = useCart();
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
@@ -79,10 +79,22 @@ export default function CartDrawer() {
               ))}
             </ul>
             <div className="space-y-3 border-t p-5">
+              {bundle > 0 && (
+                <div className="flex justify-between text-sm font-medium text-leaf-600">
+                  <span>Buy 2 &amp; save</span>
+                  <span>−{formatPrice(bundle)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-base font-semibold">
                 <span>Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{formatPrice(subtotal - bundle)}</span>
               </div>
+              {items.some((i) => Number(i.bundle_save) > 0 && i.quantity % 2 === 1) && (
+                <p className="bg-accent-50 px-3 py-2 text-xs font-medium text-accent-700">
+                  🎁 Add 1 more {items.find((i) => Number(i.bundle_save) > 0 && i.quantity % 2 === 1)!.name} and save{" "}
+                  {formatPrice(Number(items.find((i) => Number(i.bundle_save) > 0 && i.quantity % 2 === 1)!.bundle_save))}
+                </p>
+              )}
               <p className="text-xs text-ink/55">Delivery is free. Pay cash when your order arrives — or {BANK.discountPct}% off with bank transfer.</p>
               <Link href="/checkout" onClick={() => setDrawerOpen(false)} className="btn-primary w-full">
                 Checkout

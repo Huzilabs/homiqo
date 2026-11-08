@@ -3,6 +3,9 @@
 
 alter table public.orders add column if not exists discount numeric(12,2) not null default 0;
 alter table public.orders add column if not exists postal_code text;
+alter table public.orders add column if not exists bundle_discount numeric(12,2) not null default 0;
+-- Bundle: Rs off for every 2 units of the same product (e.g. coffee beater: buy 2, save Rs 200)
+alter table public.products add column if not exists bundle_save numeric(12,2) not null default 0;
 
 create or replace function public.place_order(customer jsonb, items jsonb)
 returns jsonb
@@ -18,6 +21,7 @@ declare
   v_discount   numeric(12,2) := 0;
   v_units      integer := 0;
   v_offer_disc numeric(12,2) := 0;
+  v_bundle     numeric(12,2) := 0;
   v_offer_id   uuid;
   v_item       jsonb;
   v_qty        integer;
@@ -70,6 +74,7 @@ begin
 
     v_subtotal := v_subtotal + v_product.price * v_qty;
     v_units := v_units + v_qty;
+    v_bundle := v_bundle + floor(v_qty / 2) * coalesce(v_product.bundle_save, 0);
   end loop;
 
   if v_payment = 'bank_transfer' then
@@ -77,7 +82,7 @@ begin
   end if;
   v_shipping := 0;   -- free delivery on every order
 
-  -- Meta ad offer: extra 5% if ordered before the offer expires (1 min grace), single use, once per phone number
+  -- Meta ad offer: extra 3% if ordered before the offer expires (1 min grace), single use, once per phone number
   if coalesce(customer->>'flash_offer', '') ~ '^[0-9a-fA-F-]{36}$' then
     select id into v_offer_id from flash_offers
     where id = (customer->>'flash_offer')::uuid and used_at is null and expires_at + interval '1 minute' > now()
@@ -85,18 +90,18 @@ begin
     if v_offer_id is not null and not exists (
       select 1 from orders where offer_discount > 0 and status <> 'cancelled' and id <> v_order_id
         and right(regexp_replace(phone, '\D', '', 'g'), 10) = right(regexp_replace(v_phone, '\D', '', 'g'), 10)) then
-      v_offer_disc := round(v_subtotal * 0.05);
+      v_offer_disc := round(v_subtotal * 0.03);
       update flash_offers set used_at = now(), order_id = v_order_id where id = v_offer_id;
     end if;
   end if;
-  v_discount := v_discount + v_offer_disc;
+  v_discount := v_discount + v_offer_disc + v_bundle;
 
-  update orders set subtotal = v_subtotal, shipping_fee = v_shipping, discount = v_discount, offer_discount = v_offer_disc,
+  update orders set subtotal = v_subtotal, shipping_fee = v_shipping, discount = v_discount, offer_discount = v_offer_disc, bundle_discount = v_bundle,
                     total = v_subtotal - v_discount + v_shipping
   where id = v_order_id;
 
   return jsonb_build_object('order_number', v_number, 'total', v_subtotal - v_discount + v_shipping,
-                            'payment_method', v_payment, 'offer_discount', v_offer_disc);
+                            'payment_method', v_payment, 'offer_discount', v_offer_disc, 'bundle_discount', v_bundle);
 end $function$;
 
 create or replace function public.track_order(p_order_number text, p_phone text)

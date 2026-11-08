@@ -31,10 +31,14 @@ export const BANK = {
 };
 /** Meta-ad visitor offer: reach checkout within 2 minutes of arriving → extra 5% off, locked in for 30 minutes to finish the order.
  *  Keep in sync with start_flash_offer() / claim_flash_offer() / place_order(). */
-export const FLASH_OFFER = { reachMinutes: 2, completeMinutes: 30, pct: 5 };
+export const FLASH_OFFER = { reachMinutes: 2, completeMinutes: 30, pct: 3 };
 export const flashDiscount = (subtotal: number) => Math.round(subtotal * FLASH_OFFER.pct / 100);
 
 export const bankDiscount = (subtotal: number) => Math.round(subtotal * BANK.discountPct / 100);
+
+/** Bundle saving: Rs `bundle_save` off for every 2 units of the same product. Keep in sync with public.place_order(). */
+export const bundleDiscount = (items: { quantity: number; bundle_save?: number }[]) =>
+  items.reduce((s, i) => s + Math.floor(i.quantity / 2) * Number(i.bundle_save || 0), 0);
 
 export const MEDIA_BUCKET = "product-media";
 
