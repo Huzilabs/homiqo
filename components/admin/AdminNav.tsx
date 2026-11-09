@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ChartColumn, ExternalLink, LayoutDashboard, LogOut, Megaphone, Menu, Package, ShoppingCart, Star, X } from "lucide-react";
+import { ChartColumn, ExternalLink, LayoutDashboard, LogOut, Megaphone, Menu, Package, ShoppingCart, Star, UserRoundX, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { STORE } from "@/lib/config";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/abandoned", label: "Abandoned checkouts", icon: UserRoundX },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/analytics", label: "Analytics", icon: ChartColumn },

@@ -11,6 +11,7 @@ import { formatPrice } from "@/lib/format";
 import { BANK, FLASH_OFFER, STORE, bankDiscount, flashDiscount } from "@/lib/config";
 import { claimFlash, markFlashUsed, mmss, useFlashOffer } from "@/lib/flash";
 import { createClient } from "@/lib/supabase/client";
+import { clearLead, saveLead } from "@/lib/checkout-lead";
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
 const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
@@ -49,6 +50,12 @@ export default function CheckoutPage() {
       });
   }, []);
   const tracked = useRef(false);
+  const leadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onFormChange = (e: React.FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget;
+    if (leadTimer.current) clearTimeout(leadTimer.current);
+    leadTimer.current = setTimeout(() => saveLead(form, items, subtotal), 1200);
+  };
 
   useEffect(() => {
     if (ready && items.length && !tracked.current) {
@@ -94,6 +101,8 @@ export default function CheckoutPage() {
     }
     const { order_number, total: serverTotal } = data!;
     placed.current = true;
+    if (leadTimer.current) clearTimeout(leadTimer.current);
+    clearLead();
     track.purchase(order_number, items, Number(serverTotal), shipping, payment);
     try {
       sessionStorage.setItem("homecart.lastOrder", JSON.stringify({ order_number, phone: customer.phone }));
@@ -108,7 +117,7 @@ export default function CheckoutPage() {
   return (
     <div className="container-x py-10">
       <h1 className="font-serif text-4xl font-medium sm:text-5xl">Checkout</h1>
-      <form onSubmit={onSubmit} className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+      <form onSubmit={onSubmit} onChange={onFormChange} onBlur={onFormChange} className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
         <div className="min-w-0 space-y-6">
           <section className="card p-6">
             <h2 className="font-serif text-2xl font-medium">Contact & delivery details</h2>
@@ -116,7 +125,7 @@ export default function CheckoutPage() {
               <Field label="Full name" name="customer_name" required autoComplete="name" className="sm:col-span-2" />
               <div>
                 <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" inputMode="tel" pattern="[0-9+\-\s]{10,16}" />
-                <p className="mt-1 text-xs text-ink/50">We’ll call this number to confirm your order.</p>
+                <p className="mt-1 text-xs text-ink/50">We’ll call or WhatsApp this number about your order.</p>
               </div>
               <div>
                 <Field label="Email (optional)" name="email" type="email" autoComplete="email" placeholder="For order updates & tracking link" />
