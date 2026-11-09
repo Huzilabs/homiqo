@@ -2,7 +2,7 @@ export const STORE = {
   name: process.env.NEXT_PUBLIC_STORE_NAME || "Homiqo",
   tagline: "Smart kitchen & home essentials, delivered to your door",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.homiqoofficial.site",
-  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "",
+  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "+92 305 4471454",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "923054471454",
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/homiqo.offical/",
