@@ -26,7 +26,7 @@ export interface EmailOrder {
 
 // Default sender: the store Gmail. Only SMTP_PASS (a Gmail App Password) has to be set; the rest can be overridden by env vars.
 const SMTP_HOST = () => process.env.SMTP_HOST || "smtp.gmail.com";
-const SMTP_USER = () => process.env.SMTP_USER || "homiqo.offical@gmail.com";
+const SMTP_USER = () => process.env.SMTP_USER || "homiqo.officialsite@gmail.com";
 
 export const emailConfigured = () => Boolean(process.env.SMTP_PASS);
 
@@ -184,5 +184,24 @@ export async function sendNewOrderAlert(order: EmailOrder) {
   } catch (e) {
     console.error("sendNewOrderAlert failed", e);
     return false;
+  }
+}
+
+/** Admin check: verify the SMTP login and send a short test message to the owner inboxes. */
+export async function sendTestEmail(): Promise<{ ok: boolean; from: string; to: string[]; error?: string }> {
+  const to = adminRecipients();
+  if (!emailConfigured()) return { ok: false, from: from(), to, error: "SMTP_PASS is not set" };
+  try {
+    const t = getTransport();
+    await t.verify();
+    await t.sendMail({
+      from: from(),
+      to,
+      subject: `${STORE.name} — test email`,
+      text: `This is a test from your ${STORE.name} website. If you can read this, order emails are being sent from ${SMTP_USER()} correctly.`,
+    });
+    return { ok: true, from: from(), to };
+  } catch (e) {
+    return { ok: false, from: from(), to, error: e instanceof Error ? e.message : String(e) };
   }
 }
