@@ -31,6 +31,16 @@ export function sendVisitEvent(type: string, extra: { pid?: string; val?: number
   }
   Object.assign(payload, s.sess.src || {});
   s.save();
+  // Tag the Clarity recording with the same ids the admin shows (set on every event so it is never missed)
+  try {
+    const c = (window as unknown as { clarity?: (...a: unknown[]) => void }).clarity;
+    if (c) {
+      c("set", "hq_session", s.sess.id);
+      c("set", "hq_visitor", s.vid);
+      if (s.sess.src?.us) c("set", "utm_source", s.sess.src.us);
+      if (s.sess.src?.uc) c("set", "utm_campaign", s.sess.src.uc);
+    }
+  } catch {}
   const body = JSON.stringify(payload);
   if (!(navigator.sendBeacon && navigator.sendBeacon("/api/track", new Blob([body], { type: "text/plain" })))) {
     fetch("/api/track", { method: "POST", body, keepalive: true }).catch(() => {});
