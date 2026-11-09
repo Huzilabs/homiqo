@@ -63,6 +63,12 @@ export default async function ProductPage({ params }: { params: Params }) {
   const sameCategory = all.filter((p) => p.id !== product.id && p.category === product.category);
   const related = [...sameCategory, ...all.filter((p) => p.id !== product.id && p.category !== product.category)].slice(0, 4);
   const off = discountPercent(product.price, product.compare_at_price);
+  const byId = new Map(all.map((p) => [p.id, p]));
+  const included = (product.components || []).map((id) => byId.get(id)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const combos = all
+    .filter((c) => c.id !== product.id && (c.components || []).includes(product.id))
+    .map((c) => ({ c, parts: (c.components || []).map((id) => byId.get(id)).filter((p): p is NonNullable<typeof p> => Boolean(p)) }))
+    .filter(({ c, parts }) => parts.length === (c.components || []).length && parts.reduce((s, p) => s + Number(p.price), 0) > Number(c.price));
   const preview = previewVideo(product.videos);
 
   const [rv, recent] = await Promise.all([getProductReviews(product.id), recentOrders(product.id)]);
@@ -130,6 +136,35 @@ export default async function ProductPage({ params }: { params: Params }) {
 
             <UrgencyBox stock={product.stock} saleEndsAt={product.sale_ends_at} hasDiscount={off > 0} recentOrders={recent} />
 
+            {included.length > 0 && (
+              <div className="mt-6 border border-ink/10 bg-white p-4">
+                <p className="label">What’s in this combo</p>
+                <ul className="mt-2 space-y-2">
+                  {included.map((p) => (
+                    <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
+                      <Link href={`/product/${p.slug}`} className="font-medium text-ink hover:underline">✓ {p.name}</Link>
+                      <span className="whitespace-nowrap text-ink/45 line-through">{formatPrice(p.price)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-sm font-semibold text-accent-700">
+                  Combo price {formatPrice(product.price)} — you save {formatPrice(included.reduce((s, p) => s + Number(p.price), 0) - Number(product.price))}
+                </p>
+              </div>
+            )}
+            {combos.map(({ c, parts }) => (
+              <Link
+                key={c.id}
+                href={`/product/${c.slug}`}
+                className="mt-6 flex items-center justify-between gap-3 border border-accent-500/40 bg-accent-50 px-4 py-3 text-sm hover:border-accent-600"
+              >
+                <span className="text-ink/80">
+                  🎁 <b className="text-accent-700">Combo deal:</b> {parts.filter((p) => p.id !== product.id).map((p) => p.name).join(" + ")} + this for{" "}
+                  <b>{formatPrice(c.price)}</b> (save {formatPrice(parts.reduce((s, p) => s + Number(p.price), 0) - Number(c.price))})
+                </span>
+                <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[.14em] text-accent-700">View →</span>
+              </Link>
+            ))}
             <ProductActions product={product} />
 
             <p className="mt-6 text-sm text-ink/65">

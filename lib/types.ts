@@ -15,6 +15,7 @@ export interface Product {
   compare_at_price: number | null;
   stock: number;
   bundle_save?: number;
+  components?: string[] | null;
   sale_ends_at?: string | null;
   images: string[];
   videos: string[];
@@ -44,6 +45,7 @@ export interface Order {
   discount?: number;
   offer_discount?: number;
   bundle_discount?: number;
+  combo_discount?: number;
   total: number;
   created_at: string;
   updated_at: string;

@@ -9,7 +9,7 @@ import { track } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
 
 export default function CartPage() {
-  const { items, ready, setQty, remove, subtotal, bundle, shipping, total } = useCart();
+  const { items, ready, setQty, remove, subtotal, bundle, combo, shipping, total } = useCart();
   const tracked = useRef(false);
 
   useEffect(() => {
@@ -77,6 +77,7 @@ export default function CartPage() {
           <h2 className="font-serif text-2xl font-medium">Order summary</h2>
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-ink/65">Subtotal</dt><dd className="font-medium">{formatPrice(subtotal)}</dd></div>
+            {combo > 0 && <div className="flex justify-between text-leaf-600"><dt>Combo deal saving</dt><dd className="font-medium">−{formatPrice(combo)}</dd></div>}
             {bundle > 0 && <div className="flex justify-between text-leaf-600"><dt>Buy 2 &amp; save</dt><dd className="font-medium">−{formatPrice(bundle)}</dd></div>}
             <div className="flex justify-between"><dt className="text-ink/65">Delivery</dt><dd className="font-medium">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd></div>
             <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>

@@ -8,7 +8,7 @@ import { BANK } from "@/lib/config";
 import ProductImage from "./ProductImage";
 
 export default function CartDrawer() {
-  const { items, drawerOpen, setDrawerOpen, setQty, remove, subtotal, bundle } = useCart();
+  const { items, drawerOpen, setDrawerOpen, setQty, remove, subtotal, bundle, combo } = useCart();
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
@@ -79,6 +79,12 @@ export default function CartDrawer() {
               ))}
             </ul>
             <div className="space-y-3 border-t p-5">
+              {combo > 0 && (
+                <div className="flex justify-between text-sm font-medium text-leaf-600">
+                  <span>Combo deal saving</span>
+                  <span>−{formatPrice(combo)}</span>
+                </div>
+              )}
               {bundle > 0 && (
                 <div className="flex justify-between text-sm font-medium text-leaf-600">
                   <span>Buy 2 &amp; save</span>
@@ -87,7 +93,7 @@ export default function CartDrawer() {
               )}
               <div className="flex justify-between text-base font-semibold">
                 <span>Subtotal</span>
-                <span>{formatPrice(subtotal - bundle)}</span>
+                <span>{formatPrice(subtotal - bundle - combo)}</span>
               </div>
               {items.some((i) => Number(i.bundle_save) > 0 && i.quantity % 2 === 1) && (
                 <p className="bg-accent-50 px-3 py-2 text-xs font-medium text-accent-700">

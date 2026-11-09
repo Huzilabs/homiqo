@@ -17,11 +17,11 @@ const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "
 const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function CheckoutPage() {
-  const { items, ready, subtotal, bundle, shipping: codShipping, clear } = useCart();
+  const { items, ready, subtotal, bundle, combo, shipping: codShipping, clear } = useCart();
   const [payment, setPaymentState] = useState<"cod" | "bank_transfer">("cod");
   const setPayment = (p: "cod" | "bank_transfer") => {
     setPaymentState(p);
-    track.addPaymentInfo(items, (p === "bank_transfer" ? subtotal - bankDiscount(subtotal) : subtotal) - bundle + codShipping, p);
+    track.addPaymentInfo(items, (p === "bank_transfer" ? subtotal - bankDiscount(subtotal) : subtotal) - bundle - combo + codShipping, p);
   };
   const isBank = payment === "bank_transfer";
   // Must match public.place_order(): bank transfer = 5% off products; delivery follows the normal rule
@@ -30,7 +30,7 @@ export default function CheckoutPage() {
     claimFlash(); // reached checkout: lock the Meta offer in if still within the 2 minutes
   }, []);
   const offerDiscount = offer?.claimed ? flashDiscount(subtotal) : 0;
-  const discount = (isBank ? bankDiscount(subtotal) : 0) + offerDiscount + bundle;
+  const discount = (isBank ? bankDiscount(subtotal) : 0) + offerDiscount + bundle + combo;
   const shipping = codShipping;
   const total = subtotal - discount + shipping;
   const router = useRouter();
@@ -184,6 +184,7 @@ export default function CheckoutPage() {
           </ul>
           <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
             <div className="flex justify-between"><dt className="text-ink/65">Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div>
+            {combo > 0 && <div className="flex justify-between text-leaf-600"><dt>Combo deal saving</dt><dd>−{formatPrice(combo)}</dd></div>}
             {bundle > 0 && <div className="flex justify-between text-leaf-600"><dt>Buy 2 &amp; save</dt><dd>−{formatPrice(bundle)}</dd></div>}
             {isBank && <div className="flex justify-between text-leaf-600"><dt>Bank transfer discount ({BANK.discountPct}%)</dt><dd>−{formatPrice(bankDiscount(subtotal))}</dd></div>}
             {offerDiscount > 0 && (

@@ -40,6 +40,32 @@ export const bankDiscount = (subtotal: number) => Math.round(subtotal * BANK.dis
 export const bundleDiscount = (items: { quantity: number; bundle_save?: number }[]) =>
   items.reduce((s, i) => s + Math.floor(i.quantity / 2) * Number(i.bundle_save || 0), 0);
 
+export type ComboDef = { id: string; price: number; components: string[] };
+
+/**
+ * Combo + buy-2 savings for a cart. Mirrors public.place_order(): components bought separately get the combo price
+ * first; buy-2 savings apply to the units left over.
+ */
+export function cartSavings(
+  items: { product_id: string; price: number; quantity: number; bundle_save?: number }[],
+  combos: ComboDef[],
+) {
+  const qty = new Map(items.map((i) => [i.product_id, i.quantity]));
+  const price = new Map(items.map((i) => [i.product_id, Number(i.price)]));
+  let combo = 0;
+  for (const c of combos) {
+    if (!c.components.length || c.components.some((id) => !price.has(id))) continue;
+    const n = Math.min(...c.components.map((id) => qty.get(id) || 0));
+    const parts = c.components.reduce((s, id) => s + (price.get(id) || 0), 0);
+    if (n > 0 && parts > c.price) {
+      combo += n * (parts - c.price);
+      c.components.forEach((id) => qty.set(id, (qty.get(id) || 0) - n));
+    }
+  }
+  const bundle = items.reduce((s, i) => s + Math.floor((qty.get(i.product_id) || 0) / 2) * Number(i.bundle_save || 0), 0);
+  return { combo, bundle };
+}
+
 export const MEDIA_BUCKET = "product-media";
 
 export const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;

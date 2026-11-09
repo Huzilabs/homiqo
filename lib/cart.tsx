@@ -1,7 +1,8 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import type { CartItem, Product } from "./types";
-import { bundleDiscount, shippingFor } from "./config";
+import { cartSavings, shippingFor, type ComboDef } from "./config";
 import { track } from "./analytics";
 
 const KEY = "homecart.cart.v1";
@@ -12,6 +13,7 @@ interface CartCtx {
   count: number;
   subtotal: number;
   bundle: number;
+  combo: number;
   shipping: number;
   total: number;
   drawerOpen: boolean;
@@ -28,6 +30,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [combos, setCombos] = useState<ComboDef[]>([]);
+
+  // Active combo deals (for the automatic combo price when both items are in the cart)
+  useEffect(() => {
+    createClient()
+      .from("products")
+      .select("id, price, components")
+      .eq("is_active", true)
+      .not("components", "is", null)
+      .then(({ data }) => setCombos((data || []).map((c) => ({ id: c.id, price: Number(c.price), components: c.components || [] }))), () => {});
+  }, []);
 
   useEffect(() => {
     try {
@@ -91,7 +104,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(() => {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const bundle = bundleDiscount(items);
+    const { bundle, combo } = cartSavings(items, combos);
     const shipping = shippingFor(subtotal, items.reduce((n, i) => n + i.quantity, 0));
     return {
       items,
@@ -99,8 +112,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       count: items.reduce((s, i) => s + i.quantity, 0),
       subtotal,
       bundle,
+      combo,
       shipping,
-      total: subtotal - bundle + shipping,
+      total: subtotal - bundle - combo + shipping,
       drawerOpen,
       setDrawerOpen,
       add,
@@ -108,7 +122,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       remove,
       clear,
     };
-  }, [items, ready, drawerOpen, add, setQty, remove, clear]);
+  }, [items, combos, ready, drawerOpen, add, setQty, remove, clear]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
