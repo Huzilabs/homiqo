@@ -35,6 +35,7 @@ export function sendVisitEvent(type: string, extra: { pid?: string; val?: number
   try {
     const c = (window as unknown as { clarity?: (...a: unknown[]) => void }).clarity;
     if (c) {
+      c("identify", s.vid, s.sess.id); // Clarity "Custom user ID" = our visitor id, "Custom session ID" = our session id
       c("set", "hq_session", s.sess.id);
       c("set", "hq_visitor", s.vid);
       if (s.sess.src?.us) c("set", "utm_source", s.sess.src.us);
