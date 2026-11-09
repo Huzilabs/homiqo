@@ -70,7 +70,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   const faqs = [
     ...productFaqs,
     { q: "Delivery & charges", a: `Delivered in 2–5 working days across Pakistan. Delivery is free on every order. Pay by bank transfer to get ${BANK.discountPct}% off.` },
-    { q: "Cash on delivery", a: "No advance payment — pay the rider in cash when your parcel arrives." },
+    { q: "Cash on delivery", a: "No advance payment. You can open the parcel and check the product in front of the rider, then pay in cash." },
     { q: "Returns & warranty", a: "Damaged or faulty? Contact us within 7 days of delivery for a free replacement or refund." },
   ];
 
@@ -133,7 +133,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             <ProductActions product={product} />
 
             <p className="mt-6 text-sm text-ink/65">
-              Estimated delivery <span className="font-medium text-ink">{deliveryWindow()}</span>. No advance payment: pay the rider in cash when it arrives.
+              Estimated delivery <span className="font-medium text-ink">{deliveryWindow()}</span>. No advance payment: open the parcel, check it, then pay the rider in cash.
             </p>
             {STORE.whatsapp && (
               <a

@@ -24,7 +24,7 @@ export const metadata: Metadata = { alternates: { canonical: "/" }, openGraph: {
 export const revalidate = 300;
 
 const faqs = [
-  { q: "How does Cash on Delivery work?", a: "Place your order online without paying anything. Our rider delivers to your door and you pay in cash after receiving the parcel." },
+  { q: "How does Cash on Delivery work?", a: "Place your order online without paying anything. Our rider delivers to your door — you can open the parcel and check the product, then pay in cash." },
   { q: "Can I pay by bank transfer?", a: `Yes. Choose Bank Transfer at checkout to get ${BANK.discountPct}% off. Transfer the amount to our ${BANK.bank} account and send the payment screenshot on WhatsApp to ${BANK.whatsappDisplay} — we dispatch as soon as it is confirmed.` },
   { q: "How long does delivery take?", a: "Most orders arrive within 2–5 working days anywhere in Pakistan. Karachi, Lahore and Islamabad are usually faster." },
   { q: "How much is delivery?", a: "Delivery is free on every order, anywhere in Pakistan. There is no minimum order." },
@@ -138,7 +138,7 @@ export default async function HomePage() {
       <section className="container-x pt-28">
         <div className="grid grid-cols-2 border-y border-ink/10 lg:grid-cols-4">
           {[
-            { icon: Banknote, t: "Cash on delivery", d: "Pay at your doorstep" },
+            { icon: Banknote, t: "Cash on delivery", d: "Open & check, then pay" },
             { icon: Truck, t: "Delivered in 2–5 days", d: "Free delivery, every order" },
             { icon: RotateCcw, t: "7-day returns", d: "Simple replacements" },
             { icon: PackageCheck, t: "Quality checked", d: "Tested before dispatch" },
@@ -215,7 +215,7 @@ export default async function HomePage() {
               ["Choose", "Watch the films and add what you love to your cart."],
               ["Place your order", "Just your name, phone, email and address — no card needed."],
               ["We confirm & ship", "You’ll get an email confirmation, then we dispatch within 24 hours."],
-              ["Pay on delivery", "Receive your parcel, check it, then pay the rider in cash."],
+              ["Pay on delivery", "Open your parcel and check it in front of the rider, then pay in cash."],
             ].map(([t, d], i) => (
               <li key={t} className="border-t border-ink/15 pt-6">
                 <span className="font-serif text-5xl italic text-accent-500">0{i + 1}</span>

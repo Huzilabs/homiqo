@@ -140,7 +140,7 @@ export default function CheckoutPage() {
           <section className="card p-6">
             <h2 className="font-serif text-2xl font-medium">Payment</h2>
             <div className="mt-4 space-y-3">
-              <PayOption checked={!isBank} onSelect={() => setPayment("cod")} icon={<Banknote className="h-5 w-5 text-brand-600" />} title="Cash on Delivery" text="Pay in cash when your order is delivered." />
+              <PayOption checked={!isBank} onSelect={() => setPayment("cod")} icon={<Banknote className="h-5 w-5 text-brand-600" />} title="Cash on Delivery" text="Open the parcel and check it, then pay the rider in cash." />
               <PayOption
                 checked={isBank}
                 onSelect={() => setPayment("bank_transfer")}
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
             {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
           </button>
           <ul className="mt-4 space-y-1.5 text-xs text-ink/60">
-            <li>✓ {isBank ? "Pay by bank transfer — details shown after you place the order" : "No advance payment — pay cash when the parcel arrives"}</li>
+            <li>✓ {isBank ? "Pay by bank transfer — details shown after you place the order" : "No advance payment — open & check the parcel, then pay cash"}</li>
             <li>✓ We call to confirm before dispatch · delivered in 2–5 working days</li>
             <li>✓ Damaged or faulty? Replacement or refund within 7 days</li>
           </ul>

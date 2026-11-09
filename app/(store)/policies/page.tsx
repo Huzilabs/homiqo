@@ -19,7 +19,7 @@ export default function PoliciesPage() {
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Cash on Delivery</h2>
-          <p className="mt-2">Pay the rider in cash when your parcel arrives. Our team may call you to confirm your order before dispatch.</p>
+          <p className="mt-2">Pay the rider in cash when your parcel arrives. You can open the parcel and check your product in front of the rider before you pay. Our team may call you to confirm your order before dispatch.</p>
         </section>
         <section>
           <h2 className="text-xl font-bold text-ink">Bank transfer</h2>
