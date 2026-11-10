@@ -10,9 +10,11 @@ import { youTubeId } from "@/lib/format";
 type Media = { kind: "image" | "video"; url: string };
 
 export default function MediaGallery({ name, images, videos }: { name: string; images: string[]; videos: string[] }) {
+  // Main photo first, then the video (so people see the product in action on the first swipe), then the other photos
   const media: Media[] = [
-    ...images.map((url) => ({ kind: "image" as const, url })),
+    ...images.slice(0, 1).map((url) => ({ kind: "image" as const, url })),
     ...videos.map((url) => ({ kind: "video" as const, url })),
+    ...images.slice(1).map((url) => ({ kind: "image" as const, url })),
   ];
   const [index, setIndex] = useState(0);
   const [hover, setHover] = useState(false);

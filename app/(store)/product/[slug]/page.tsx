@@ -123,13 +123,22 @@ export default async function ProductPage({ params }: { params: Params }) {
                   <span className="bg-accent-600 px-2.5 py-1 text-[11px] font-medium tracking-[.12em] text-white">SAVE {off}%</span>
                 </>
               )}
+              {Number(product.bundle_save) > 0 && !(product.components || []).length && product.stock >= 2 && (
+                <span className="border border-accent-600 bg-accent-50 px-2.5 py-1 text-[11px] font-semibold tracking-[.08em] text-accent-700">
+                  🎁 BUY 2, SAVE {formatPrice(Number(product.bundle_save)).toUpperCase()}
+                </span>
+              )}
             </div>
             {off > 0 && (
               <p className="mt-2 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
             )}
-            <p className="mt-2 text-sm text-ink/60">
-              <span className="font-medium text-leaf-600">✓ Free delivery all over Pakistan</span> · or pay by bank transfer for {BANK.discountPct}% off
-            </p>
+            <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border border-leaf-600/20 bg-leaf-100/40 px-4 py-3 text-[13px] font-medium text-ink/80">
+              <li>✓ Cash on delivery</li>
+              <li>✓ Open parcel before paying</li>
+              <li>✓ Free delivery all over Pakistan</li>
+              <li>✓ 7-day replacement</li>
+            </ul>
+            <p className="mt-2 text-xs text-ink/55">Or pay by bank transfer for {BANK.discountPct}% off.</p>
             <p className={`mt-3 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
               {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
             </p>
