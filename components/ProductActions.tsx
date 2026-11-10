@@ -21,6 +21,15 @@ export default function ProductActions({ product }: { product: Product }) {
     track.viewItem(product);
   }, [product]);
 
+  // Lets the floating WhatsApp button mention this product
+  useEffect(() => {
+    const w = window as unknown as { __hqProduct?: { name: string; price: string; url: string } };
+    w.__hqProduct = { name: product.name, price: formatPrice(product.price), url: `${STORE.siteUrl.replace(/\/$/, "")}/product/${product.slug}` };
+    return () => {
+      delete w.__hqProduct;
+    };
+  }, [product]);
+
   const waHref = () => {
     const url = `${STORE.siteUrl.replace(/\/$/, "")}/product/${product.slug}`;
     const msg =
