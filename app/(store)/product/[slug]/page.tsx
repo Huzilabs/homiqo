@@ -215,11 +215,9 @@ export default async function ProductPage({ params }: { params: Params }) {
               <ReadMore><RichText text={product.description || product.short_description} /></ReadMore>
             </div>
           </div>
-          <div className="lg:pt-16">
-            <h2 className="mb-3 text-lg font-semibold text-ink lg:eyebrow lg:mb-6">
-              <span className="lg:hidden">Questions</span>
-              <span className="hidden lg:inline">{product.name} — questions, answered</span>
-            </h2>
+          {/* Desktop: FAQs beside the description. Mobile: moved to a collapsed row at the very end of the page. */}
+          <div className="hidden lg:block lg:pt-16">
+            <h2 className="eyebrow mb-6">{product.name} — questions, answered</h2>
             <Faq items={faqs} />
           </div>
         </div>
@@ -290,6 +288,16 @@ export default async function ProductPage({ params }: { params: Params }) {
             {related.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
+      )}
+
+      {faqs.length > 0 && (
+        <details className="group container-x mt-10 lg:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between border-y border-ink/10 py-4 text-[15px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
+            Questions &amp; answers ({faqs.length})
+            <span className="text-xl font-normal text-ink/50 transition group-open:rotate-45">+</span>
+          </summary>
+          <div className="pt-2"><Faq items={faqs} /></div>
+        </details>
       )}
     </>
   );
