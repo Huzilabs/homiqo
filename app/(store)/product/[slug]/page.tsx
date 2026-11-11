@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Banknote, MessageCircle, RotateCcw, Truck } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
 import Stars from "@/components/Stars";
 import UrgencyBox from "@/components/UrgencyBox";
-import FlashOfferBanner from "@/components/FlashOfferBanner";
 import { recentOrders } from "@/lib/recent";
 import { getProductReviews } from "@/lib/reviews";
 import { categoryPath } from "@/lib/categories";
@@ -94,25 +93,25 @@ export default async function ProductPage({ params }: { params: Params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={ld(jsonLd)} />
-      <div className="container-x pb-28 pt-8 lg:pb-10">
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
+      <div className="container-x pb-28 pt-3 lg:pb-10 lg:pt-8">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} />
 
           <div className="min-w-0 lg:pt-2">
-            <p className="eyebrow">{product.category}</p>
-            <h1 className="mt-3 font-serif text-[2.4rem] font-medium leading-[1.05] text-ink sm:text-[3rem] lg:text-[2.75rem]">{product.name}</h1>
+            <p className="eyebrow hidden lg:block">{product.category}</p>
+            <h1 className="text-[1.3rem] font-semibold leading-snug text-ink lg:mt-3 lg:font-serif lg:text-[2.75rem] lg:font-medium lg:leading-[1.05]">{product.name}</h1>
             {rv.count > 0 && (
               <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink">
                 <Stars rating={rv.average} /> <span className="font-medium text-ink">{rv.average.toFixed(1)}</span> · {rv.count} review{rv.count === 1 ? "" : "s"}
               </a>
             )}
-            <p className="mt-3 text-[16px] leading-relaxed text-ink/65 lg:line-clamp-2">{product.short_description}</p>
+            <p className="mt-3 hidden text-[16px] leading-relaxed text-ink/65 lg:line-clamp-2 lg:block">{product.short_description}</p>
 
-            <div className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-t border-ink/10 pt-5">
-              <span className={`font-serif text-4xl ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2 lg:mt-5 lg:gap-x-4 lg:border-t lg:border-ink/10 lg:pt-5">
+              <span className={`text-[1.6rem] font-bold lg:font-serif lg:text-4xl lg:font-normal ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
               {off > 0 && (
                 <>
-                  <span className="text-lg text-ink/35 line-through">{formatPrice(product.compare_at_price!)}</span>
+                  <span className="text-base text-ink/35 line-through lg:text-lg">{formatPrice(product.compare_at_price!)}</span>
                   <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-600 px-2.5 text-[12px] font-semibold tracking-[.04em] text-white">Save {off}%</span>
                 </>
               )}
@@ -125,19 +124,17 @@ export default async function ProductPage({ params }: { params: Params }) {
             {off > 0 && (
               <p className="mt-1 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
             )}
-            <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 border border-leaf-600/20 bg-leaf-100/40 px-4 py-2.5 text-[13px] font-medium text-ink/80">
+            <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[12px] font-medium text-leaf-600 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-1.5 lg:border lg:border-leaf-600/20 lg:bg-leaf-100/40 lg:px-4 lg:py-2.5 lg:text-[13px] lg:text-ink/80">
               <li>✓ Cash on delivery</li>
+              <li>✓ Free delivery</li>
               <li>✓ Open parcel before paying</li>
-              <li>✓ Free delivery all over Pakistan</li>
               <li>✓ 7-day replacement</li>
             </ul>
 
-            {product.stock > 0 && (
-              <div className="mt-3">
-                <FlashOfferBanner variant="box" />
-              </div>
-            )}
             <ProductActions product={product} />
+
+            {/* Mobile: the longer pitch sits below the buttons so the price + Buy are on the first screen */}
+            <p className="mt-5 text-[15px] leading-relaxed text-ink/65 lg:hidden">{product.short_description}</p>
 
             <p className={`mt-4 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
               {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
@@ -190,19 +187,6 @@ export default async function ProductPage({ params }: { params: Params }) {
               </a>
             )}
 
-            <div className="mt-8 grid grid-cols-3 border-y border-ink/10">
-              {[
-                { icon: Banknote, t: "Cash on delivery" },
-                { icon: Truck, t: "Free delivery" },
-                { icon: RotateCcw, t: "7-day returns" },
-              ].map(({ icon: Icon, t }, i) => (
-                <div key={t} className={`flex flex-col items-center gap-2 px-2 py-5 text-center ${i ? "border-l border-ink/10" : ""}`}>
-                  <Icon className="h-5 w-5 text-brand-600" strokeWidth={1.25} />
-                  <span className="text-[10px] uppercase leading-snug tracking-[.16em] text-ink/60">{t}</span>
-                </div>
-              ))}
-            </div>
-
             {product.features.length > 0 && (
               <div className="mt-10">
                 <p className="label">Highlights</p>
@@ -234,6 +218,7 @@ export default async function ProductPage({ params }: { params: Params }) {
         </div>
       </section>
 
+      {rv.count > 0 && (
       <section id="reviews" className="container-x scroll-mt-28 pt-24">
         <div className="grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
           <div>
@@ -283,6 +268,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           )}
         </div>
       </section>
+      )}
 
       {related.length > 0 && (
         <section className="container-x pt-28">

@@ -110,11 +110,11 @@ export default function AIChat() {
             (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", "ai_chat_open");
           }}
           aria-label="Ask our assistant"
-          className={`fixed left-4 z-30 flex h-12 items-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-white shadow-lift transition hover:scale-105 lg:left-auto lg:right-6 lg:bottom-24 lg:h-14 lg:w-14 lg:justify-center lg:px-0 ${
-            onProduct ? "bottom-[5.5rem]" : "bottom-6"
+          className={`fixed right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-ink text-white shadow-lift transition hover:scale-105 lg:right-6 lg:bottom-24 lg:h-14 lg:w-14 ${
+            onProduct ? "bottom-[5.75rem]" : "bottom-[4.75rem]"
           }`}
         >
-          <Sparkles className="h-5 w-5 text-accent-400 lg:h-6 lg:w-6" /> <span className="lg:hidden">Ask us</span>
+          <Sparkles className="h-5 w-5 text-accent-400 lg:h-6 lg:w-6" />
         </button>
       )}
 

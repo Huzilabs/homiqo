@@ -5,8 +5,8 @@ import { BANK, STORE } from "@/lib/config";
 export default function Footer() {
   return (
     <footer className="mt-32 bg-ink text-white/70">
-      <div className="container-x grid gap-12 py-20 lg:grid-cols-[1.3fr_1fr_1fr_1.2fr]">
-        <div>
+      <div className="container-x grid gap-12 py-20 text-center lg:grid-cols-[1.3fr_1fr_1fr_1.2fr] lg:text-left">
+        <div className="flex flex-col items-center lg:items-start">
           <Image src="/logo-white.png" alt={STORE.name} width={280} height={86} className="h-12 w-auto" />
           <p className="mt-6 max-w-xs font-serif text-xl leading-snug text-white/90">
             Thoughtful tools for the modern Pakistani kitchen.
@@ -16,7 +16,7 @@ export default function Footer() {
               Chat on WhatsApp
             </a>
           )}
-          <div className="mt-8 flex gap-3">
+          <div className="mt-8 flex justify-center gap-3 lg:justify-start">
             {STORE.instagram && (
               <a href={STORE.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${STORE.name} on Instagram`} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white hover:text-white">
                 <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
