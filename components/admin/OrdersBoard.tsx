@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoaderCircle, MessageCircle, Phone, Truck } from "lucide-react";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, STATUS_STYLE } from "@/lib/format";
 
 export type BoardOrder = {
   id: string;
@@ -128,7 +128,7 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
                         disabled={moving === o.id}
                         onChange={(e) => move(o, e.target.value)}
                         aria-label={`Status of ${o.order_number}`}
-                        className="border border-ink/15 bg-white px-2 py-1 text-xs font-medium"
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${STATUS_STYLE[statusOf(o)] || ""}`}
                       >
                         {COLUMNS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
                       </select>
