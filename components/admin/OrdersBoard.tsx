@@ -90,7 +90,7 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
                 const o = orders.find((x) => x.id === e.dataTransfer.getData("text/plain"));
                 if (o) move(o, c.key);
               }}
-              className={`flex w-[280px] shrink-0 flex-col border bg-gray-50/80 transition ${over === c.key ? "border-ink bg-white" : "border-ink/10"}`}
+              className={`flex min-w-[240px] flex-1 basis-0 flex-col border bg-gray-50/80 transition ${over === c.key ? "border-ink bg-white" : "border-ink/10"}`}
             >
               <header className="border-b border-ink/10 bg-white px-3 py-2.5">
                 <p className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-gray-600">
