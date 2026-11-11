@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, MessageCircle, Phone, Search, Truck } from "lucide-react";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
+import OrdersBoard, { type BoardOrder } from "@/components/admin/OrdersBoard";
 import PostExSyncButton from "@/components/admin/PostExSyncButton";
 import { createClient } from "@/lib/supabase/server";
 import { ORDER_STATUSES } from "@/lib/config";
@@ -35,21 +36,22 @@ const when = (iso: string) => {
 export default async function AdminOrders({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; view?: string }>;
 }) {
-  const { status, q, page: pageParam } = await searchParams;
+  const { status, q, page: pageParam, view } = await searchParams;
+  const board = view === "board";
   const page = Math.max(1, Number(pageParam) || 1);
   const supabase = await createClient();
 
   let query = supabase.from("orders").select("*", { count: "exact" }).order("created_at", { ascending: false });
-  if (status && (ORDER_STATUSES as readonly string[]).includes(status)) query = query.eq("status", status);
+  if (!board && status && (ORDER_STATUSES as readonly string[]).includes(status)) query = query.eq("status", status);
   if (q) {
     const term = q.replace(/[%,()]/g, " ").trim();
     if (term) query = query.or(`order_number.ilike.%${term}%,customer_name.ilike.%${term}%,phone.ilike.%${term}%,city.ilike.%${term}%`);
   }
 
   const [{ data, count }, ...statusCounts] = await Promise.all([
-    query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1),
+    board ? query.limit(300) : query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1),
     supabase.from("orders").select("id", { count: "exact", head: true }),
     ...ORDER_STATUSES.map((s) => supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", s)),
   ]);
@@ -69,6 +71,7 @@ export default async function AdminOrders({
 
   const href = (o: { status?: string; page?: number }) => {
     const sp = new URLSearchParams();
+    if (board) sp.set("view", "board");
     const s = "status" in o ? o.status : status;
     if (s) sp.set("status", s);
     if (q) sp.set("q", q);
@@ -88,7 +91,13 @@ export default async function AdminOrders({
             {counts.pending > 0 ? `${counts.pending} waiting for a confirmation call` : "All caught up — no pending orders"}
           </p>
         </div>
-        <PostExSyncButton />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex border border-ink/15 bg-white text-xs font-semibold">
+            <Link href={`/admin/orders${q ? `?q=${encodeURIComponent(q)}` : ""}`} className={`px-3 py-2 ${board ? "text-gray-500 hover:text-ink" : "bg-ink text-white"}`}>List</Link>
+            <Link href={`/admin/orders?view=board${q ? `&q=${encodeURIComponent(q)}` : ""}`} className={`px-3 py-2 ${board ? "bg-ink text-white" : "text-gray-500 hover:text-ink"}`}>Board</Link>
+          </div>
+          <PostExSyncButton />
+        </div>
       </div>
 
       {/* Status tiles double as filters */}
@@ -109,11 +118,22 @@ export default async function AdminOrders({
       </div>
 
       <form className="relative">
-        {status && <input type="hidden" name="status" value={status} />}
+        {board && <input type="hidden" name="view" value="board" />}
+        {!board && status && <input type="hidden" name="status" value={status} />}
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <input name="q" defaultValue={q} placeholder="Search order #, customer name, phone or city" className="input pl-9" />
       </form>
 
+      {board ? (
+        <OrdersBoard
+          orders={orders.map<BoardOrder>((o) => ({
+            id: o.id, order_number: o.order_number, customer_name: o.customer_name, city: o.city, phone: o.phone, status: o.status,
+            total: Number(o.total), payment_method: o.payment_method, courier: o.courier, tracking_number: o.tracking_number,
+            postex_status: o.postex_status ?? null, created_at: o.created_at, items: items.get(o.id) || [],
+          }))}
+        />
+      ) : (
+      <>
       {/* Desktop table */}
       <div className="card hidden overflow-x-auto lg:block">
         <table className="w-full text-sm">
@@ -220,7 +240,10 @@ export default async function AdminOrders({
         {orders.length === 0 && <p className="card p-10 text-center text-gray-500">No orders found.</p>}
       </div>
 
-      {pages > 1 && (
+      </>
+      )}
+
+      {!board && pages > 1 && (
         <div className="flex items-center justify-center gap-3 text-sm">
           {page > 1 && <Link href={href({ page: page - 1 })} className="btn-secondary px-4 py-2">Previous</Link>}
           <span className="text-gray-500">Page {page} of {pages}</span>
