@@ -54,7 +54,7 @@ export default function UrgencyBox({
   const soldOut = stock <= 0;
 
   return (
-    <div className="mt-6 space-y-2.5">
+    <div className="mt-4 space-y-2.5">
       {!soldOut && <FlashOfferBanner variant="box" />}
       {/* Real sale end — the price really goes back up when this reaches zero */}
       {saleLive && (

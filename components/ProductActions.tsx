@@ -46,7 +46,7 @@ export default function ProductActions({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="mt-8 flex flex-col gap-3">
+      <div className="mt-4 flex flex-col gap-3">
         <div className="flex gap-3">
           <div className="flex h-[52px] items-center border border-ink/20">
             <button className="flex h-full w-12 items-center justify-center hover:bg-sand" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Decrease quantity">
@@ -61,9 +61,6 @@ export default function ProductActions({ product }: { product: Product }) {
             Add to cart
           </button>
         </div>
-        {!soldOut && (
-          <p className="text-sm font-medium text-leaf-600">🚚 FREE delivery on this order — anywhere in Pakistan</p>
-        )}
         {!soldOut && bundleSave > 0 && max >= 2 && (
           <div className="flex items-center justify-between gap-3 border border-accent-500/40 bg-accent-50 px-4 py-3 text-sm">
             {qty >= 2 ? (

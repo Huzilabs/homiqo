@@ -40,9 +40,13 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
             />
             <HoverVideo url={videos[0]} active={hover} />
             {videos.length > 0 && !hover && (
-              <span className="pointer-events-none absolute bottom-5 left-5 bg-paper/95 px-4 py-2.5 text-[10px] font-medium uppercase tracking-[.2em] text-ink">
-                ▶ Hover to watch it in action
-              </span>
+              <button
+                type="button"
+                onClick={() => setIndex(media.findIndex((m) => m.kind === "video"))}
+                className="absolute bottom-5 left-5 bg-paper/95 px-4 py-2.5 text-[10px] font-medium uppercase tracking-[.2em] text-ink hover:bg-white"
+              >
+                ▶ Watch it in action
+              </button>
             )}
           </>
         ) : (

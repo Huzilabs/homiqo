@@ -90,8 +90,8 @@ export default function AIChat() {
             (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.("event", "ai_chat_open");
           }}
           aria-label="Ask our assistant"
-          className={`fixed right-4 z-30 flex h-12 items-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-white shadow-lift transition hover:scale-105 lg:right-6 lg:bottom-24 ${
-            onProduct ? "bottom-44" : "bottom-[5.5rem]"
+          className={`fixed left-4 z-30 flex h-12 items-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-white shadow-lift transition hover:scale-105 lg:bottom-6 lg:left-6 ${
+            onProduct ? "bottom-28" : "bottom-6"
           }`}
         >
           <Sparkles className="h-5 w-5 text-accent-400" /> Ask us
@@ -99,7 +99,7 @@ export default function AIChat() {
       )}
 
       {open && (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85svh] flex-col border-t border-ink/10 bg-white shadow-2xl sm:inset-x-auto sm:bottom-6 sm:right-6 sm:h-[560px] sm:w-[380px] sm:border">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85svh] flex-col border-t border-ink/10 bg-white shadow-2xl sm:inset-x-auto sm:bottom-6 sm:left-6 sm:h-[560px] sm:w-[380px] sm:border">
           <div className="flex items-center justify-between bg-ink px-4 py-3 text-white">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-accent-400" />

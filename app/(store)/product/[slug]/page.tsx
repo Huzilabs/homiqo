@@ -105,17 +105,17 @@ export default async function ProductPage({ params }: { params: Params }) {
         <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} />
 
-          <div className="min-w-0 lg:pt-6">
+          <div className="min-w-0 lg:pt-2">
             <p className="eyebrow">{product.category}</p>
-            <h1 className="mt-4 font-serif text-[2.6rem] font-medium leading-[1.05] text-ink sm:text-[3.4rem]">{product.name}</h1>
+            <h1 className="mt-3 font-serif text-[2.4rem] font-medium leading-[1.05] text-ink sm:text-[3rem] lg:text-[2.75rem]">{product.name}</h1>
             {rv.count > 0 && (
               <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink">
                 <Stars rating={rv.average} /> <span className="font-medium text-ink">{rv.average.toFixed(1)}</span> · {rv.count} review{rv.count === 1 ? "" : "s"}
               </a>
             )}
-            <p className="mt-5 text-[17px] leading-relaxed text-ink/65">{product.short_description}</p>
+            <p className="mt-3 text-[16px] leading-relaxed text-ink/65 lg:line-clamp-2">{product.short_description}</p>
 
-            <div className="mt-8 flex flex-wrap items-baseline gap-4 border-t border-ink/10 pt-8">
+            <div className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-t border-ink/10 pt-5">
               <span className={`font-serif text-4xl ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
               {off > 0 && (
                 <>
@@ -130,17 +130,20 @@ export default async function ProductPage({ params }: { params: Params }) {
               )}
             </div>
             {off > 0 && (
-              <p className="mt-2 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
+              <p className="mt-1 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
             )}
-            <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border border-leaf-600/20 bg-leaf-100/40 px-4 py-3 text-[13px] font-medium text-ink/80">
+            <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 border border-leaf-600/20 bg-leaf-100/40 px-4 py-2.5 text-[13px] font-medium text-ink/80">
               <li>✓ Cash on delivery</li>
               <li>✓ Open parcel before paying</li>
               <li>✓ Free delivery all over Pakistan</li>
               <li>✓ 7-day replacement</li>
             </ul>
-            <p className="mt-2 text-xs text-ink/55">Or pay by bank transfer for {BANK.discountPct}% off.</p>
-            <p className={`mt-3 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
+
+            <ProductActions product={product} />
+
+            <p className={`mt-4 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
               {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
+              <span className="ml-2 normal-case tracking-normal text-ink/50">· or pay by bank transfer for {BANK.discountPct}% off</span>
             </p>
 
             <UrgencyBox stock={product.stock} saleEndsAt={product.sale_ends_at} hasDiscount={off > 0} recentOrders={recent} />
@@ -174,7 +177,6 @@ export default async function ProductPage({ params }: { params: Params }) {
                 <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[.14em] text-accent-700">View →</span>
               </Link>
             ))}
-            <ProductActions product={product} />
 
             <p className="mt-6 text-sm text-ink/65">
               Estimated delivery <span className="font-medium text-ink">{deliveryWindow()}</span>. No advance payment: open the parcel, check it, then pay the rider in cash.
