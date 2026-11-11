@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
+import ReadMore from "@/components/ReadMore";
 import Stars from "@/components/Stars";
 import UrgencyBox from "@/components/UrgencyBox";
 import { recentOrders } from "@/lib/recent";
@@ -93,7 +94,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={ld(jsonLd)} />
-      <div className="container-x pb-28 pt-3 lg:pb-10 lg:pt-8">
+      <div className="container-x pb-4 pt-3 lg:pb-10 lg:pt-8">
         <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} />
 
@@ -133,12 +134,10 @@ export default async function ProductPage({ params }: { params: Params }) {
 
             <ProductActions product={product} />
 
-            {/* Mobile: the longer pitch sits below the buttons so the price + Buy are on the first screen */}
-            <p className="mt-5 text-[15px] leading-relaxed text-ink/65 lg:hidden">{product.short_description}</p>
 
             <p className={`mt-4 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
               {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
-              {product.stock > 0 && <span className="ml-2 normal-case tracking-normal text-ink/50">· or pay by bank transfer for {BANK.discountPct}% off</span>}
+              {product.stock > 0 && <span className="ml-2 hidden normal-case tracking-normal text-ink/50 lg:inline">· or pay by bank transfer for {BANK.discountPct}% off</span>}
             </p>
 
             <UrgencyBox stock={product.stock} saleEndsAt={product.sale_ends_at} hasDiscount={off > 0} recentOrders={recent} />
@@ -173,27 +172,27 @@ export default async function ProductPage({ params }: { params: Params }) {
               </Link>
             ))}
 
-            <p className="mt-6 text-sm text-ink/65">
-              Estimated delivery <span className="font-medium text-ink">{deliveryWindow()}</span>. No advance payment: open the parcel, check it, then pay the rider in cash.
+            <p className="mt-4 text-sm text-ink/65">
+              🚚 Delivery by <span className="font-medium text-ink">{deliveryWindow()}</span>
             </p>
             {STORE.whatsapp && (
               <a
                 href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(`Assalam o Alaikum, I have a question about the ${product.name} (${formatPrice(product.price)}).`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#128C7E] hover:underline"
+                className="mt-4 hidden items-center gap-2 text-sm font-medium text-[#128C7E] hover:underline lg:inline-flex"
               >
                 <MessageCircle className="h-4 w-4" /> Questions? Ask us on WhatsApp
               </a>
             )}
 
             {product.features.length > 0 && (
-              <div className="mt-10">
+              <div className="mt-6 lg:mt-10">
                 <p className="label">Highlights</p>
-                <ul className="mt-2">
+                <ul className="mt-2 space-y-1.5 lg:space-y-0">
                   {product.features.map((f) => (
-                    <li key={f} className="flex items-center gap-4 border-b border-ink/10 py-3.5 text-[15px] text-ink/80">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-ink/80 lg:items-center lg:gap-4 lg:border-b lg:border-ink/10 lg:py-3.5 lg:text-[15px]">
+                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500 lg:mt-0" />
                       {f}
                     </li>
                   ))}
@@ -204,15 +203,23 @@ export default async function ProductPage({ params }: { params: Params }) {
         </div>
       </div>
 
-      <section className="mt-16 bg-sand py-24">
-        <div className="container-x grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-24">
+      <section className="mt-10 bg-sand py-8 lg:mt-16 lg:py-24">
+        <div className="container-x grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-24">
           <div>
-            <p className="eyebrow">The details</p>
-            <h2 className="h-section mt-4">About the {product.name}</h2>
-            <div className="mt-8"><RichText text={product.description || product.short_description} /></div>
+            <p className="eyebrow hidden lg:block">The details</p>
+            <h2 className="text-lg font-semibold text-ink lg:h-section lg:mt-4">
+              <span className="lg:hidden">Description</span>
+              <span className="hidden lg:inline">About the {product.name}</span>
+            </h2>
+            <div className="mt-3 lg:mt-8">
+              <ReadMore><RichText text={product.description || product.short_description} /></ReadMore>
+            </div>
           </div>
           <div className="lg:pt-16">
-            <h2 className="eyebrow mb-6">{product.name} — questions, answered</h2>
+            <h2 className="mb-3 text-lg font-semibold text-ink lg:eyebrow lg:mb-6">
+              <span className="lg:hidden">Questions</span>
+              <span className="hidden lg:inline">{product.name} — questions, answered</span>
+            </h2>
             <Faq items={faqs} />
           </div>
         </div>
@@ -271,7 +278,7 @@ export default async function ProductPage({ params }: { params: Params }) {
       )}
 
       {related.length > 0 && (
-        <section className="container-x pt-28">
+        <section className="container-x pt-10 lg:pt-28">
           <div className="mb-10 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
             <div>
               <p className="eyebrow">Complete the kitchen</p>

@@ -4,7 +4,7 @@ import { BANK, STORE } from "@/lib/config";
 
 export default function Footer() {
   return (
-    <footer className="mt-32 bg-ink text-white/70">
+    <footer className="mt-16 bg-ink pb-24 text-white/70 lg:mt-32 lg:pb-0">
       <div className="container-x grid gap-12 py-20 text-center lg:grid-cols-[1.3fr_1fr_1fr_1.2fr] lg:text-left">
         <div className="flex flex-col items-center lg:items-start">
           <Image src="/logo-white.png" alt={STORE.name} width={280} height={86} className="h-12 w-auto" />
