@@ -21,8 +21,9 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className={`fixed right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lift transition hover:scale-105 lg:bottom-6 lg:right-6 lg:h-14 lg:w-14 ${
-        pathname.startsWith("/product/") ? "bottom-28" : "bottom-6"
+      className={`fixed bottom-6 right-4 z-30 h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lift transition hover:scale-105 lg:right-6 lg:h-14 lg:w-14 ${
+        // product pages on mobile have a WhatsApp button in the sticky order bar
+        pathname.startsWith("/product/") ? "hidden lg:flex" : "flex"
       }`}
     >
       <MessageCircle className="h-6 w-6 lg:h-7 lg:w-7" />

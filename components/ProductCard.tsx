@@ -17,7 +17,8 @@ export default function ProductCard({ product, priority }: { product: Product; p
   const video = previewVideo(product.videos);
 
   const start = () => {
-    if (!video) return;
+    // Phones fire "mouseenter" on touch/scroll — only auto-preview on real hover devices (mouse)
+    if (!video || typeof window === "undefined" || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setPlaying(true), 200);
   };
@@ -27,7 +28,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
   };
 
   return (
-    <div className="group" onMouseEnter={start} onMouseLeave={stop}>
+    <div className="group flex h-full flex-col" onMouseEnter={start} onMouseLeave={stop}>
       <div className="relative aspect-square overflow-hidden bg-white">
         <Link href={`/product/${product.slug}`} className="absolute inset-0" aria-label={product.name}>
           <ProductImage src={product.images[0]} alt={product.name} priority={priority} sizes="(max-width: 768px) 50vw, 25vw" />
@@ -67,12 +68,12 @@ export default function ProductCard({ product, priority }: { product: Product; p
         </button>
       </div>
 
-      <div className="pt-4">
+      <div className="flex flex-1 flex-col pt-4">
         <p className="text-[10px] font-medium uppercase tracking-[.2em] text-ink/50 sm:text-[11px]">{product.category}</p>
-        <Link href={`/product/${product.slug}`} className="h-card mt-1.5 block text-ink transition hover:text-brand-600 max-sm:text-[1.05rem] max-sm:leading-snug">
+        <Link href={`/product/${product.slug}`} className="h-card mt-1.5 line-clamp-2 min-h-[2.6em] text-ink transition hover:text-brand-600 max-sm:text-[1.05rem] max-sm:leading-snug">
           {product.name}
         </Link>
-        <p className="mt-1.5 flex items-baseline gap-2.5 text-sm">
+        <p className="mb-3 mt-1.5 flex items-baseline gap-2.5 text-sm">
           <span className={`font-medium ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
           {off > 0 && <span data-nosnippet className="text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price!)}</span>}
         </p>
@@ -81,7 +82,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
             type="button"
             data-nosnippet
             onClick={() => add(product, 1)}
-            className="mt-3 w-full border border-ink/80 py-2.5 text-[10px] font-medium uppercase tracking-[.18em] text-ink transition active:bg-ink active:text-white lg:hidden"
+            className="mt-auto w-full border border-ink/80 py-2.5 text-[10px] font-medium uppercase tracking-[.18em] text-ink transition active:bg-ink active:text-white lg:hidden"
           >
             Add to cart
           </button>

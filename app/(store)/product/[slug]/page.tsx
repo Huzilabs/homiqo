@@ -95,14 +95,6 @@ export default async function ProductPage({ params }: { params: Params }) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={ld(jsonLd)} />
       <div className="container-x pb-28 pt-8 lg:pb-10">
-        <nav className="mb-8 flex items-center gap-2 text-[11px] uppercase tracking-[.2em] text-ink/45">
-          <Link href="/" className="hover:text-ink">Home</Link>
-          <span>/</span>
-          <Link href={categoryPath(product.category)} className="hover:text-ink">{product.category}</Link>
-          <span>/</span>
-          <span className="truncate text-ink/80">{product.name}</span>
-        </nav>
-
         <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
           <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} />
 
