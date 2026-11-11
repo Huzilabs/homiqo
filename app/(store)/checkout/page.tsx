@@ -115,38 +115,73 @@ export default function CheckoutPage() {
   if (!ready || items.length === 0) return <div className="container-x py-20" />;
 
   return (
-    <div className="container-x py-10">
-      <h1 className="font-serif text-4xl font-medium sm:text-5xl">Checkout</h1>
-      <form onSubmit={onSubmit} onChange={onFormChange} onBlur={onFormChange} className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
-        <div className="min-w-0 space-y-6">
-          <section className="card p-6">
-            <h2 className="font-serif text-2xl font-medium">Contact & delivery details</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+    <div className="container-x pb-32 pt-6 lg:py-10">
+      <h1 className="font-serif text-3xl font-medium sm:text-5xl">Checkout</h1>
+
+      {/* Mobile: order summary first, so people see what they're buying and the total */}
+      <details className="card mt-4 lg:hidden" open>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4">
+          <span className="flex min-w-0 items-center gap-3">
+            <span className="relative h-12 w-12 shrink-0 overflow-hidden bg-sand">
+              <ProductImage src={items[0].image} alt={items[0].name} sizes="48px" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold">{items[0].name}{items.length > 1 ? ` + ${items.length - 1} more` : ""}</span>
+              <span className="block text-xs text-ink/55">{items.reduce((n, i) => n + i.quantity, 0)} item{items.reduce((n, i) => n + i.quantity, 0) > 1 ? "s" : ""} · Free delivery · {isBank ? "Bank transfer" : "Cash on delivery"}</span>
+            </span>
+          </span>
+          <span className="shrink-0 text-right">
+            <span className="block text-lg font-bold text-accent-700">{formatPrice(total)}</span>
+            {total < subtotal && <span className="block text-xs text-ink/40 line-through">{formatPrice(subtotal)}</span>}
+          </span>
+        </summary>
+        <div className="space-y-1.5 border-t border-ink/10 px-4 py-3 text-sm">
+          {items.map((i) => (
+            <p key={i.product_id} className="flex justify-between gap-3"><span className="min-w-0 truncate text-ink/70">{i.quantity}× {i.name}</span><span className="shrink-0">{formatPrice(i.price * i.quantity)}</span></p>
+          ))}
+          {combo > 0 && <p className="flex justify-between text-leaf-600"><span>Combo deal saving</span><span>−{formatPrice(combo)}</span></p>}
+          {bundle > 0 && <p className="flex justify-between text-leaf-600"><span>Buy 2 &amp; save</span><span>−{formatPrice(bundle)}</span></p>}
+          {isBank && <p className="flex justify-between text-leaf-600"><span>Bank transfer ({BANK.discountPct}%)</span><span>−{formatPrice(bankDiscount(subtotal))}</span></p>}
+          {offerDiscount > 0 && <p className="flex justify-between text-accent-700"><span>Special offer · {mmss(msLeft)} left</span><span>−{formatPrice(offerDiscount)}</span></p>}
+          <p className="flex justify-between"><span className="text-ink/60">Delivery</span><span className="font-medium text-leaf-600">Free</span></p>
+          <p className="flex justify-between border-t border-ink/10 pt-2 font-bold"><span>Total {isBank ? "(bank transfer)" : "(pay on delivery)"}</span><span>{formatPrice(total)}</span></p>
+        </div>
+      </details>
+
+      <form onSubmit={onSubmit} onChange={onFormChange} onBlur={onFormChange} className="mt-5 grid grid-cols-1 gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
+        <div className="min-w-0 space-y-5 lg:space-y-6">
+          <section className="card p-5 sm:p-6">
+            <h2 className="font-serif text-2xl font-medium">Delivery details</h2>
+            <p className="mt-1 text-xs text-ink/55">Only 4 details — no account, no advance payment.</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Full name" name="customer_name" required autoComplete="name" className="sm:col-span-2" />
               <div>
                 <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" inputMode="tel" pattern="[0-9+\-\s]{10,16}" />
                 <p className="mt-1 text-xs text-ink/50">We’ll call or WhatsApp this number about your order.</p>
               </div>
               <div>
-                <Field label="Email (optional)" name="email" type="email" autoComplete="email" placeholder="For order updates & tracking link" />
-              </div>
-              <Field label="Complete address" name="address" required placeholder="House #, street, area" autoComplete="street-address" className="sm:col-span-2" />
-              <div>
                 <label className="label" htmlFor="city">City *</label>
-                <input id="city" name="city" list="cities" required className="input" autoComplete="address-level2" />
+                <input id="city" name="city" list="cities" required className="input" autoComplete="address-level2" placeholder="Start typing your city" />
                 <datalist id="cities">{cities.map((c) => <option key={c} value={c} />)}</datalist>
               </div>
-              <div>
-                <label className="label" htmlFor="postal_code">Postal code</label>
-                <input id="postal_code" name="postal_code" className="input" inputMode="numeric" autoComplete="postal-code" pattern="[0-9]{5}" maxLength={5} placeholder="e.g. 54000" title="5-digit postal code" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="label" htmlFor="notes">Order notes (optional)</label>
-                <textarea id="notes" name="notes" rows={3} className="input" placeholder="Landmark, preferred delivery time…" />
-              </div>
+              <Field label="Complete address" name="address" required placeholder="House #, street, area / block" autoComplete="street-address" className="sm:col-span-2" />
             </div>
+            <details className="mt-4 text-sm">
+              <summary className="cursor-pointer font-medium text-brand-700">+ Add email, postal code or a note (optional)</summary>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                <Field label="Email" name="email" type="email" autoComplete="email" placeholder="For order updates & tracking link" />
+                <div>
+                  <label className="label" htmlFor="postal_code">Postal code</label>
+                  <input id="postal_code" name="postal_code" className="input" inputMode="numeric" autoComplete="postal-code" pattern="[0-9]{5}" maxLength={5} placeholder="e.g. 54000" title="5-digit postal code" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="label" htmlFor="notes">Order note</label>
+                  <textarea id="notes" name="notes" rows={2} className="input" placeholder="Landmark, preferred delivery time…" />
+                </div>
+              </div>
+            </details>
           </section>
-          <section className="card p-6">
+          <section className="card p-5 sm:p-6">
             <h2 className="font-serif text-2xl font-medium">Payment</h2>
             <div className="mt-4 space-y-3">
               <PayOption checked={!isBank} onSelect={() => setPayment("cod")} icon={<Banknote className="h-5 w-5 text-brand-600" />} title="Cash on Delivery" text="Open the parcel and check it, then pay the rider in cash." />
@@ -166,9 +201,32 @@ export default function CheckoutPage() {
               </div>
             )}
           </section>
+
+          <div className="space-y-1.5 px-1 text-xs text-ink/60 lg:hidden">
+            <p>✓ We call to confirm before dispatch · delivered in 2–5 working days</p>
+            <p>✓ Damaged or faulty? Replacement or refund within 7 days</p>
+            {STORE.whatsapp && (
+              <a href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent("Assalam o Alaikum, I need help placing an order.")}`} target="_blank" rel="noopener noreferrer" className="block pt-1 font-medium text-[#128C7E]">
+                Need help? Order on WhatsApp →
+              </a>
+            )}
+            <p className="pt-1">
+              By placing your order you agree to our <Link href="/policies" className="underline">shipping & return policy</Link> and <Link href="/privacy" className="underline">privacy policy</Link>.
+            </p>
+          </div>
         </div>
 
-        <aside className="card h-fit min-w-0 p-5 sm:p-6 lg:sticky lg:top-28">
+        {/* Mobile: always-visible Place order button */}
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-ink/10 bg-paper/95 px-3 pb-3 pt-2 backdrop-blur lg:hidden">
+          {error && <p className="mb-2 bg-rose-50 p-2 text-xs text-rose-700" role="alert">{error}</p>}
+          <button type="submit" disabled={submitting} className="flex h-14 w-full items-center justify-center gap-2 bg-accent-600 text-white shadow-lift active:bg-accent-700 disabled:opacity-70">
+            {submitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Lock className="h-4 w-4" />}
+            <span className="text-[15px] font-bold uppercase tracking-[.1em]">{submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}</span>
+          </button>
+          <p className="mt-1 text-center text-[11px] text-ink/55">{isBank ? "Bank transfer details shown after ordering" : "Pay cash on delivery · open & check the parcel first"}</p>
+        </div>
+
+        <aside className="card hidden h-fit min-w-0 p-5 sm:p-6 lg:sticky lg:top-28 lg:block">
           <h2 className="font-serif text-2xl font-medium">Your order</h2>
           <ul className="mt-4 max-h-72 space-y-4 overflow-y-auto">
             {items.map((i) => (
@@ -197,7 +255,7 @@ export default function CheckoutPage() {
             <div className="flex justify-between border-t pt-3 text-base font-bold"><dt>{isBank ? "Total (bank transfer)" : "Total (COD)"}</dt><dd>{formatPrice(total)}</dd></div>
           </dl>
           {error && <p className="mt-4 bg-rose-50 p-3 text-sm text-rose-700" role="alert">{error}</p>}
-          <button type="submit" disabled={submitting} className="btn-accent mt-5 w-full py-3.5 text-base">
+          <button type="submit" disabled={submitting} className="btn-accent mt-5 w-full whitespace-nowrap py-4 text-[15px] tracking-[.08em]">
             {submitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Lock className="h-4 w-4" />}
             {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
           </button>
