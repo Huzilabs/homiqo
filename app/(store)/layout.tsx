@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import VisitTracker from "@/components/VisitTracker";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import AIChat from "@/components/AIChat";
 import { CartProvider } from "@/lib/cart";
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <Footer />
       <CartDrawer />
       <WhatsAppButton />
+      <AIChat />
     </CartProvider>
   );
 }
