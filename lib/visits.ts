@@ -18,7 +18,7 @@ function ids() {
   }
 }
 
-export function sendVisitEvent(type: string, extra: { pid?: string; val?: number } = {}) {
+export function sendVisitEvent(type: string, extra: { pid?: string; val?: number; label?: string } = {}) {
   if (typeof window === "undefined" || navigator.webdriver) return;
   const s = ids();
   if (!s) return;

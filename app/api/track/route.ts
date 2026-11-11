@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const TYPES = new Set(["pageview", "view_item", "add_to_cart", "begin_checkout", "purchase"]);
+const TYPES = new Set(["pageview", "view_item", "add_to_cart", "begin_checkout", "purchase", "engaged_10s", "engaged_30s", "scroll_50", "video_play", "checkout_error"]);
 const BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|headless|lighthouse|pingdom|monitor/i;
 const UUID = /^[0-9a-f-]{36}$/i;
 const cut = (v: unknown, n: number) => (typeof v === "string" && v ? v.slice(0, n) : null);
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
     device,
     country,
     value: typeof b.val === "number" && isFinite(b.val) ? b.val : null,
+    label: cut(b.label, 200),
   });
   if (error) console.error("track", error.message);
   return new NextResponse(null, { status: 204 });

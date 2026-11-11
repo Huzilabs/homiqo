@@ -12,6 +12,7 @@ import { BANK, FLASH_OFFER, STORE, bankDiscount, flashDiscount } from "@/lib/con
 import { claimFlash, markFlashUsed, mmss, useFlashOffer } from "@/lib/flash";
 import { createClient } from "@/lib/supabase/client";
 import { clearLead, saveLead } from "@/lib/checkout-lead";
+import { sendVisitEvent } from "@/lib/visits";
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
 const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
@@ -77,13 +78,14 @@ export default function CheckoutPage() {
     );
     customer.payment_method = payment;
     if (offer?.claimed) customer.flash_offer = offer.id;
-    // Use the courier's spelling of the city so the parcel can be booked without edits
-    const match = cities.find((c) => c.toLowerCase() === String(customer.city).toLowerCase());
-    if (cities.length > POPULAR.length && !match) {
-      setError("We couldn’t find that city. Please choose your city from the suggestions as you type.");
-      return;
-    }
-    if (match) customer.city = match;
+    // Use the courier's spelling of the city when we can match it — but never block the order over it
+    // (admin can pick the PostEx city when confirming)
+    const norm = (v: string) => v.toLowerCase().replace(/[^a-z]/g, "");
+    const typed = norm(String(customer.city));
+    const match =
+      cities.find((c) => norm(c) === typed) ||
+      (typed.length >= 4 ? cities.find((c) => norm(c).startsWith(typed) || typed.startsWith(norm(c))) : undefined);
+    customer.city = match || titleCase(String(customer.city).trim());
     setSubmitting(true);
     let data: { order_number: string; total: number; error?: string } | null = null;
     try {
@@ -96,7 +98,9 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error(data?.error || "Could not place your order. Please try again.");
     } catch (err) {
       setSubmitting(false);
-      setError(err instanceof Error ? err.message : "Could not place your order. Please try again.");
+      const msg = err instanceof Error ? err.message : "Could not place your order. Please try again.";
+      setError(msg);
+      sendVisitEvent("checkout_error", { label: msg });
       return;
     }
     const { order_number, total: serverTotal } = data!;
@@ -148,7 +152,17 @@ export default function CheckoutPage() {
         </div>
       </details>
 
-      <form onSubmit={onSubmit} onChange={onFormChange} onBlur={onFormChange} className="mt-5 grid grid-cols-1 gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
+      <form
+        onSubmit={onSubmit}
+        onChange={onFormChange}
+        onBlur={onFormChange}
+        onInvalidCapture={(e) => {
+          // A wrong value in a folded optional field (email / postal code) would block silently — open it
+          const d = (e.target as HTMLElement).closest("details");
+          if (d) d.open = true;
+          sendVisitEvent("checkout_error", { label: `invalid field: ${(e.target as HTMLInputElement).name}` });
+        }}
+        className="mt-5 grid grid-cols-1 gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
         <div className="min-w-0 space-y-5 lg:space-y-6">
           <section className="card p-5 sm:p-6">
             <h2 className="font-serif text-2xl font-medium">Delivery details</h2>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { track } from "@/lib/analytics";
+import { sendVisitEvent } from "@/lib/visits";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { STORE } from "@/lib/config";
@@ -20,6 +21,27 @@ export default function ProductActions({ product }: { product: Product }) {
   useEffect(() => {
     track.viewItem(product);
   }, [product]);
+
+  // Engagement: did they stay 10s / 30s and scroll half the page? (tells us "left instantly" vs "read and left")
+  useEffect(() => {
+    const t1 = setTimeout(() => sendVisitEvent("engaged_10s", { pid: product.id }), 10000);
+    const t2 = setTimeout(() => sendVisitEvent("engaged_30s", { pid: product.id }), 30000);
+    let scrolled = false;
+    const onScroll = () => {
+      if (scrolled) return;
+      const h = document.documentElement;
+      if ((h.scrollTop + window.innerHeight) / h.scrollHeight > 0.5) {
+        scrolled = true;
+        sendVisitEvent("scroll_50", { pid: product.id });
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [product.id]);
 
   // Lets the floating WhatsApp button mention this product
   useEffect(() => {
