@@ -28,7 +28,6 @@ const nextConfig = {
       { source: "/combo", destination: "/product/knife-sharpener-faucet-sink-rack-combo", permanent: false },
       // Health products removed (Meta blocks pixel data for health-related sites)
       { source: "/category/health-care", destination: "/shop", permanent: false },
-      { source: "/product/portable-mesh-nebulizer", destination: "/shop", permanent: false },
       // The Vercel default domain and the old homiqo.site domain duplicate the site — 301 them to the real domain
       {
         source: "/:path*",
