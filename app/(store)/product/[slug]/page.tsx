@@ -99,7 +99,7 @@ export default async function ProductPage({ params }: { params: Params }) {
 
           <div className="min-w-0 lg:pt-2">
             <p className="eyebrow hidden lg:block">{product.category}</p>
-            <h1 className="text-[1.3rem] font-semibold leading-snug text-ink lg:mt-3 lg:font-serif lg:text-[2.75rem] lg:font-medium lg:leading-[1.05]">{product.name}</h1>
+            <h1 className="text-[1.3rem] font-semibold leading-snug text-ink [text-wrap:wrap] lg:mt-3 lg:[text-wrap:balance] lg:font-serif lg:text-[2.75rem] lg:font-medium lg:leading-[1.05]">{product.name}</h1>
             {rv.count > 0 && (
               <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink">
                 <Stars rating={rv.average} /> <span className="font-medium text-ink">{rv.average.toFixed(1)}</span> · {rv.count} review{rv.count === 1 ? "" : "s"}
