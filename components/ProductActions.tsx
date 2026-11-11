@@ -97,18 +97,17 @@ export default function ProductActions({ product }: { product: Product }) {
       </div>
 
       {!soldOut && (
-        <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-4 border-t border-ink/10 bg-paper/95 px-5 py-3 backdrop-blur lg:hidden">
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-serif text-lg leading-tight">{product.name}</p>
-            <p className="text-sm text-ink/60">
-              {formatPrice(product.price)}
-              {product.compare_at_price && product.compare_at_price > product.price && (
-                <span className="ml-2 text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price)}</span>
-              )}
-              <span className="ml-2 text-[11px] text-leaf-600">· Cash on delivery</span>
-            </p>
+        <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-ink/10 bg-paper/95 px-4 py-2.5 backdrop-blur lg:hidden">
+          <div className="shrink-0">
+            <p className="font-serif text-xl leading-none text-accent-700">{formatPrice(product.price)}</p>
+            {product.compare_at_price && product.compare_at_price > product.price && (
+              <p className="mt-1 text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price)}</p>
+            )}
           </div>
-          <button onClick={buyNow} className="btn-primary px-6 py-3.5">Buy now</button>
+          <button onClick={buyNow} className="flex h-14 flex-1 flex-col items-center justify-center bg-accent-600 text-white shadow-lift active:bg-accent-700">
+            <span className="text-[15px] font-bold uppercase tracking-[.14em]">Buy now</span>
+            <span className="text-[11px] font-medium text-white/85">Cash on delivery · Free delivery</span>
+          </button>
         </div>
       )}
     </>

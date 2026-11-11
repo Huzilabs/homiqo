@@ -6,6 +6,7 @@ import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
 import Stars from "@/components/Stars";
 import UrgencyBox from "@/components/UrgencyBox";
+import FlashOfferBanner from "@/components/FlashOfferBanner";
 import { recentOrders } from "@/lib/recent";
 import { getProductReviews } from "@/lib/reviews";
 import { categoryPath } from "@/lib/categories";
@@ -139,11 +140,16 @@ export default async function ProductPage({ params }: { params: Params }) {
               <li>✓ 7-day replacement</li>
             </ul>
 
+            {product.stock > 0 && (
+              <div className="mt-3">
+                <FlashOfferBanner variant="box" />
+              </div>
+            )}
             <ProductActions product={product} />
 
             <p className={`mt-4 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
               {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
-              <span className="ml-2 normal-case tracking-normal text-ink/50">· or pay by bank transfer for {BANK.discountPct}% off</span>
+              {product.stock > 0 && <span className="ml-2 normal-case tracking-normal text-ink/50">· or pay by bank transfer for {BANK.discountPct}% off</span>}
             </p>
 
             <UrgencyBox stock={product.stock} saleEndsAt={product.sale_ends_at} hasDiscount={off > 0} recentOrders={recent} />

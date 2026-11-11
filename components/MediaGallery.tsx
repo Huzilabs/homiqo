@@ -39,10 +39,10 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
               sizes="(max-width:1024px) 100vw, 50vw"
             />
             <HoverVideo url={videos[0]} active={hover} />
-            {videos.length > 0 && !hover && (
+            {videos.length > 0 && (
               <button
                 type="button"
-                onClick={() => setIndex(media.findIndex((m) => m.kind === "video"))}
+                onClick={() => setIndex(Math.max(0, media.findIndex((m) => m.kind === "video")))}
                 className="absolute bottom-5 left-5 bg-paper/95 px-4 py-2.5 text-[10px] font-medium uppercase tracking-[.2em] text-ink hover:bg-white"
               >
                 ▶ Watch it in action

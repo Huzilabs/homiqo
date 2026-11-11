@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Clock, Flame, ShoppingBag, Truck } from "lucide-react";
-import FlashOfferBanner from "./FlashOfferBanner";
 
 /** Daily order cut-off (Pakistan time): orders confirmed by 6 PM are booked on PostEx that day. */
 export const CUTOFF_HOUR_PKT = 18;
@@ -55,7 +54,6 @@ export default function UrgencyBox({
 
   return (
     <div className="mt-4 space-y-2.5">
-      {!soldOut && <FlashOfferBanner variant="box" />}
       {/* Real sale end — the price really goes back up when this reaches zero */}
       {saleLive && (
         <p className="flex items-center gap-2.5 border border-accent-500/40 bg-accent-50 px-4 py-3 text-sm text-accent-700">
