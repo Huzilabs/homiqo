@@ -115,7 +115,7 @@ begin
     'invoiceDivision', 1,
     'items', greatest(v_items, 1),
     'orderType', 'Normal',
-    'pickupAddressCode', coalesce(nullif(trim(coalesce(p_pickup_code, '')), ''), '001')
+    'pickupAddressCode', coalesce(nullif(trim(coalesce(p_pickup_code, '')), ''), 'PWs2s6')  -- Palm City, Lahore
   ));
 end $function$;
 
