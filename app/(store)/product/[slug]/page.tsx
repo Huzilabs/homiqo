@@ -113,12 +113,12 @@ export default async function ProductPage({ params }: { params: Params }) {
               {off > 0 && (
                 <>
                   <span className="text-lg text-ink/35 line-through">{formatPrice(product.compare_at_price!)}</span>
-                  <span className="bg-accent-600 px-2.5 py-1 text-[11px] font-medium tracking-[.12em] text-white">SAVE {off}%</span>
+                  <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-600 px-2.5 text-[12px] font-semibold tracking-[.04em] text-white">Save {off}%</span>
                 </>
               )}
               {Number(product.bundle_save) > 0 && !(product.components || []).length && product.stock >= 2 && (
-                <span className="border border-accent-600 bg-accent-50 px-2.5 py-1 text-[11px] font-semibold tracking-[.08em] text-accent-700">
-                  🎁 BUY 2, SAVE {formatPrice(Number(product.bundle_save)).toUpperCase()}
+                <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-50 px-2.5 text-[12px] font-semibold tracking-[.04em] text-accent-700">
+                  🎁 Buy 2, save {formatPrice(Number(product.bundle_save))}
                 </span>
               )}
             </div>
