@@ -3,14 +3,16 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { LoaderCircle, Send, Sparkles, X } from "lucide-react";
 import { BANK, STORE } from "@/lib/config";
+import { track } from "@/lib/analytics";
+import { formatPrice } from "@/lib/format";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; order?: { number: string; total: number; url: string } };
 const KEY = "hq.chat";
 const GREETING: Msg = {
   role: "assistant",
-  content: `Assalam o Alaikum! 👋 I'm the ${STORE.name} assistant. Ask me anything — products, prices, delivery or cash on delivery.`,
+  content: `Assalam o Alaikum! 👋 I'm the ${STORE.name} assistant. Ask me anything — or place your order right here in the chat (Cash on Delivery).`,
 };
-const SUGGESTIONS = ["Delivery kitne din mein hogi?", "Cash on delivery hai?", "Best product for kitchen?", "Combo deal kya hai?"];
+const SUGGESTIONS = ["Mujhe order karna hai", "Delivery kitne din mein hogi?", "Cash on delivery hai?", "Combo deal kya hai?"];
 
 /** Turns [text](url) and bare links into clickable links; everything else stays plain text. */
 function Rich({ text }: { text: string }) {
@@ -71,10 +73,28 @@ export default function AIChat() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next.filter((m) => m !== GREETING).slice(-10), page: pathname }),
+        body: JSON.stringify({ messages: next.filter((m) => m !== GREETING).map(({ role, content }) => ({ role, content })).slice(-12), page: pathname }),
       });
       const data = await res.json().catch(() => ({}));
-      setMsgs((m) => [...m, { role: "assistant", content: data.reply || data.error || "Sorry, something went wrong. Please WhatsApp us." }]);
+      const o = data.order as { order_number: string; total: number; phone: string; items: { product_id: string; name: string; price: number; quantity: number }[] } | undefined;
+      if (o) {
+        // Same conversion tracking as a checkout order (Meta Purchase, GA4, our analytics)
+        track.purchase(
+          o.order_number,
+          o.items.map((i) => ({ product_id: i.product_id, slug: "", name: i.name, price: i.price, image: null, quantity: i.quantity, stock: 0 })),
+          Number(o.total),
+          0,
+          "cod",
+        );
+      }
+      setMsgs((m) => [
+        ...m,
+        {
+          role: "assistant",
+          content: data.reply || data.error || "Sorry, something went wrong. Please WhatsApp us.",
+          ...(o ? { order: { number: o.order_number, total: Number(o.total), url: `/order/${o.order_number}?phone=${encodeURIComponent(o.phone)}` } } : {}),
+        },
+      ]);
     } catch {
       setMsgs((m) => [...m, { role: "assistant", content: "Sorry, something went wrong. Please WhatsApp us." }]);
     }
@@ -118,6 +138,11 @@ export default function AIChat() {
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <p className={`max-w-[85%] whitespace-pre-wrap break-words px-3 py-2 leading-relaxed ${m.role === "user" ? "bg-brand-600 text-white" : "border border-ink/10 bg-white text-ink"}`}>
                   {m.role === "assistant" ? <Rich text={m.content} /> : m.content}
+                  {m.order && (
+                    <a href={m.order.url} className="mt-2 block border border-leaf-600/30 bg-leaf-100/60 px-3 py-2 text-xs font-semibold text-leaf-600">
+                      ✅ Order {m.order.number} · {formatPrice(m.order.total)} COD — view order →
+                    </a>
+                  )}
                 </p>
               </div>
             ))}
