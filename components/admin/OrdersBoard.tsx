@@ -23,8 +23,8 @@ export type BoardOrder = {
 
 const COLUMNS = [
   { key: "pending", label: "Pending", dot: "bg-amber-500", hint: "Call to confirm" },
-  { key: "confirmed", label: "Confirmed", dot: "bg-sky-500", hint: "Booked on PostEx" },
-  { key: "shipped", label: "Shipped", dot: "bg-indigo-500", hint: "With the courier" },
+  { key: "confirmed", label: "Confirmed", dot: "bg-blue-500", hint: "Booked on PostEx" },
+  { key: "shipped", label: "Shipped", dot: "bg-purple-500", hint: "With the courier" },
   { key: "delivered", label: "Delivered", dot: "bg-emerald-500", hint: "Paid & done" },
   { key: "cancelled", label: "Cancelled", dot: "bg-rose-500", hint: "" },
 ] as const;

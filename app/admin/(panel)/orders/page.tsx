@@ -13,8 +13,8 @@ const PAGE_SIZE = 25;
 const TILE: Record<string, { label: string; dot: string }> = {
   all: { label: "All orders", dot: "bg-ink" },
   pending: { label: "Pending", dot: "bg-amber-500" },
-  confirmed: { label: "Confirmed", dot: "bg-sky-500" },
-  shipped: { label: "Shipped", dot: "bg-indigo-500" },
+  confirmed: { label: "Confirmed", dot: "bg-blue-500" },
+  shipped: { label: "Shipped", dot: "bg-purple-500" },
   delivered: { label: "Delivered", dot: "bg-emerald-500" },
   cancelled: { label: "Cancelled", dot: "bg-rose-500" },
 };

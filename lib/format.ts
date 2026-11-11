@@ -29,11 +29,11 @@ export const STATUS_LABEL: Record<string, string> = {
 };
 
 export const STATUS_STYLE: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700 ring-amber-600/20",
-  confirmed: "bg-sky-50 text-sky-700 ring-sky-600/20",
-  shipped: "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
-  delivered: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-  cancelled: "bg-rose-50 text-rose-700 ring-rose-600/20",
+  pending: "bg-amber-100 text-amber-800 ring-amber-500/40",
+  confirmed: "bg-blue-100 text-blue-800 ring-blue-500/40",
+  shipped: "bg-purple-100 text-purple-800 ring-purple-500/40",
+  delivered: "bg-emerald-100 text-emerald-800 ring-emerald-500/40",
+  cancelled: "bg-rose-100 text-rose-800 ring-rose-500/40",
 };
 
 const isYouTube = (url: string) => youTubeId(url) !== null;
