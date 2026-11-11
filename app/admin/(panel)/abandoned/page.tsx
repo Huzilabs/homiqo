@@ -11,7 +11,7 @@ const TABS = [
   { key: "open", label: "To follow up" },
   { key: "contacted", label: "Contacted" },
   { key: "converted", label: "Ordered" },
-  { key: "dismissed", label: "Dismissed" },
+  { key: "dismissed", label: "Cancelled" },
 ] as const;
 
 type Lead = {
