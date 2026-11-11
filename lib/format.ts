@@ -36,6 +36,15 @@ export const STATUS_STYLE: Record<string, string> = {
   cancelled: "bg-rose-100 text-rose-800 ring-rose-500/40",
 };
 
+/** Light row tint + coloured left edge for whole order rows/cards, matching STATUS_STYLE. */
+export const STATUS_ROW: Record<string, string> = {
+  pending: "bg-amber-50 hover:bg-amber-100/70 border-l-4 border-l-amber-400",
+  confirmed: "bg-blue-50 hover:bg-blue-100/70 border-l-4 border-l-blue-500",
+  shipped: "bg-purple-50 hover:bg-purple-100/70 border-l-4 border-l-purple-500",
+  delivered: "bg-emerald-50 hover:bg-emerald-100/70 border-l-4 border-l-emerald-500",
+  cancelled: "bg-rose-50 hover:bg-rose-100/70 border-l-4 border-l-rose-500",
+};
+
 const isYouTube = (url: string) => youTubeId(url) !== null;
 /** First uploaded video file (mp4/webm) — used for lightweight hover/inline previews. */
 export const previewVideo = (videos: string[]) => videos.find((v) => !isYouTube(v));

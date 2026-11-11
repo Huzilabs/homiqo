@@ -5,7 +5,7 @@ import OrdersBoard, { type BoardOrder } from "@/components/admin/OrdersBoard";
 import PostExSyncButton from "@/components/admin/PostExSyncButton";
 import { createClient } from "@/lib/supabase/server";
 import { ORDER_STATUSES } from "@/lib/config";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, STATUS_ROW } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
 const PAGE_SIZE = 25;
@@ -153,7 +153,7 @@ export default async function AdminOrders({
               const t = when(o.created_at);
               const its = items.get(o.id) || [];
               return (
-                <tr key={o.id} className={`align-top transition hover:bg-gray-50/70 ${o.status === "pending" ? "bg-amber-50/30" : ""}`}>
+                <tr key={o.id} className={`align-top transition ${STATUS_ROW[o.status] || "hover:bg-gray-50/70"}`}>
                   <td className="px-5 py-4">
                     <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700 hover:underline">{o.order_number}</Link>
                     <p className="mt-0.5 text-xs text-gray-500">{t.date} · {t.time}</p>
@@ -209,7 +209,7 @@ export default async function AdminOrders({
           const t = when(o.created_at);
           const its = items.get(o.id) || [];
           return (
-            <div key={o.id} className={`card p-4 ${o.status === "pending" ? "border-l-2 border-l-amber-500" : ""}`}>
+            <div key={o.id} className={`card p-4 ${STATUS_ROW[o.status] || ""}`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700">{o.order_number}</Link>

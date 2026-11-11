@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoaderCircle, MessageCircle, Phone, Truck } from "lucide-react";
-import { formatPrice, STATUS_STYLE } from "@/lib/format";
+import { formatPrice, STATUS_ROW, STATUS_STYLE } from "@/lib/format";
 
 export type BoardOrder = {
   id: string;
@@ -105,7 +105,7 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
                     key={o.id}
                     draggable
                     onDragStart={(e) => e.dataTransfer.setData("text/plain", o.id)}
-                    className={`cursor-grab border border-ink/10 bg-white p-3 text-sm shadow-sm active:cursor-grabbing ${moving === o.id ? "opacity-60" : ""}`}
+                    className={`cursor-grab border border-ink/10 p-3 text-sm shadow-sm active:cursor-grabbing ${STATUS_ROW[statusOf(o)] || "bg-white"} ${moving === o.id ? "opacity-60" : ""}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700 hover:underline">{o.order_number}</Link>
