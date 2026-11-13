@@ -1,0 +1,20 @@
+{
+  "name": "Homiqo Admin",
+  "short_name": "Homiqo Admin",
+  "description": "Orders, calls and follow-ups for Homiqo",
+  "id": "/admin",
+  "start_url": "/admin/orders",
+  "scope": "/admin",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D5B58",
+  "theme_color": "#0D5B58",
+  "icons": [
+    { "src": "/admin-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/admin-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Orders", "url": "/admin/orders", "icons": [{ "src": "/admin-icon-192.png", "sizes": "192x192" }] },
+    { "name": "Abandoned checkouts", "url": "/admin/abandoned", "icons": [{ "src": "/admin-icon-192.png", "sizes": "192x192" }] }
+  ]
+}
