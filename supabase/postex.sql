@@ -236,7 +236,7 @@ begin
         and created_at > now() - interval '60 days'
     ) t group by grp
   loop
-    res := private.postex_call('GET', 'v1/track-bulk-order?trackingNumber=' || array_to_string(batch, ','));
+    res := private.postex_call('GET', 'v1/track-bulk-order?TrackingNumbers=' || array_to_string(batch, ','));
     if (res->>'status')::int <> 200 then
       errors := errors || jsonb_build_object('http', res->>'status', 'body', left(res->>'body', 200));
       continue;
@@ -248,12 +248,20 @@ begin
       if not found then continue; end if;
       checked := checked + 1;
       new_status := private.postex_map_status(tr->>'transactionStatus');
+      -- PostEx keeps transactionStatus = 'Attempted' while a refused parcel is being sent back; the history says "Return …"
+      if coalesce(new_status, '') <> 'delivered'
+         and lower(coalesce(tr->'transactionStatusHistory'->-1->>'transactionStatusMessage', '')) like '%return%' then
+        new_status := 'cancelled';
+      end if;
       rank_old := array_position(array['pending','confirmed','shipped','delivered','cancelled'], o.status);
       rank_new := array_position(array['pending','confirmed','shipped','delivered','cancelled'], new_status);
       if new_status is null or rank_new <= rank_old or o.status in ('delivered', 'cancelled') then new_status := o.status; end if;
 
       update orders set
-        postex_status = tr->>'transactionStatus',
+        postex_status = case when lower(coalesce(tr->'transactionStatusHistory'->-1->>'transactionStatusMessage', '')) like '%return%'
+                            and lower(coalesce(tr->>'transactionStatus', '')) not like 'return%'
+                       then 'Returning: ' || (tr->'transactionStatusHistory'->-1->>'transactionStatusMessage')
+                       else tr->>'transactionStatus' end,
         postex_history = tr,
         postex_synced_at = now(),
         postex_error = null,
