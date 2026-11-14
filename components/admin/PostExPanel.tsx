@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { LoaderCircle, PackageCheck, Printer, RefreshCw, Truck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Order } from "@/lib/types";
+import CityPicker from "./CityPicker";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Karachi" }) : "—");
 
@@ -106,10 +107,9 @@ export default function PostExPanel({ order, suggestedCity }: { order: Order; su
           <p className="text-sm text-gray-600">After confirming with the customer by phone, approve the order to create the PostEx shipment automatically.</p>
           <div>
             <label className="label" htmlFor="postex-city">PostEx delivery city</label>
-            <input id="postex-city" list="postex-cities" value={city} onChange={(e) => setCity(e.target.value)} className="input" placeholder="Start typing…" />
-            <datalist id="postex-cities">{cities.map((c) => <option key={c} value={c} />)}</datalist>
+            <CityPicker value={city} onChange={setCity} cities={cities} hint={order.city} />
             <p className={`mt-1 text-xs ${cityValid && city ? "text-emerald-700" : "text-amber-700"}`}>
-              {!city ? `Customer typed “${order.city}” — choose the matching PostEx city.` : cityValid ? "✓ PostEx delivers here" : "Not on PostEx's list — pick a city from the suggestions"}
+              {!city ? `Customer typed “${order.city}” — choose the matching PostEx city.` : cityValid ? "✓ PostEx delivers here" : "Not on PostEx's list — tap one of the suggestions"}
             </p>
           </div>
           <label className="flex items-center gap-2 text-sm">
