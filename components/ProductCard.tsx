@@ -73,9 +73,10 @@ export default function ProductCard({ product, priority }: { product: Product; p
         <Link href={`/product/${product.slug}`} className="h-card mt-1.5 line-clamp-2 min-h-[2.6em] text-ink transition hover:text-brand-600 max-sm:text-[1.05rem] max-sm:leading-snug">
           {product.name}
         </Link>
-        <p className="mb-3 mt-1.5 flex items-baseline gap-2.5 text-sm">
+        <p className="mb-3 mt-1.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-sm">
           <span className={`font-medium ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
           {off > 0 && <span data-nosnippet className="text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price!)}</span>}
+          <span className="basis-full text-[11px] font-semibold text-leaf-600">🚚 Free delivery · COD</span>
         </p>
         {!soldOut && (
           <button

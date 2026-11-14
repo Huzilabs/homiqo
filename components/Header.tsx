@@ -73,8 +73,8 @@ export default function Header() {
   return (
     <>
       <FlashOfferBanner variant="float" />
-      <div className="bg-ink px-4 py-2.5 text-center text-[11px] font-medium uppercase tracking-[.22em] text-white/85">
-        Free delivery all over Pakistan <span className="mx-3 text-accent-400">·</span> Buy 2, save Rs 200
+      <div className="bg-leaf-600 px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[.16em] text-white">
+        🚚 Free delivery all over Pakistan <span className="mx-2 text-white/60">·</span> Buy 2, save Rs 200
         <span className="hidden sm:inline"><span className="mx-3 text-accent-400">·</span> Cash on delivery</span>
         <span className="hidden sm:inline"><span className="mx-3 text-accent-400">·</span> {BANK.discountPct}% off on bank transfer</span>
       </div>

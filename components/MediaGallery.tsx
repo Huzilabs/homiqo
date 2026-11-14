@@ -64,6 +64,10 @@ export default function MediaGallery({ name, images, videos, productId }: { name
             <video key={current.url} src={current.url} autoPlay muted loop playsInline controls onPlay={() => { if (!videoSent[current.url]) { videoSent[current.url] = true; sendVisitEvent("video_play", { pid: productId }); } }} className="absolute inset-0 h-full w-full bg-black object-cover" />
           )
         )}
+        {/* Free delivery is a big reason to buy — keep it on the photo itself */}
+        <span className="pointer-events-none absolute bottom-5 right-4 z-10 inline-flex items-center gap-1.5 bg-leaf-600 px-3 py-2 text-[11px] font-bold uppercase tracking-[.08em] text-white shadow-md">
+          🚚 Free delivery
+        </span>
         {media.length > 1 && (
           <>
             <button

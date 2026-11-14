@@ -122,7 +122,7 @@ export default function ProductActions({ product }: { product: Product }) {
         <div className="fixed inset-x-0 bottom-0 z-30 flex items-stretch gap-2 border-t border-ink/10 bg-paper/95 px-3 py-2.5 backdrop-blur lg:hidden">
           <button onClick={buyNow} className="flex h-14 flex-1 basis-0 flex-col items-center justify-center bg-accent-600 text-white shadow-lift active:bg-accent-700">
             <span className="text-[15px] font-bold uppercase tracking-[.12em]">Buy now</span>
-            <span className="text-[11px] font-medium text-white/90">{formatPrice(product.price)} · Cash on delivery</span>
+            <span className="text-[11px] font-medium text-white/90">{formatPrice(product.price)} · Free delivery · COD</span>
           </button>
           {STORE.whatsapp && (
             <a

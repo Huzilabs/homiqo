@@ -116,6 +116,7 @@ export default async function ProductPage({ params }: { params: Params }) {
                   <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-600 px-2.5 text-[12px] font-semibold tracking-[.04em] text-white">Save {off}%</span>
                 </>
               )}
+              <span className="inline-flex h-7 items-center border border-leaf-600 bg-leaf-600 px-2.5 text-[12px] font-semibold tracking-[.04em] text-white">🚚 FREE delivery</span>
               {Number(product.bundle_save) > 0 && !(product.components || []).length && product.stock >= 2 && (
                 <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-50 px-2.5 text-[12px] font-semibold tracking-[.04em] text-accent-700">
                   🎁 Buy 2, save {formatPrice(Number(product.bundle_save))}
