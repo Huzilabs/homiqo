@@ -6,10 +6,14 @@ import HoverVideo from "./HoverVideo";
 import ProductImage from "./ProductImage";
 import VideoEmbed from "./VideoEmbed";
 import { youTubeId } from "@/lib/format";
+import { sendVisitEvent } from "@/lib/visits";
 
 type Media = { kind: "image" | "video"; url: string };
 
-export default function MediaGallery({ name, images, videos }: { name: string; images: string[]; videos: string[] }) {
+/** one video_play event per video per page load */
+const videoSent: Record<string, boolean> = {};
+
+export default function MediaGallery({ name, images, videos, productId }: { name: string; images: string[]; videos: string[]; productId?: string }) {
   // Main photo first, then the video (so people see the product in action on the first swipe), then the other photos
   const media: Media[] = [
     ...images.slice(0, 1).map((url) => ({ kind: "image" as const, url })),
@@ -57,7 +61,7 @@ export default function MediaGallery({ name, images, videos }: { name: string; i
               </div>
             </div>
           ) : (
-            <video key={current.url} src={current.url} autoPlay muted loop playsInline controls className="absolute inset-0 h-full w-full bg-black object-cover" />
+            <video key={current.url} src={current.url} autoPlay muted loop playsInline controls onPlay={() => { if (!videoSent[current.url]) { videoSent[current.url] = true; sendVisitEvent("video_play", { pid: productId }); } }} className="absolute inset-0 h-full w-full bg-black object-cover" />
           )
         )}
         {media.length > 1 && (

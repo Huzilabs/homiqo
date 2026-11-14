@@ -96,7 +96,7 @@ export default async function ProductPage({ params }: { params: Params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={ld(jsonLd)} />
       <div className="container-x pb-4 pt-3 lg:pb-10 lg:pt-8">
         <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
-          <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} />
+          <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} productId={product.id} />
 
           <div className="min-w-0 lg:pt-2">
             <p className="eyebrow hidden lg:block">{product.category}</p>
