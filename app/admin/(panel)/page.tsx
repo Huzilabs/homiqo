@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, Banknote, Clock, Package, ShoppingCart } from "lucide-react";
+import { AlertTriangle, Banknote, Clock, Megaphone, Package, ShoppingCart, TrendingUp } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -8,7 +8,8 @@ import type { Order, Product } from "@/lib/types";
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const since = new Date(Date.now() - 30 * 864e5).toISOString();
-  const [{ data: orders }, { data: recent }, { data: products }, { data: lines }] = await Promise.all([
+  const pkDay = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" }); // YYYY-MM-DD in Pakistan time
+  const [{ data: orders }, { data: recent }, { data: products }, { data: lines }, { data: ads }] = await Promise.all([
     supabase.from("orders").select("status,total,created_at").gte("created_at", since),
     supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(8),
     supabase.from("products").select("id,name,stock,is_active").order("stock"),
@@ -17,7 +18,11 @@ export default async function AdminDashboard() {
       .select("line_total, unit_cost, quantity, orders!inner(status, created_at)")
       .gte("orders.created_at", since)
       .neq("orders.status", "cancelled"),
+    // Meta ad spend per day (synced hourly from Ads Manager by public.meta_ads_sync)
+    supabase.from("ad_spend_daily").select("day, spend").gt("day", pkDay(new Date(Date.now() - 30 * 864e5))),
   ]);
+  const spendByDay = new Map(((ads || []) as { day: string; spend: number }[]).map((a) => [a.day, Number(a.spend)]));
+  const adSpend = [...spendByDay.values()].reduce((s, v) => s + v, 0);
 
   // Gross profit = sales − buying cost, for order lines whose product has a buying price set
   const costed = (lines || []).filter((l) => l.unit_cost != null);
@@ -42,27 +47,30 @@ export default async function AdminDashboard() {
     const next = new Date(d);
     next.setDate(d.getDate() + 1);
     const dayOrders = valid.filter((o) => new Date(o.created_at) >= d && new Date(o.created_at) < next);
-    return { d, count: dayOrders.length, total: dayOrders.reduce((s, o) => s + Number(o.total), 0) };
+    return { d, count: dayOrders.length, total: dayOrders.reduce((s, o) => s + Number(o.total), 0), ads: spendByDay.get(pkDay(d)) || 0 };
   });
-  const maxDay = Math.max(1, ...perDay.map((p) => p.total));
+  const maxDay = Math.max(1, ...perDay.map((p) => Math.max(p.total, p.ads)));
+  const netProfit = profit - adSpend;
 
   const stats = [
     { label: "Orders (30 days)", value: valid.length.toString(), icon: ShoppingCart },
     { label: "Sales (30 days)", value: formatPrice(revenue), icon: Banknote },
     { label: "Gross profit (30 days)", value: formatPrice(profit), icon: Package, hint: uncosted ? `${uncosted} item${uncosted === 1 ? "" : "s"} without a buying price` : `Delivered: ${formatPrice(delivered)}` },
+    { label: "Ad spend (30 days)", value: formatPrice(Math.round(adSpend)), icon: Megaphone, hint: valid.length ? `Cost per order: ${formatPrice(Math.round(adSpend / valid.length))}` : "Meta ads" },
+    { label: "Profit after ads (30 days)", value: formatPrice(Math.round(netProfit)), icon: TrendingUp, tone: netProfit < 0 ? "text-rose-600" : "text-emerald-700", hint: adSpend ? `Sales ÷ ad spend: ${(revenue / adSpend).toFixed(1)}×` : undefined },
     { label: "Awaiting confirmation", value: pending.toString(), icon: Clock, href: "/admin/orders?status=pending" },
   ];
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold">Dashboard</h1>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map(({ label, value, icon: Icon, href, hint }: { label: string; value: string; icon: typeof Package; href?: string; hint?: string }) => {
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 2xl:grid-cols-6">
+        {stats.map(({ label, value, icon: Icon, href, hint, tone }: { label: string; value: string; icon: typeof Package; href?: string; hint?: string; tone?: string }) => {
           const body = (
             <>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Icon className="h-5 w-5" /></div>
               <p className="mt-3 text-xs text-gray-500 sm:text-sm">{label}</p>
-              <p className="text-xl font-extrabold sm:text-2xl">{value}</p>
+              <p className={`text-xl font-extrabold sm:text-2xl ${tone || ""}`}>{value}</p>
               {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
             </>
           );
@@ -75,16 +83,26 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="card p-5">
-        <p className="font-bold">Sales — last 14 days</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-bold">Sales vs ad spend — last 14 days</p>
+          <p className="flex items-center gap-4 text-xs text-gray-500">
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-brand-500" /> Sales</span>
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-accent-500" /> Ad spend</span>
+          </p>
+        </div>
         <div className="mt-5 flex h-40 items-end gap-1.5 sm:gap-2">
           {perDay.map((p) => (
-            <div key={p.d.toISOString()} className="group relative flex h-full flex-1 flex-col justify-end">
+            <div key={p.d.toISOString()} className="group relative flex h-full flex-1 items-end gap-0.5">
               <div
-                className="w-full rounded-t-md bg-brand-500 transition group-hover:bg-brand-600"
+                className="flex-1 rounded-t-md bg-brand-500 transition group-hover:bg-brand-600"
                 style={{ height: `${Math.max(2, (p.total / maxDay) * 100)}%`, opacity: p.total ? 1 : 0.25 }}
               />
-              <span className="pointer-events-none absolute -top-9 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-[11px] text-white group-hover:block">
-                {p.count} · {formatPrice(p.total)}
+              <div
+                className="w-1/3 rounded-t-sm bg-accent-500"
+                style={{ height: `${Math.max(1, (p.ads / maxDay) * 100)}%`, opacity: p.ads ? 0.9 : 0.2 }}
+              />
+              <span className="pointer-events-none absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-[11px] text-white group-hover:block">
+                {p.count} order{p.count === 1 ? "" : "s"} · {formatPrice(p.total)} · ads {formatPrice(Math.round(p.ads))}
               </span>
             </div>
           ))}
