@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, Banknote, Clock, Megaphone, Package, ShoppingCart, TrendingUp } from "lucide-react";
+import { AlertTriangle, Banknote, Clock, Megaphone, Package, ShoppingCart, TrendingUp, Truck } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -10,7 +10,7 @@ export default async function AdminDashboard() {
   const since = new Date(Date.now() - 30 * 864e5).toISOString();
   const pkDay = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Karachi" }); // YYYY-MM-DD in Pakistan time
   const [{ data: orders }, { data: recent }, { data: products }, { data: lines }, { data: ads }] = await Promise.all([
-    supabase.from("orders").select("status,total,created_at").gte("created_at", since),
+    supabase.from("orders").select("status,total,created_at,tracking_number,fee:postex_history->>transactionFee,tax:postex_history->>transactionTax,rfee:postex_history->>reversalFee,rtax:postex_history->>reversalTax").gte("created_at", since),
     supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(8),
     supabase.from("products").select("id,name,stock,is_active").order("stock"),
     supabase
@@ -50,21 +50,33 @@ export default async function AdminDashboard() {
     return { d, count: dayOrders.length, total: dayOrders.reduce((s, o) => s + Number(o.total), 0), ads: spendByDay.get(pkDay(d)) || 0 };
   });
   const maxDay = Math.max(1, ...perDay.map((p) => Math.max(p.total, p.ads)));
-  const netProfit = profit - adSpend;
+  // PostEx delivery charges (we pay them — delivery is free for customers). PostEx only reports the real fee once a parcel
+  // is delivered/returned, so other shipments use the usual charge as an estimate. Returned parcels still cost delivery.
+  const POSTEX_EST = 240; // Rs 206.25 fee + Rs 33 tax per parcel, as charged on delivered orders
+  type Charged = { status: string; tracking_number: string | null; fee: string | null; tax: string | null; rfee: string | null; rtax: string | null };
+  let courierActual = 0, courierEstimated = 0;
+  for (const o of (orders || []) as unknown as Charged[]) {
+    const real = [o.fee, o.tax, o.rfee, o.rtax].reduce((s, v) => s + (Number(v) || 0), 0);
+    if (real > 0) courierActual += real;
+    else if (o.status !== "cancelled" || o.tracking_number) courierEstimated += POSTEX_EST; // cancelled before shipping costs nothing
+  }
+  const courier = courierActual + courierEstimated;
+  const netProfit = profit - adSpend - courier;
 
   const stats = [
     { label: "Orders (30 days)", value: valid.length.toString(), icon: ShoppingCart },
     { label: "Sales (30 days)", value: formatPrice(revenue), icon: Banknote },
     { label: "Gross profit (30 days)", value: formatPrice(profit), icon: Package, hint: uncosted ? `${uncosted} item${uncosted === 1 ? "" : "s"} without a buying price` : `Delivered: ${formatPrice(delivered)}` },
     { label: "Ad spend (30 days)", value: formatPrice(Math.round(adSpend)), icon: Megaphone, hint: valid.length ? `Cost per order: ${formatPrice(Math.round(adSpend / valid.length))}` : "Meta ads" },
-    { label: "Profit after ads (30 days)", value: formatPrice(Math.round(netProfit)), icon: TrendingUp, tone: netProfit < 0 ? "text-rose-600" : "text-emerald-700", hint: adSpend ? `Sales ÷ ad spend: ${(revenue / adSpend).toFixed(1)}×` : undefined },
+    { label: "PostEx charges (30 days)", value: formatPrice(Math.round(courier)), icon: Truck, hint: `Actual ${formatPrice(Math.round(courierActual))} · estimated ${formatPrice(courierEstimated)}` },
+    { label: "Net profit (30 days)", value: formatPrice(Math.round(netProfit)), icon: TrendingUp, tone: netProfit < 0 ? "text-rose-600" : "text-emerald-700", hint: `After ads & delivery${adSpend ? ` · sales ÷ ads ${(revenue / adSpend).toFixed(1)}×` : ""}` },
     { label: "Awaiting confirmation", value: pending.toString(), icon: Clock, href: "/admin/orders?status=pending" },
   ];
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold">Dashboard</h1>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 2xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map(({ label, value, icon: Icon, href, hint, tone }: { label: string; value: string; icon: typeof Package; href?: string; hint?: string; tone?: string }) => {
           const body = (
             <>
