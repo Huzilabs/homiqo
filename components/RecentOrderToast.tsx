@@ -1,0 +1,98 @@
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
+import { useFlashOffer } from "@/lib/flash";
+
+type Recent = { first_name: string; city: string; product_name: string; product_slug: string; product_image: string | null; ordered_at: string };
+
+const FIRST_DELAY = 9000, SHOW_FOR = 6500, GAP = 22000, MAX_PER_VISIT = 6;
+const HIDE_KEY = "hq.proof.off";
+
+function ago(iso: string) {
+  const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (m < 60) return `${m} minute${m === 1 ? "" : "s"} ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} hour${h === 1 ? "" : "s"} ago`;
+  const d = Math.round(h / 24);
+  return d === 1 ? "yesterday" : `${d} days ago`;
+}
+
+/** Bottom-left popup cycling through REAL recent orders (first name, city, product). */
+export default function RecentOrderToast() {
+  const pathname = usePathname();
+  const { offer } = useFlashOffer();
+  const [list, setList] = useState<Recent[]>([]);
+  const [cur, setCur] = useState<Recent | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [off, setOff] = useState(true);
+  const [topPx, setTopPx] = useState(88);
+  const shown = useRef(0);
+
+  // Not on checkout / order pages, and not while the Meta-offer countdown occupies the same corner
+  const blocked = off || Boolean(offer) || pathname === "/checkout" || pathname.startsWith("/order");
+
+  useEffect(() => {
+    try { setOff(sessionStorage.getItem(HIDE_KEY) === "1"); } catch { setOff(false); }
+    fetch("/api/recent-orders").then((r) => r.json()).then((d) => Array.isArray(d) && setList(d)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (blocked || !list.length) { setVisible(false); return; }
+    let i = Math.floor(Math.random() * list.length);
+    let t: ReturnType<typeof setTimeout>;
+    const cycle = (delay: number) => {
+      t = setTimeout(() => {
+        if (shown.current >= MAX_PER_VISIT) return;
+        // prefer a different product than the one on screen, so it reads as "others are buying too"
+        const onSlug = pathname.startsWith("/product/") ? pathname.split("/")[2] : "";
+        let pick = list[i % list.length];
+        for (let k = 0; k < list.length && pick.product_slug === onSlug && list.length > 1 && k < 1; k++) pick = list[++i % list.length];
+        i++;
+        // sit just under the sticky header (its position changes while the top bar scrolls away)
+        const hb = document.querySelector("header")?.getBoundingClientRect().bottom;
+        setTopPx(Math.max(8, Math.round(hb ?? 80)) + 8);
+        setCur(pick); setVisible(true); shown.current++;
+        t = setTimeout(() => { setVisible(false); cycle(GAP); }, SHOW_FOR);
+      }, delay);
+    };
+    cycle(shown.current ? GAP : FIRST_DELAY);
+    return () => clearTimeout(t);
+  }, [blocked, list, pathname]);
+
+  if (!cur || blocked) return null;
+  const onProduct = pathname.startsWith("/product/");
+
+  return (
+    <div
+      role="status"
+      style={onProduct && typeof window !== "undefined" && window.innerWidth < 1024 ? { top: topPx } : undefined}
+      aria-live="polite"
+      // Phones, product page: top (over the photo) so it never covers the price or the Buy Now bar. Elsewhere: bottom-left.
+      className={`fixed left-3 right-[4.5rem] z-30 transition-all duration-500 sm:right-auto sm:w-[340px] max-sm:max-w-[290px] lg:bottom-6 lg:left-6 lg:top-auto ${
+        onProduct ? "" : "bottom-4"
+      } ${visible ? "translate-y-0 opacity-100" : `pointer-events-none opacity-0 ${onProduct ? "max-lg:-translate-y-4 lg:translate-y-4" : "translate-y-4"}`}`}
+    >
+      <div className="relative flex items-center gap-2.5 border border-ink/10 bg-white/95 p-1.5 pr-7 shadow-lift backdrop-blur sm:gap-3 sm:p-2.5 sm:pr-8">
+        <Link href={`/product/${cur.product_slug}`} className="relative h-10 w-10 shrink-0 overflow-hidden bg-sand sm:h-14 sm:w-14">
+          {cur.product_image && <Image src={cur.product_image} alt="" fill sizes="(max-width:640px) 40px, 56px" className="object-cover" />}
+        </Link>
+        <Link href={`/product/${cur.product_slug}`} className="min-w-0 text-[12px] leading-tight text-ink sm:text-[13px] sm:leading-snug">
+          <span className="font-semibold">{cur.first_name}</span> from <span className="font-semibold">{cur.city}</span> ordered
+          <span className="block truncate font-medium text-brand-700">{cur.product_name}</span>
+          <span className="text-[10px] text-ink/50 sm:text-[11px]">{ago(cur.ordered_at)} · ✓ Verified order</span>
+        </Link>
+        <button
+          type="button"
+          aria-label="Hide"
+          onClick={() => { setVisible(false); setOff(true); try { sessionStorage.setItem(HIDE_KEY, "1"); } catch {} }}
+          className="absolute right-1.5 top-1.5 p-1 text-ink/40 hover:text-ink"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
