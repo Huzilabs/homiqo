@@ -57,6 +57,7 @@ export interface Order {
   } | null;
   postex_error?: string | null;
   postex_city?: string | null;
+  replacement_tracking?: string | null;
 }
 
 export interface OrderItem {

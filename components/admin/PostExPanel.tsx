@@ -98,6 +98,16 @@ export default function PostExPanel({ order, suggestedCity }: { order: Order; su
               {busy === "sync" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync now
             </button>
           </div>
+          {order.replacement_tracking && (
+            <div className="border border-amber-300 bg-amber-50 p-3 text-sm">
+              <p className="font-semibold text-amber-800">🔁 Replacement shipment</p>
+              <p className="mt-0.5 font-mono text-xs">{order.replacement_tracking}</p>
+              <p className="mt-1 text-xs text-amber-800">Rider delivers the new item and collects the old one back · Rs 0</p>
+              <a href={`/api/admin/orders/${order.id}/airway-bill?replacement=1`} target="_blank" rel="noopener noreferrer" className="btn-secondary mt-2 w-full px-3 py-2 text-[11px]">
+                <Printer className="h-4 w-4" /> Replacement airway bill
+              </a>
+            </div>
+          )}
           <p className="text-xs text-gray-500">Status updates from PostEx are pulled automatically every 15 minutes. Cancelling this order here also cancels it on PostEx.</p>
         </>
       ) : order.status === "cancelled" ? (

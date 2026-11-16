@@ -318,3 +318,7 @@ select cron.schedule('postex-cities', '17 3 * * *', $c$select public.postex_refr
 
 -- Admin: permanently delete an order (see app/api/admin/orders/[id] DELETE). Stock returns only for pending/confirmed orders.
 -- create or replace function public.admin_delete_order(p_order_id uuid) returns jsonb ... (applied 2026-11-16 as migration admin_delete_order)
+
+-- Replacement shipments (PostEx orderType 'Replacement': deliver new item, collect the old one). Applied 2026-11-16:
+-- alter table public.orders add column replacement_tracking text;
+-- public.postex_airway_bill(p_order_id uuid, p_replacement boolean) prints the replacement label.
