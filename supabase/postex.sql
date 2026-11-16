@@ -315,3 +315,6 @@ grant execute on function public.postex_refresh_cities(), public.postex_order_pa
 select cron.unschedule(jobid) from cron.job where jobname in ('postex-sync', 'postex-cities');
 select cron.schedule('postex-sync', '*/15 * * * *', $c$select public.postex_sync()$c$);
 select cron.schedule('postex-cities', '17 3 * * *', $c$select public.postex_refresh_cities()$c$);
+
+-- Admin: permanently delete an order (see app/api/admin/orders/[id] DELETE). Stock returns only for pending/confirmed orders.
+-- create or replace function public.admin_delete_order(p_order_id uuid) returns jsonb ... (applied 2026-11-16 as migration admin_delete_order)

@@ -86,3 +86,35 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   return NextResponse.json({ ok: true, emailed, hasEmail: Boolean((order as Order).email) });
 }
+
+/** Permanently delete an order. A live PostEx shipment is cancelled on PostEx first. */
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+  if (!isAdmin) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+
+  const { data: o } = await supabase.from("orders").select("status, courier, tracking_number, postex_status").eq("id", id).maybeSingle();
+  if (!o) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+
+  const livePostEx = o.courier === "PostEx" && Boolean(o.tracking_number) && !["delivered", "cancelled"].includes(o.status)
+    && !/^(returned|returning|cancel)/i.test(o.postex_status || "");
+  if (livePostEx) {
+    const { data: res, error } = await supabase.rpc("postex_cancel_order", { p_order_id: id });
+    const r = res as { ok: boolean; error?: string } | null;
+    if (error || !r?.ok) {
+      return NextResponse.json(
+        { error: `Could not cancel the PostEx shipment (${error?.message || r?.error || "unknown error"}) — it may already be picked up, so the order was not deleted.` },
+        { status: 400 },
+      );
+    }
+  }
+
+  const { data: del, error } = await supabase.rpc("admin_delete_order", { p_order_id: id });
+  const d = del as { ok: boolean; error?: string; restocked?: boolean } | null;
+  if (error || !d?.ok) return NextResponse.json({ error: error?.message || d?.error || "Delete failed" }, { status: 400 });
+  revalidateTag(PRODUCTS_TAG);
+  return NextResponse.json({ ok: true, restocked: d.restocked, postexCancelled: livePostEx });
+}

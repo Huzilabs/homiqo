@@ -3,6 +3,7 @@ import { reviewLink } from "@/lib/reviews";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, MessageCircle, Phone, Star } from "lucide-react";
+import DeleteOrderButton from "@/components/admin/DeleteOrderButton";
 import OrderStatusForm from "@/components/admin/OrderStatusForm";
 import PostExPanel from "@/components/admin/PostExPanel";
 import PrintButton from "@/components/admin/PrintButton";
@@ -120,6 +121,11 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               ))}
             </ol>
           </div>
+          <DeleteOrderButton
+            id={o.id}
+            orderNumber={o.order_number}
+            booked={o.courier === "PostEx" && Boolean(o.tracking_number) && !["delivered", "cancelled"].includes(o.status)}
+          />
         </div>
       </div>
     </div>
