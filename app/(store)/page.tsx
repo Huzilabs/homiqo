@@ -53,21 +53,22 @@ export default async function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={ld([itemListJsonLd(products), faqJsonLd(faqs)])} />
       {/* ═════════ HERO — full-screen editorial split ═════════ */}
-      <section className="grid lg:h-[calc(100svh-113px)] lg:min-h-[640px] lg:grid-cols-2">
-        <div className="relative order-2 flex items-center bg-sand px-6 py-16 sm:px-12 lg:order-1 lg:px-[max(3rem,calc((100vw-1320px)/2+3rem))] lg:py-0">
+      {/* Square photo (the product images are square, so no white bars) + a text panel of the same height */}
+      <section className="grid lg:grid-cols-[1fr_min(640px,calc(100svh-150px))]">
+        <div className="relative order-2 flex items-center bg-sand px-6 py-12 sm:px-12 lg:order-1 lg:px-[max(3rem,calc((100vw-1320px)/2+3rem))] lg:py-8">
           <div className="max-w-[560px]">
             <p className="eyebrow">Kitchen &amp; home gadgets · Pakistan</p>
-            <h1 className="h-display mt-6 text-ink">
+            <h1 className="mt-4 font-serif text-[2.6rem] font-medium leading-[1.05] tracking-[-.01em] text-ink sm:text-5xl lg:text-[3.5rem] xl:text-[3.9rem]">
               Clever kitchen gadgets for the <em className="font-serif italic text-brand-600">heart</em> of your home
             </h1>
-            <p className="mt-7 max-w-md text-base leading-relaxed text-ink/65 sm:text-[17px]">
+            <p className="mt-5 max-w-md text-base leading-relaxed text-ink/65">
               Electric choppers, vegetable cutters, coffee beaters, sink organizers and cordless vacuums — delivered anywhere in Pakistan. Pay cash when it arrives.
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link href="/shop" className="btn-primary">Shop now</Link>
               <a href="#watch" className="link-arrow">Watch it in action <ArrowRight className="h-3.5 w-3.5" /></a>
             </div>
-            <div className="mt-14 hidden grid-cols-3 border-t border-ink/10 pt-8 sm:grid">
+            <div className="mt-9 hidden grid-cols-3 border-t border-ink/10 pt-6 sm:grid">
               {[
                 ["Cash on", "delivery"],
                 ["2–5 day", "delivery"],
@@ -82,8 +83,8 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="relative order-1 aspect-[4/5] overflow-hidden bg-brand-900 sm:aspect-[16/11] lg:order-2 lg:aspect-auto">
-          <ProductImage src={hero.images[0]} alt={hero.name} priority sizes="(max-width:1024px) 100vw, 50vw" />
+        <div className="relative order-1 aspect-square overflow-hidden bg-white lg:order-2">
+          <ProductImage src={hero.images[0]} alt={hero.name} priority sizes="(max-width:1024px) 100vw, 50vw" className="!object-cover" />
           <InViewVideo url={previewVideo(hero.videos)} deferUntilLoad minWidth={768} />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent" />
           <Link
