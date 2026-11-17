@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { TrackedOrder } from "@/lib/types";
 import { BANK, STORE } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
+import { reviewLink } from "@/lib/reviews";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
@@ -54,6 +55,21 @@ export default async function OrderPage({
             Confirm on WhatsApp
           </a>
           <p className="mt-2 text-xs text-ink/50">or wait for our call on your number · {BANK.whatsappDisplay}</p>
+        </div>
+      )}
+
+      {/* Delivered: ask for a review right here (customers come back to this page to track their parcel) */}
+      {order && order.status === "delivered" && phone && (
+        <div className="mx-auto mt-8 max-w-xl border border-accent-500/40 bg-accent-50 p-5 text-center">
+          <p className="text-2xl">⭐⭐⭐⭐⭐</p>
+          <p className="mt-1 font-semibold text-ink">Your parcel was delivered — how did we do?</p>
+          <p className="mt-1 text-sm text-ink/65">A quick review takes 30 seconds and helps other customers choose.</p>
+          <a
+            href={reviewLink(order.order_number, phone)}
+            className="mt-4 inline-flex h-12 items-center justify-center gap-2 bg-accent-600 px-6 text-sm font-bold uppercase tracking-[.12em] text-white hover:bg-accent-700"
+          >
+            ★ Write a review
+          </a>
         </div>
       )}
 
