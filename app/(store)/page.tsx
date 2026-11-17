@@ -128,7 +128,7 @@ export default async function HomePage() {
       <section className="container-x pt-28 sm:pt-36">
         <SectionHead eyebrow="Featured collection" title="The Bestseller Edit" href="/shop" />
         <div className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-7 lg:grid-cols-4">
-          {edit.map((p, i) => <ProductCard key={p.id} product={p} priority={i < 2} />)}
+          {edit.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
       </section>
 
