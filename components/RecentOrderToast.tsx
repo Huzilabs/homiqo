@@ -8,7 +8,7 @@ import { useFlashOffer } from "@/lib/flash";
 
 type Recent = { first_name: string; city: string; product_name: string; product_slug: string; product_image: string | null; ordered_at: string };
 
-const FIRST_DELAY = 5000, SHOW_FOR = 6500, GAP = 22000, MAX_PER_VISIT = 6;
+const FIRST_DELAY = 4000, SHOW_FOR = 7000, GAP = 6000, MAX_PER_VISIT = 40;
 const HIDE_KEY = "hq.proof.off";
 
 function ago(iso: string) {
@@ -72,18 +72,18 @@ export default function RecentOrderToast() {
       style={onProduct && typeof window !== "undefined" && window.innerWidth < 1024 ? { top: topPx } : undefined}
       aria-live="polite"
       // Phones, product page: top (over the photo) so it never covers the price or the Buy Now bar. Elsewhere: bottom-left.
-      className={`fixed left-3 right-[4.5rem] z-30 transition-all duration-500 sm:right-auto sm:w-[340px] max-sm:max-w-[290px] lg:bottom-6 lg:left-6 lg:top-auto ${
+      className={`fixed left-3 right-[4.5rem] z-[45] transition-all duration-500 sm:right-auto sm:w-[420px] max-sm:max-w-[330px] lg:bottom-6 lg:left-6 lg:top-auto ${
         onProduct ? (raised ? "lg:!bottom-24" : "") : raised ? "bottom-[4.5rem] lg:!bottom-24" : "bottom-4"
       } ${visible ? "translate-y-0 opacity-100" : `pointer-events-none opacity-0 ${onProduct ? "max-lg:-translate-y-4 lg:translate-y-4" : "translate-y-4"}`}`}
     >
-      <div className="relative flex items-center gap-2.5 border border-ink/10 bg-white/95 p-1.5 pr-7 shadow-lift backdrop-blur sm:gap-3 sm:p-2.5 sm:pr-8">
-        <Link href={`/product/${cur.product_slug}`} className="relative h-10 w-10 shrink-0 overflow-hidden bg-sand sm:h-14 sm:w-14">
-          {cur.product_image && <Image src={cur.product_image} alt="" fill sizes="(max-width:640px) 40px, 56px" className="object-cover" />}
+      <div className="relative flex items-center gap-3 border border-ink/10 bg-white p-2 pr-8 shadow-[0_10px_40px_-8px_rgba(14,42,40,.35)] sm:gap-4 sm:p-3 sm:pr-10">
+        <Link href={`/product/${cur.product_slug}`} className="relative h-14 w-14 shrink-0 overflow-hidden bg-sand sm:h-[76px] sm:w-[76px]">
+          {cur.product_image && <Image src={cur.product_image} alt="" fill sizes="(max-width:640px) 56px, 76px" className="object-cover" />}
         </Link>
-        <Link href={`/product/${cur.product_slug}`} className="min-w-0 text-[12px] leading-tight text-ink sm:text-[13px] sm:leading-snug">
+        <Link href={`/product/${cur.product_slug}`} className="min-w-0 text-[14px] leading-snug text-ink sm:text-[16px]">
           <span className="font-semibold">{cur.first_name}</span> from <span className="font-semibold">{cur.city}</span> ordered
-          <span className="block truncate font-medium text-brand-700">{cur.product_name}</span>
-          <span className="text-[10px] text-ink/50 sm:text-[11px]">{ago(cur.ordered_at)} · ✓ Verified order</span>
+          <span className="block truncate font-semibold text-brand-700">{cur.product_name}</span>
+          <span className="mt-0.5 block text-[12px] text-ink/55 sm:text-[13px]">{ago(cur.ordered_at)} · ✓ Verified order</span>
         </Link>
         <button
           type="button"
@@ -91,7 +91,7 @@ export default function RecentOrderToast() {
           onClick={() => { setVisible(false); setOff(true); try { sessionStorage.setItem(HIDE_KEY, "1"); } catch {} }}
           className="absolute right-1.5 top-1.5 p-1 text-ink/40 hover:text-ink"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>
