@@ -8,7 +8,7 @@ import { useFlashOffer } from "@/lib/flash";
 
 type Recent = { first_name: string; city: string; product_name: string; product_slug: string; product_image: string | null; ordered_at: string };
 
-const FIRST_DELAY = 9000, SHOW_FOR = 6500, GAP = 22000, MAX_PER_VISIT = 6;
+const FIRST_DELAY = 5000, SHOW_FOR = 6500, GAP = 22000, MAX_PER_VISIT = 6;
 const HIDE_KEY = "hq.proof.off";
 
 function ago(iso: string) {
@@ -31,8 +31,9 @@ export default function RecentOrderToast() {
   const [topPx, setTopPx] = useState(88);
   const shown = useRef(0);
 
-  // Not on checkout / order pages, and not while the Meta-offer countdown occupies the same corner
-  const blocked = off || Boolean(offer) || pathname === "/checkout" || pathname.startsWith("/order");
+  // Not on checkout / order pages. While the Meta-offer countdown sits bottom-left, the popup goes just above it.
+  const blocked = off || pathname === "/checkout" || pathname.startsWith("/order");
+  const raised = Boolean(offer);
 
   useEffect(() => {
     try { setOff(sessionStorage.getItem(HIDE_KEY) === "1"); } catch { setOff(false); }
@@ -72,7 +73,7 @@ export default function RecentOrderToast() {
       aria-live="polite"
       // Phones, product page: top (over the photo) so it never covers the price or the Buy Now bar. Elsewhere: bottom-left.
       className={`fixed left-3 right-[4.5rem] z-30 transition-all duration-500 sm:right-auto sm:w-[340px] max-sm:max-w-[290px] lg:bottom-6 lg:left-6 lg:top-auto ${
-        onProduct ? "" : "bottom-4"
+        onProduct ? (raised ? "lg:!bottom-24" : "") : raised ? "bottom-[4.5rem] lg:!bottom-24" : "bottom-4"
       } ${visible ? "translate-y-0 opacity-100" : `pointer-events-none opacity-0 ${onProduct ? "max-lg:-translate-y-4 lg:translate-y-4" : "translate-y-4"}`}`}
     >
       <div className="relative flex items-center gap-2.5 border border-ink/10 bg-white/95 p-1.5 pr-7 shadow-lift backdrop-blur sm:gap-3 sm:p-2.5 sm:pr-8">
