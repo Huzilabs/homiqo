@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Inline the (small, ~13 KB) CSS into the HTML so it does not block the first paint with an extra request
+  experimental: { inlineCss: true },
   images: {
     // WebP at responsive sizes: much faster to generate on first request than AVIF (better LCP), originals untouched.
     formats: ["image/webp"],

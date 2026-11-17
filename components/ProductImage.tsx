@@ -36,7 +36,7 @@ export default function ProductImage({
     // Product photos are shown whole (never cropped) on white, whatever the frame's shape
     return (
       <div className="absolute inset-0 bg-white">
-        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={`object-contain ${className}`} />
+        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} fetchPriority={priority ? "high" : undefined} className={`object-contain ${className}`} />
       </div>
     );
   }
