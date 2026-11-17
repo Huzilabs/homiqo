@@ -43,7 +43,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
           )}
           <p className="text-sm text-gray-500">Placed {formatDate(o.created_at)}</p>
         </div>
-        <div className="flex gap-2 print:hidden">
+        <div className="flex flex-wrap gap-2 print:hidden">
           <a href={`tel:${o.phone}`} className="btn-secondary px-4 py-2"><Phone className="h-4 w-4" /> Call</a>
           <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name}, regarding your order ${o.order_number}`)}`} target="_blank" rel="noopener noreferrer" className="btn-secondary px-4 py-2">
             <MessageCircle className="h-4 w-4" /> WhatsApp
@@ -107,6 +107,21 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
         </div>
 
         <div className="space-y-6 print:hidden">
+          {o.status === "delivered" && (
+            <div className="card border-amber-300 bg-amber-50 p-6">
+              <h2 className="flex items-center gap-2 font-bold"><Star className="h-5 w-5 fill-amber-400 text-amber-400" /> Get a review</h2>
+              <p className="mt-1 text-sm text-gray-600">Delivered — send {o.customer_name.split(" ")[0]} their personal review link on WhatsApp (best 1–2 days after delivery).</p>
+              <a
+                href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name.split(" ")[0]}! Thank you for shopping with ${STORE.name}. We hope you're enjoying your order ${o.order_number}. Could you take a minute to leave a quick review? It really helps us: ${reviewLink(o.order_number, o.phone)}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 bg-[#25D366] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1ebe5b]"
+              >
+                <MessageCircle className="h-4 w-4" /> Ask for a review on WhatsApp
+              </a>
+              <p className="mt-3 break-all text-xs text-gray-500">Link: {reviewLink(o.order_number, o.phone)}</p>
+            </div>
+          )}
           <PostExPanel order={o} suggestedCity={(suggestedCity as string | null) ?? null} />
           <OrderStatusForm key={`${o.status}-${o.updated_at}`} order={o} />
           <div className="card p-6">
