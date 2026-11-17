@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import { STORE } from "@/lib/config";
+import { adRefNote } from "@/lib/ad-ref";
 
 export default function WhatsAppButton() {
   const pathname = usePathname();
@@ -14,7 +15,7 @@ export default function WhatsAppButton() {
         // On a product page, say which product they want to order
         const p = (window as unknown as { __hqProduct?: { name: string; price: string; url: string } }).__hqProduct;
         if (p && pathname.startsWith("/product/")) {
-          const text = `Assalam o Alaikum ${STORE.name}! I want to order this product:\n\n*${p.name}* (${p.price})\n${p.url}`;
+          const text = `Assalam o Alaikum ${STORE.name}! I want to order this product:\n\n*${p.name}* (${p.price})\n${p.url}` + adRefNote();
           e.currentTarget.href = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(text)}`;
         }
       }}
