@@ -1,6 +1,7 @@
 "use client";
 import { createClient } from "@/lib/supabase/client";
 import type { CartItem } from "./types";
+import { isPkMobile } from "./phone";
 
 const KEY = "hq.lead";
 
@@ -21,12 +22,12 @@ export const clearLead = () => {
   } catch {}
 };
 
-/** Save what the customer has typed so far — only once the phone number looks valid. */
+/** Save what the customer has typed so far — only once the phone is a complete Pakistani mobile number. */
 export async function saveLead(form: HTMLFormElement, items: CartItem[], subtotal: number) {
   const f = new FormData(form);
   const get = (k: string) => String(f.get(k) || "").trim();
   const phone = get("phone");
-  if (phone.replace(/\D/g, "").length < 10) return;
+  if (!isPkMobile(phone)) return;
   const id = leadId();
   if (!id) return;
   let session_id: string | undefined, utm_campaign: string | undefined;

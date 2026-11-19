@@ -12,6 +12,7 @@ import { BANK, FLASH_OFFER, STORE, bankDiscount, flashDiscount } from "@/lib/con
 import { claimFlash, markFlashUsed, mmss, useFlashOffer } from "@/lib/flash";
 import { createClient } from "@/lib/supabase/client";
 import { clearLead, saveLead } from "@/lib/checkout-lead";
+import { PK_MOBILE_PATTERN } from "@/lib/phone";
 import { sendVisitEvent } from "@/lib/visits";
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
@@ -170,7 +171,7 @@ export default function CheckoutPage() {
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Full name" name="customer_name" required autoComplete="name" className="sm:col-span-2" />
               <div>
-                <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" inputMode="tel" pattern="[0-9+\-\s]{10,16}" />
+                <Field label="Phone number" name="phone" type="tel" required placeholder="03XX XXXXXXX" autoComplete="tel" inputMode="tel" pattern={PK_MOBILE_PATTERN} title="Enter a complete mobile number, e.g. 0300 1234567" />
                 <p className="mt-1 text-xs text-ink/50">We’ll call or WhatsApp this number about your order.</p>
               </div>
               <div>
