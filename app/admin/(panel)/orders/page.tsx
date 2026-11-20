@@ -1,16 +1,19 @@
 import Link from "next/link";
-import { ChevronRight, MessageCircle, Phone, Search, Truck } from "lucide-react";
+import { Suspense } from "react";
+import { ChevronRight, MessageCircle, Phone, Truck } from "lucide-react";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
 import OrdersBoard, { type BoardOrder } from "@/components/admin/OrdersBoard";
 import PostExSyncButton from "@/components/admin/PostExSyncButton";
 import CreateOrderButton from "@/components/admin/CreateOrderButton";
+import OrdersSearch from "@/components/admin/OrdersSearch";
+import { BulkBar, OrdersSelection, RowCheckbox, SelectAll } from "@/components/admin/OrdersBulk";
 import { adminProducts } from "@/lib/admin-products";
 import { createClient } from "@/lib/supabase/server";
 import { ORDER_STATUSES } from "@/lib/config";
 import { formatPrice, STATUS_ROW } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZES = [25, 50, 100] as const;
 
 const TILE: Record<string, { label: string; dot: string }> = {
   all: { label: "All orders", dot: "bg-ink" },
@@ -38,9 +41,10 @@ const when = (iso: string) => {
 export default async function AdminOrders({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; page?: string; view?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; view?: string; per?: string }>;
 }) {
-  const { status, q, page: pageParam, view } = await searchParams;
+  const { status, q, page: pageParam, view, per: perParam } = await searchParams;
+  const PAGE_SIZE = (PAGE_SIZES as readonly number[]).includes(Number(perParam)) ? Number(perParam) : 25;
   const board = view === "board";
   const page = Math.max(1, Number(pageParam) || 1);
   const supabase = await createClient();
@@ -72,12 +76,14 @@ export default async function AdminOrders({
     items.set(r.order_id, [...(items.get(r.order_id) || []), { name: r.product_name, qty: r.quantity }]);
   }
 
-  const href = (o: { status?: string; page?: number }) => {
+  const href = (o: { status?: string; page?: number; per?: number }) => {
     const sp = new URLSearchParams();
     if (board) sp.set("view", "board");
     const s = "status" in o ? o.status : status;
     if (s) sp.set("status", s);
     if (q) sp.set("q", q);
+    const per = o.per ?? PAGE_SIZE;
+    if (per !== 25) sp.set("per", String(per));
     if (o.page && o.page > 1) sp.set("page", String(o.page));
     const str = sp.toString();
     return `/admin/orders${str ? `?${str}` : ""}`;
@@ -121,12 +127,9 @@ export default async function AdminOrders({
         ))}
       </div>
 
-      <form className="relative">
-        {board && <input type="hidden" name="view" value="board" />}
-        {!board && status && <input type="hidden" name="status" value={status} />}
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        <input name="q" defaultValue={q} placeholder="Search order #, customer name, phone or city" className="input pl-9" />
-      </form>
+      <Suspense fallback={<div className="input h-11" />}>
+        <OrdersSearch />
+      </Suspense>
 
       {board ? (
         <OrdersBoard
@@ -137,12 +140,13 @@ export default async function AdminOrders({
           }))}
         />
       ) : (
-      <>
+      <OrdersSelection>
       {/* Desktop table */}
       <div className="card hidden overflow-x-auto lg:block">
         <table className="w-full text-sm">
           <thead className="border-b bg-gray-50/80 text-left text-[11px] uppercase tracking-wider text-gray-500">
             <tr>
+              <th className="w-10 py-3 pl-5"><SelectAll ids={orders.map((o) => o.id)} /></th>
               <th className="px-5 py-3 font-medium">Order</th>
               <th className="px-5 py-3 font-medium">Customer</th>
               <th className="px-5 py-3 font-medium">Items</th>
@@ -158,6 +162,7 @@ export default async function AdminOrders({
               const its = items.get(o.id) || [];
               return (
                 <tr key={o.id} className={`align-top transition ${STATUS_ROW[o.status] || "hover:bg-gray-50/70"}`}>
+                  <td className="py-4 pl-5"><RowCheckbox id={o.id} label={o.order_number} /></td>
                   <td className="px-5 py-4">
                     <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700 hover:underline">{o.order_number}</Link>
                     <p className="mt-0.5 text-xs text-gray-500">{t.date} · {t.time}</p>
@@ -201,7 +206,7 @@ export default async function AdminOrders({
               );
             })}
             {orders.length === 0 && (
-              <tr><td colSpan={7} className="p-12 text-center text-gray-500">No orders found.</td></tr>
+              <tr><td colSpan={8} className="p-12 text-center text-gray-500">No orders found.</td></tr>
             )}
           </tbody>
         </table>
@@ -215,9 +220,12 @@ export default async function AdminOrders({
           return (
             <div key={o.id} className={`card p-4 ${STATUS_ROW[o.status] || ""}`}>
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="flex items-start gap-3">
+                  <span className="pt-1"><RowCheckbox id={o.id} label={o.order_number} /></span>
+                  <div>
                   <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700">{o.order_number}</Link>
                   <p className="text-xs text-gray-500">{t.date} · {t.time}</p>
+                  </div>
                 </div>
                 <p className="text-right font-semibold tabular-nums">
                   {formatPrice(o.total)}
@@ -244,14 +252,30 @@ export default async function AdminOrders({
         {orders.length === 0 && <p className="card p-10 text-center text-gray-500">No orders found.</p>}
       </div>
 
-      </>
+      <BulkBar orders={orders.map((o) => ({ id: o.id, order_number: o.order_number, status: o.status }))} />
+      </OrdersSelection>
       )}
 
-      {!board && pages > 1 && (
-        <div className="flex items-center justify-center gap-3 text-sm">
-          {page > 1 && <Link href={href({ page: page - 1 })} className="btn-secondary px-4 py-2">Previous</Link>}
-          <span className="text-gray-500">Page {page} of {pages}</span>
-          {page < pages && <Link href={href({ page: page + 1 })} className="btn-secondary px-4 py-2">Next</Link>}
+      {!board && (count || 0) > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-20 text-sm">
+          <p className="text-gray-500">
+            Showing <b className="text-ink">{(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, count || 0)}</b> of <b className="text-ink">{count}</b> orders
+          </p>
+          {pages > 1 && (
+            <nav className="flex items-center gap-1" aria-label="Pages">
+              <PageLink href={href({ page: page - 1 })} disabled={page <= 1} label="‹ Prev" />
+              {pageList(page, pages).map((n, i) =>
+                n === 0 ? <span key={`gap${i}`} className="px-1 text-gray-400">…</span> : <PageLink key={n} href={href({ page: n })} label={String(n)} active={n === page} />,
+              )}
+              <PageLink href={href({ page: page + 1 })} disabled={page >= pages} label="Next ›" />
+            </nav>
+          )}
+          <p className="flex items-center gap-1 text-gray-500">
+            Per page:
+            {PAGE_SIZES.map((n) => (
+              <Link key={n} href={href({ page: 1, per: n })} className={`px-2 py-1 ${n === PAGE_SIZE ? "bg-ink font-semibold text-white" : "hover:text-ink"}`}>{n}</Link>
+            ))}
+          </p>
         </div>
       )}
     </div>
@@ -270,4 +294,23 @@ function CourierCell({ o }: { o: Order }) {
   if (o.courier) return <span className="text-gray-600">{o.courier}{o.tracking_number ? ` · ${o.tracking_number}` : ""}</span>;
   if (o.status === "pending") return <span className="font-medium text-amber-700">Call to approve</span>;
   return <span className="text-gray-400">—</span>;
+}
+
+/** 1 … 4 5 [6] 7 8 … 20 (0 = gap) */
+function pageList(page: number, pages: number) {
+  const out: number[] = [];
+  for (let n = 1; n <= pages; n++) {
+    if (n === 1 || n === pages || Math.abs(n - page) <= 2) out.push(n);
+    else if (out[out.length - 1] !== 0) out.push(0);
+  }
+  return out;
+}
+
+function PageLink({ href, label, active, disabled }: { href: string; label: string; active?: boolean; disabled?: boolean }) {
+  if (disabled) return <span className="px-3 py-1.5 text-gray-300">{label}</span>;
+  return (
+    <Link href={href} aria-current={active ? "page" : undefined} className={`min-w-[2.25rem] border px-3 py-1.5 text-center ${active ? "border-ink bg-ink font-semibold text-white" : "border-ink/10 bg-white hover:border-ink/40"}`}>
+      {label}
+    </Link>
+  );
 }
