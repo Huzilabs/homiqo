@@ -3,6 +3,8 @@ import { ChevronRight, MessageCircle, Phone, Search, Truck } from "lucide-react"
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
 import OrdersBoard, { type BoardOrder } from "@/components/admin/OrdersBoard";
 import PostExSyncButton from "@/components/admin/PostExSyncButton";
+import CreateOrderButton from "@/components/admin/CreateOrderButton";
+import { adminProducts } from "@/lib/admin-products";
 import { createClient } from "@/lib/supabase/server";
 import { ORDER_STATUSES } from "@/lib/config";
 import { formatPrice, STATUS_ROW } from "@/lib/format";
@@ -50,6 +52,7 @@ export default async function AdminOrders({
     if (term) query = query.or(`order_number.ilike.%${term}%,customer_name.ilike.%${term}%,phone.ilike.%${term}%,city.ilike.%${term}%`);
   }
 
+  const productsForForm = adminProducts(supabase);
   const [{ data, count }, ...statusCounts] = await Promise.all([
     board ? query.limit(300) : query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1),
     supabase.from("orders").select("id", { count: "exact", head: true }),
@@ -97,6 +100,7 @@ export default async function AdminOrders({
             <Link href={`/admin/orders?view=board${q ? `&q=${encodeURIComponent(q)}` : ""}`} className={`px-3 py-2 ${board ? "bg-ink text-white" : "text-gray-500 hover:text-ink"}`}>Board</Link>
           </div>
           <PostExSyncButton />
+          <CreateOrderButton products={await productsForForm} />
         </div>
       </div>
 

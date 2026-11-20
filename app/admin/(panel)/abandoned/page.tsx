@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LeadActions from "@/components/admin/LeadActions";
+import { adminProducts } from "@/lib/admin-products";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import { STORE } from "@/lib/config";
@@ -16,7 +17,7 @@ const TABS = [
 
 type Lead = {
   id: string; customer_name: string | null; phone: string; city: string | null; address: string | null;
-  items: { name: string; quantity: number; price: number }[]; subtotal: number; utm_campaign: string | null;
+  items: { product_id?: string; name: string; quantity: number; price: number }[]; subtotal: number; utm_campaign: string | null;
   status: string; created_at: string; updated_at: string; orders: { order_number: string } | null;
 };
 
@@ -47,6 +48,7 @@ export default async function AbandonedCheckouts({ searchParams }: { searchParam
     ...TABS.map((t) => (t.key === "open" ? base().eq("status", "open").lt("updated_at", cutoff) : base().eq("status", t.key))),
   ]);
   const rows = (data || []) as unknown as Lead[];
+  const products = await adminProducts(supabase);
 
   return (
     <div className="space-y-6">
@@ -102,7 +104,22 @@ export default async function AbandonedCheckouts({ searchParams }: { searchParam
                       {l.orders?.order_number && <> · ordered as <b>{l.orders.order_number}</b></>}
                     </p>
                   </div>
-                  {l.status !== "converted" && <LeadActions id={l.id} status={l.status} waHref={waHref} />}
+                  {l.status !== "converted" && (
+                    <LeadActions
+                      id={l.id}
+                      status={l.status}
+                      waHref={waHref}
+                      products={products}
+                      lead={{
+                        customer_name: l.customer_name || "",
+                        phone: l.phone,
+                        city: l.city || "",
+                        address: l.address || "",
+                        notes: "",
+                        items: (l.items || []).filter((i) => i.product_id).map((i) => ({ product_id: i.product_id!, quantity: Number(i.quantity) || 1 })),
+                      }}
+                    />
+                  )}
                 </div>
               </li>
             );
