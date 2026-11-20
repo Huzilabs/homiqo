@@ -9,11 +9,14 @@ import { sendVisitEvent } from "@/lib/visits";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { STORE } from "@/lib/config";
+import QuickOrder from "@/components/QuickOrder";
+import { quickOrderVariant } from "@/lib/ab";
 
 export default function ProductActions({ product }: { product: Product }) {
   const { add } = useCart();
   const router = useRouter();
   const [qty, setQty] = useState(1);
+  const [quick, setQuick] = useState(false);
   const soldOut = product.stock <= 0;
   const max = Math.min(product.stock, 20);
   const bundleSave = Number(product.bundle_save || 0);
@@ -64,6 +67,12 @@ export default function ProductActions({ product }: { product: Product }) {
   };
 
   const buyNow = () => {
+    // 50/50 test: half of visitors order in a form on this page, half go to the checkout page
+    if (quickOrderVariant() === "sheet") {
+      track.addToCart(product, qty);
+      setQuick(true);
+      return;
+    }
     add(product, qty, false);
     router.push("/checkout");
   };
@@ -143,6 +152,7 @@ export default function ProductActions({ product }: { product: Product }) {
           )}
         </div>
       )}
+      {quick && <QuickOrder product={product} initialQty={qty} onClose={() => setQuick(false)} />}
     </>
   );
 }
