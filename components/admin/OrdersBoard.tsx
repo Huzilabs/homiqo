@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { announceConfirmed } from "@/lib/confirm-event";
 import { BulkBar, OrdersSelection, RowCheckbox, SelectAll } from "./OrdersBulk";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -66,6 +67,7 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
       setError(`${o.order_number}: ${data.needs_city ? "city not on PostEx list — open the order to pick it" : data.error || "update failed"}`);
       return;
     }
+    if (next === "confirmed" && prev !== "confirmed") announceConfirmed(o.id);
     router.refresh();
   }
 

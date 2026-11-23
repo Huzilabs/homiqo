@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { announceConfirmed } from "@/lib/confirm-event";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { ORDER_STATUSES } from "@/lib/config";
@@ -39,6 +40,7 @@ export default function OrderStatusForm({ order }: { order: Order }) {
           ? "Order updated (no customer email on file)"
           : "Order updated",
     });
+    if (status === "confirmed" && order.status !== "confirmed") announceConfirmed(order.id);
     router.refresh();
   }
 

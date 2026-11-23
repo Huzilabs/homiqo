@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { announceConfirmed } from "@/lib/confirm-event";
 import { useEffect, useState } from "react";
 import { LoaderCircle, PackageCheck, Printer, RefreshCw, Truck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -47,6 +48,7 @@ export default function PostExPanel({ order, suggestedCity }: { order: Order; su
     }
     if (!res.ok || !data.ok) return setMsg({ ok: false, text: data.error || "Booking failed" });
     setMsg({ ok: true, text: `Booked on PostEx · ${data.tracking_number}${data.emailed ? " · customer emailed ✉️" : ""}` });
+    if (order.status !== "confirmed") announceConfirmed(order.id);
     router.refresh();
   }
 

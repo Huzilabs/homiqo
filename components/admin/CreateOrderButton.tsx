@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { announceConfirmed } from "@/lib/confirm-event";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import OrderFormModal, { type AdminProduct, type OrderDraft } from "./OrderFormModal";
@@ -19,6 +20,7 @@ export default function CreateOrderButton({ products }: { products: AdminProduct
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return data.error || "Could not create the order";
     setOpen(false);
+    if (confirm && data.id) announceConfirmed(data.id);
     router.push(`/admin/orders/${data.id}`);
     router.refresh();
     return null;

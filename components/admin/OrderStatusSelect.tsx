@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { announceConfirmed } from "@/lib/confirm-event";
 import { useRouter } from "next/navigation";
 import { ChevronDown, LoaderCircle } from "lucide-react";
 import { ORDER_STATUSES } from "@/lib/config";
@@ -49,6 +50,7 @@ export default function OrderStatusSelect({ id, orderNumber, status, courier, tr
       setError(data.needs_city ? "City not on PostEx list — open the order to pick it" : data.error || "Update failed");
       return;
     }
+    if (next === "confirmed" && prev !== "confirmed") announceConfirmed(id);
     router.refresh();
   }
 

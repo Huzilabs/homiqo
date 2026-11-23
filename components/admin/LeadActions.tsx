@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { announceConfirmed } from "@/lib/confirm-event";
 import { useRouter } from "next/navigation";
 import { Check, LoaderCircle, PackagePlus, Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -50,6 +51,7 @@ export default function LeadActions({ id, status, waHref, lead, products }: { id
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return data.error || "Could not create the order";
     setEditing(false);
+    if (confirm && data.id) { announceConfirmed(data.id); router.refresh(); return null; }
     alert(`Order ${data.order_number} created.${confirm ? " Book it on PostEx from the order page." : " Confirm it in Orders to book PostEx."}`);
     router.refresh();
     return null;

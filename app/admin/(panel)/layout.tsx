@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import DeliveryGuidePopup from "@/components/admin/DeliveryGuidePopup";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminNav from "@/components/admin/AdminNav";
@@ -33,6 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminNav email={user.email || ""} />
+      <DeliveryGuidePopup />
       <div className="lg:pl-64">
         <div className="mx-auto max-w-[1680px] p-4 sm:p-6 lg:p-8">{children}</div>
       </div>
