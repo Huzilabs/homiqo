@@ -106,7 +106,8 @@ export default function MediaGallery({ name, images, videos, productId }: { name
                 ) : yt ? (
                   <Image src={`https://img.youtube.com/vi/${yt}/mqdefault.jpg`} alt={`${name} video`} fill sizes="140px" className="object-cover" />
                 ) : (
-                  <video src={m.url} muted preload="metadata" className="absolute inset-0 h-full w-full object-cover" />
+                  // a photo, not a <video> — a video thumbnail downloads the clip on page load (slower for ad visitors)
+                  images[0] ? <Image src={images[0]} alt={`${name} video`} fill sizes="140px" className="bg-white object-contain" /> : null
                 )}
                 {m.kind === "video" && (
                   <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-black/35 text-white">
