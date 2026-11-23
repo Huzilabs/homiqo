@@ -214,6 +214,11 @@ export default async function AdminOrders({
 
       {/* Mobile / tablet cards */}
       <div className="space-y-3 lg:hidden">
+        {orders.length > 0 && (
+          <label className="flex cursor-pointer items-center gap-2.5 border border-ink/10 bg-white px-4 py-3 text-sm font-medium">
+            <SelectAll ids={orders.map((o) => o.id)} /> Select all {orders.length} orders on this page
+          </label>
+        )}
         {orders.map((o) => {
           const t = when(o.created_at);
           const its = items.get(o.id) || [];

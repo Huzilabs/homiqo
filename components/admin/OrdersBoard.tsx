@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { BulkBar, OrdersSelection, RowCheckbox, SelectAll } from "./OrdersBulk";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoaderCircle, MessageCircle, Phone, Truck } from "lucide-react";
@@ -69,6 +70,7 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
   }
 
   return (
+    <OrdersSelection>
     <div>
       {error && <p className="mb-3 border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
       <p className="mb-3 text-xs text-gray-500">Drag a card to another column — or use its status menu — to update the order. Confirming books it on PostEx.</p>
@@ -98,6 +100,11 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
                   <span className="tabular-nums text-ink">{list.length}</span>
                 </p>
                 <p className="mt-0.5 text-[11px] text-gray-400">{formatPrice(sum)}{c.hint ? ` · ${c.hint}` : ""}</p>
+                {list.length > 0 && (
+                  <label className="mt-1.5 flex cursor-pointer items-center gap-1.5 text-[11px] text-gray-500">
+                    <SelectAll ids={list.map((o) => o.id)} /> Select all {c.label.toLowerCase()}
+                  </label>
+                )}
               </header>
               <div className="flex max-h-[70vh] flex-col gap-2 overflow-y-auto p-2">
                 {list.map((o) => (
@@ -108,7 +115,10 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
                     className={`cursor-grab border border-ink/10 p-3 text-sm shadow-sm active:cursor-grabbing ${STATUS_ROW[statusOf(o)] || "bg-white"} ${moving === o.id ? "opacity-60" : ""}`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700 hover:underline">{o.order_number}</Link>
+                      <span className="flex items-center gap-2">
+                        <RowCheckbox id={o.id} label={o.order_number} />
+                        <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700 hover:underline">{o.order_number}</Link>
+                      </span>
                       <span className="text-right font-semibold tabular-nums">
                         {formatPrice(o.total)}
                         <span className={`block text-[9px] font-medium uppercase tracking-wider ${o.payment_method === "bank_transfer" ? "text-violet-700" : "text-gray-400"}`}>
@@ -146,6 +156,8 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
           );
         })}
       </div>
+      <BulkBar orders={orders.map((o) => ({ id: o.id, order_number: o.order_number, status: statusOf(o) }))} />
     </div>
+    </OrdersSelection>
   );
 }

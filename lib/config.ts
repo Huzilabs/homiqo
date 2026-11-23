@@ -69,3 +69,6 @@ export function cartSavings(
 export const MEDIA_BUCKET = "product-media";
 
 export const ORDER_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
+
+/** Optional link to a short video / voice note about delivery (rider rules). Set NEXT_PUBLIC_DELIVERY_GUIDE_URL or edit here. */
+export const DELIVERY_GUIDE_URL = process.env.NEXT_PUBLIC_DELIVERY_GUIDE_URL || "";

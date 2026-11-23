@@ -322,3 +322,7 @@ select cron.schedule('postex-cities', '17 3 * * *', $c$select public.postex_refr
 -- Replacement shipments (PostEx orderType 'Replacement': deliver new item, collect the old one). Applied 2026-11-16:
 -- alter table public.orders add column replacement_tracking text;
 -- public.postex_airway_bill(p_order_id uuid, p_replacement boolean) prints the replacement label.
+
+-- 2026-11-23: rider-facing airway-bill note (postex_order_payload v_note). Internal admin tags are stripped; customer notes come first:
+--   "<customer note> | Open parcel allowed. FREE delivery (already paid) - collect COD amount only, no extra charge, no advance.
+--    Call customer + Homiqo 03054471454 before marking refused/CNA/address issue."

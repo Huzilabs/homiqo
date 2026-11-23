@@ -8,6 +8,7 @@ import type { TrackedOrder } from "@/lib/types";
 import { BANK, STORE } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
 import { reviewLink } from "@/lib/reviews";
+import { helpline } from "@/lib/delivery-guide";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
@@ -55,6 +56,27 @@ export default async function OrderPage({
             Confirm on WhatsApp
           </a>
           <p className="mt-2 text-xs text-ink/50">or wait for our call on your number · {BANK.whatsappDisplay}</p>
+        </div>
+      )}
+
+      {/* Before delivery: tell the customer what the rider may NOT ask for, and to call us instead of refusing */}
+      {order && ["pending", "confirmed", "shipped"].includes(order.status) && (
+        <div className="mx-auto mt-8 max-w-xl border-2 border-brand-600/30 bg-brand-50 p-5">
+          <p className="font-semibold text-ink">🚚 Delivery guarantee — please read</p>
+          <ul className="mt-3 space-y-1.5 text-sm text-ink/80">
+            <li>✅ Delivery is <b>FREE</b> — we have already paid the courier.</li>
+            <li>✅ Pay the rider only <b>{formatPrice(Number(order.total))}</b>{order.payment_method === "bank_transfer" ? " (Rs 0 if you paid by bank transfer)" : ""} — not one rupee more.</li>
+            <li>✅ You can <b>open the parcel and check it</b> before paying.</li>
+            <li>❌ If the rider asks for <b>extra money, delivery charges or an advance</b> — don't pay.</li>
+            <li>❌ <b>Don't return the parcel.</b> Call or WhatsApp us first and we'll sort it out right away.</li>
+          </ul>
+          <p className="mt-3 text-sm text-ink/70" dir="rtl" lang="ur">ڈیلیوری مفت ہے۔ رائیڈر صرف آرڈر کی رقم لے گا — زیادہ پیسے یا ایڈوانس نہ دیں، پارسل واپس نہ کریں، پہلے ہمیں کال کریں۔</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a href={`tel:${helpline().replace(/\s/g, "")}`} className="inline-flex h-11 items-center justify-center bg-ink px-5 text-sm font-semibold text-white">📞 Call {helpline()}</a>
+            {STORE.whatsapp && (
+              <a href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(`Assalam o Alaikum, delivery ke baare mein baat karni hai. Order ${order.order_number}`)}`} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center justify-center bg-[#25D366] px-5 text-sm font-semibold text-white">WhatsApp us</a>
+            )}
+          </div>
         </div>
       )}
 
