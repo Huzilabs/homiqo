@@ -118,6 +118,7 @@ export default function PushToggle({ variant = "nav" }: { variant?: "nav" | "ban
         <div className="flex items-center justify-between gap-2 text-emerald-300">
           <span className="flex items-center gap-1.5"><BellRing className="h-4 w-4" /> Order alerts on</span>
           <span className="flex gap-2">
+            <a href="/sounds/new-order.mp3" download="homiqo-order.mp3" className="text-gray-300 underline-offset-2 hover:text-white hover:underline">Sound</a>
             <button onClick={test} disabled={busy} className="text-gray-300 underline-offset-2 hover:text-white hover:underline">Test</button>
             <button onClick={disable} disabled={busy} className="text-gray-400 underline-offset-2 hover:text-white hover:underline">Turn off</button>
           </span>

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import AdminSW from "@/components/admin/AdminSW";
+import OrderSound from "@/components/admin/OrderSound";
 
 // The admin panel installs on a phone as its own app ("Homiqo Admin").
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default function AdminRoot({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AdminSW />
+      <OrderSound />
       {children}
     </>
   );
