@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ChartColumn, ExternalLink, LayoutDashboard, LogOut, Megaphone, Menu, Package, ShoppingCart, Star, UserRoundX, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { STORE } from "@/lib/config";
+import PushToggle from "./PushToggle";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -48,6 +49,7 @@ export default function AdminNav({ email }: { email: string }) {
         <ExternalLink className="h-5 w-5" /> View store
       </Link>
       <div className="mt-auto border-t border-white/10 pt-4">
+        <PushToggle />
         <p className="truncate px-3 text-xs text-gray-400">{email}</p>
         <button onClick={signOut} className="mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white">
           <LogOut className="h-5 w-5" /> Sign out

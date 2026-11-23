@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, Banknote, Clock, Megaphone, Package, ShoppingCart, TrendingUp, Truck } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
+import PushToggle from "@/components/admin/PushToggle";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatPrice } from "@/lib/format";
 import type { Order, Product } from "@/lib/types";
@@ -76,6 +77,7 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold">Dashboard</h1>
+      <PushToggle variant="banner" />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map(({ label, value, icon: Icon, href, hint, tone }: { label: string; value: string; icon: typeof Package; href?: string; hint?: string; tone?: string }) => {
           const body = (

@@ -10,3 +10,33 @@ self.addEventListener("fetch", (e) => {
     )
   );
 });
+
+// ── New-order push notifications (sent by the Supabase "order-push" function) ──
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { title: "Homiqo", body: e.data ? e.data.text() : "" }; }
+  e.waitUntil(
+    self.registration.showNotification(d.title || "🛒 New order", {
+      body: d.body || "",
+      icon: "/admin-icon-192.png",
+      badge: "/admin-icon-192.png",
+      tag: d.tag || undefined,
+      renotify: true,
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+      data: { url: d.url || "/admin/orders" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || "/admin/orders", self.location.origin).href;
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      const w = wins.find((c) => c.url.startsWith(self.location.origin + "/admin"));
+      if (w) return w.focus().then(() => w.navigate(url));
+      return self.clients.openWindow(url);
+    })
+  );
+});
