@@ -36,7 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminNav email={user.email || ""} />
       <DeliveryGuidePopup />
       <div className="lg:pl-64">
-        <div className="mx-auto max-w-[1680px] p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="mx-auto max-w-[1680px] p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:p-6 lg:p-8">{children}</div>
       </div>
     </div>
   );

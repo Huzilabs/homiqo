@@ -13,6 +13,9 @@ export const viewport: Viewport = { themeColor: "#0D5B58" };
 export default function AdminRoot({ children }: { children: React.ReactNode }) {
   return (
     <>
+      {/* The store clips sideways overflow on <html>/<body>; on an iPhone home-screen app that can stop the
+          page from scrolling, so the admin turns it off (its wide tables scroll inside their own boxes). */}
+      <style>{`html,body{overflow-x:visible!important}`}</style>
       <AdminSW />
       <OrderSound />
       {children}
