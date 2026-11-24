@@ -1,21 +1,15 @@
 "use client";
 /**
- * 50/50 test: "sheet" = order form slides up on the product page, "page" = the normal /checkout page.
- * A visitor keeps the same variant (localStorage). Force one with ?qo=sheet or ?qo=page in the URL.
- * Results: admin Analytics → begin_checkout/purchase events with path /product/… are the sheet, /checkout the page.
+ * Quick-order test (20–24 Nov 2026) is finished: the form that slides up on the product page won
+ * (16 orders vs 7 for the /checkout page from the same traffic), so every visitor now gets "sheet".
+ * Add ?qo=page to a product URL to see the old checkout-page flow.
  */
 export type QuickOrderVariant = "sheet" | "page";
-const KEY = "hq.ab.qo";
 
 export function quickOrderVariant(): QuickOrderVariant {
   try {
-    const forced = new URLSearchParams(location.search).get("qo");
-    if (forced === "sheet" || forced === "page") localStorage.setItem(KEY, forced);
-    let v = localStorage.getItem(KEY) as QuickOrderVariant | null;
-    if (v !== "sheet" && v !== "page") localStorage.setItem(KEY, (v = Math.random() < 0.5 ? "sheet" : "page"));
-    (window as unknown as { clarity?: (...a: unknown[]) => void }).clarity?.("set", "qo_variant", v);
-    return v;
+    return new URLSearchParams(location.search).get("qo") === "page" ? "page" : "sheet";
   } catch {
-    return "page";
+    return "sheet";
   }
 }
