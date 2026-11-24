@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { announceConfirmed } from "@/lib/confirm-event";
+import CallStatusSelect from "./CallStatusSelect";
+import { showsCallStatus } from "@/lib/call-status";
 import { BulkBar, OrdersSelection, RowCheckbox, SelectAll } from "./OrdersBulk";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,6 +21,8 @@ export type BoardOrder = {
   courier: string | null;
   tracking_number: string | null;
   postex_status: string | null;
+  call_status?: string | null;
+  call_attempts?: number;
   created_at: string;
   items: { name: string; qty: number }[];
 };
@@ -134,6 +138,7 @@ export default function OrdersBoard({ orders }: { orders: BoardOrder[] }) {
                     {o.courier === "PostEx" && o.tracking_number && (
                       <p className="mt-1 inline-flex items-center gap-1 font-mono text-[11px] text-gray-600"><Truck className="h-3 w-3" /> {o.tracking_number} · {o.postex_status || "Booked"}</p>
                     )}
+                    {showsCallStatus(statusOf(o)) && <div className="mt-2"><CallStatusSelect key={`${o.id}-${o.call_status}`} id={o.id} value={o.call_status} attempts={o.call_attempts} /></div>}
                     <div className="mt-2 flex items-center justify-between gap-2 border-t border-ink/5 pt-2">
                       <select
                         value={statusOf(o)}

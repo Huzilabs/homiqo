@@ -1,4 +1,6 @@
 import Link from "next/link";
+import CallStatusSelect from "@/components/admin/CallStatusSelect";
+import { CALL_STATUSES, showsCallStatus } from "@/lib/call-status";
 import { Suspense } from "react";
 import { ChevronRight, MessageCircle, Phone, Truck } from "lucide-react";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
@@ -41,9 +43,10 @@ const when = (iso: string) => {
 export default async function AdminOrders({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; page?: string; view?: string; per?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; view?: string; per?: string; call?: string }>;
 }) {
-  const { status, q, page: pageParam, view, per: perParam } = await searchParams;
+  const { status, q, page: pageParam, view, per: perParam, call } = await searchParams;
+  const callKey = CALL_STATUSES.some((c) => c.key === call) ? call : undefined;
   const PAGE_SIZE = (PAGE_SIZES as readonly number[]).includes(Number(perParam)) ? Number(perParam) : 25;
   const board = view === "board";
   const page = Math.max(1, Number(pageParam) || 1);
@@ -51,13 +54,15 @@ export default async function AdminOrders({
 
   let query = supabase.from("orders").select("*", { count: "exact" }).order("created_at", { ascending: false });
   if (!board && status && (ORDER_STATUSES as readonly string[]).includes(status)) query = query.eq("status", status);
+  if (!board && callKey) query = query.eq("call_status", callKey).in("status", ["pending", "confirmed"]);
   if (q) {
     const term = q.replace(/[%,()]/g, " ").trim();
     if (term) query = query.or(`order_number.ilike.%${term}%,customer_name.ilike.%${term}%,phone.ilike.%${term}%,city.ilike.%${term}%`);
   }
 
   const productsForForm = adminProducts(supabase);
-  const [{ data, count }, ...statusCounts] = await Promise.all([
+  const [{ data: callRows }, { data, count }, ...statusCounts] = await Promise.all([
+    supabase.from("orders").select("call_status").not("call_status", "is", null).in("status", ["pending", "confirmed"]),
     board ? query.limit(300) : query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1),
     supabase.from("orders").select("id", { count: "exact", head: true }),
     ...ORDER_STATUSES.map((s) => supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", s)),
@@ -65,6 +70,8 @@ export default async function AdminOrders({
   const counts: Record<string, number> = { all: statusCounts[0].count || 0 };
   ORDER_STATUSES.forEach((s, i) => (counts[s] = statusCounts[i + 1].count || 0));
 
+  const callCounts: Record<string, number> = {};
+  for (const r of (callRows || []) as { call_status: string }[]) callCounts[r.call_status] = (callCounts[r.call_status] || 0) + 1;
   const orders = (data || []) as Order[];
   const pages = Math.max(1, Math.ceil((count || 0) / PAGE_SIZE));
 
@@ -76,12 +83,14 @@ export default async function AdminOrders({
     items.set(r.order_id, [...(items.get(r.order_id) || []), { name: r.product_name, qty: r.quantity }]);
   }
 
-  const href = (o: { status?: string; page?: number; per?: number }) => {
+  const href = (o: { status?: string; page?: number; per?: number; call?: string }) => {
     const sp = new URLSearchParams();
     if (board) sp.set("view", "board");
     const s = "status" in o ? o.status : status;
     if (s) sp.set("status", s);
     if (q) sp.set("q", q);
+    const c = "call" in o ? o.call : callKey;
+    if (c) sp.set("call", c);
     const per = o.per ?? PAGE_SIZE;
     if (per !== 25) sp.set("per", String(per));
     if (o.page && o.page > 1) sp.set("page", String(o.page));
@@ -127,6 +136,23 @@ export default async function AdminOrders({
         ))}
       </div>
 
+      {/* Website-only call follow-up labels (never sent to PostEx) — tap to filter */}
+      {!board && Object.keys(callCounts).length > 0 && (
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 text-xs sm:mx-0 sm:flex-wrap sm:px-0">
+          <span className="shrink-0 self-center font-semibold uppercase tracking-wider text-gray-500">Calls:</span>
+          {CALL_STATUSES.filter((c) => callCounts[c.key]).map((c) => (
+            <Link
+              key={c.key}
+              href={href({ call: callKey === c.key ? undefined : c.key, page: 1 })}
+              className={`shrink-0 rounded-full px-3 py-1.5 font-semibold ring-1 ring-inset ${callKey === c.key ? "bg-ink text-white ring-ink" : c.style}`}
+            >
+              {c.emoji} {c.label} · {callCounts[c.key]}
+            </Link>
+          ))}
+          {callKey && <Link href={href({ call: undefined, page: 1 })} className="shrink-0 self-center px-2 font-semibold text-gray-500 underline">Clear</Link>}
+        </div>
+      )}
+
       <Suspense fallback={<div className="input h-11" />}>
         <OrdersSearch />
       </Suspense>
@@ -136,7 +162,7 @@ export default async function AdminOrders({
           orders={orders.map<BoardOrder>((o) => ({
             id: o.id, order_number: o.order_number, customer_name: o.customer_name, city: o.city, phone: o.phone, status: o.status,
             total: Number(o.total), payment_method: o.payment_method, courier: o.courier, tracking_number: o.tracking_number,
-            postex_status: o.postex_status ?? null, created_at: o.created_at, items: items.get(o.id) || [],
+            postex_status: o.postex_status ?? null, call_status: o.call_status ?? null, call_attempts: o.call_attempts ?? 0, created_at: o.created_at, items: items.get(o.id) || [],
           }))}
         />
       ) : (
@@ -187,6 +213,7 @@ export default async function AdminOrders({
                   </td>
                   <td className="px-5 py-4">
                     <OrderStatusSelect id={o.id} orderNumber={o.order_number} status={o.status} courier={o.courier} trackingNumber={o.tracking_number} />
+                    {showsCallStatus(o.status) && <div className="mt-1.5"><CallStatusSelect key={`${o.id}-${o.call_status}`} id={o.id} value={o.call_status} attempts={o.call_attempts} /></div>}
                   </td>
                   <td className="px-5 py-4 text-xs">
                     <CourierCell o={o} />
@@ -248,7 +275,10 @@ export default async function AdminOrders({
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between gap-3 border-t border-ink/5 pt-3">
-                <OrderStatusSelect id={o.id} orderNumber={o.order_number} status={o.status} courier={o.courier} trackingNumber={o.tracking_number} />
+                <div className="flex flex-col items-start gap-1.5">
+                  <OrderStatusSelect id={o.id} orderNumber={o.order_number} status={o.status} courier={o.courier} trackingNumber={o.tracking_number} />
+                  {showsCallStatus(o.status) && <CallStatusSelect key={`${o.id}-${o.call_status}`} id={o.id} value={o.call_status} attempts={o.call_attempts} />}
+                </div>
                 <div className="text-right text-xs"><CourierCell o={o} /></div>
               </div>
             </div>

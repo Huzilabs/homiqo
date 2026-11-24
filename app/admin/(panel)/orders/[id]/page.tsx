@@ -1,4 +1,6 @@
 import { BANK, STORE } from "@/lib/config";
+import CallStatusSelect from "@/components/admin/CallStatusSelect";
+import { showsCallStatus } from "@/lib/call-status";
 import { reviewLink } from "@/lib/reviews";
 import { deliveryGuideMessage } from "@/lib/delivery-guide";
 import Link from "next/link";
@@ -132,6 +134,13 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
                 <MessageCircle className="h-4 w-4" /> Ask for a review on WhatsApp
               </a>
               <p className="mt-3 break-all text-xs text-gray-500">Link: {reviewLink(o.order_number, o.phone)}</p>
+            </div>
+          )}
+          {showsCallStatus(o.status) && (
+            <div className="card p-6">
+              <h2 className="font-bold">Confirmation call</h2>
+              <p className="mt-1 text-sm text-gray-500">Website only — PostEx never sees this. Unanswered tries are counted.</p>
+              <div className="mt-3"><CallStatusSelect key={`${o.id}-${o.call_status}`} id={o.id} value={o.call_status} attempts={o.call_attempts} /></div>
             </div>
           )}
           <PostExPanel order={o} suggestedCity={(suggestedCity as string | null) ?? null} />
