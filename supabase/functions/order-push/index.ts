@@ -18,6 +18,26 @@ Deno.serve(async (req) => {
   let payload: Record<string, unknown>;
   if (body.test) {
     payload = { title: "🔔 Homiqo notifications are on", body: "You'll get a notification here for every new order.", url: "/admin/orders", tag: "test" };
+  } else if (body.summary) {
+    // nightly summary (pg_cron 22:00 Pakistan time)
+    const { data: d } = await supabase.rpc("daily_summary");
+    const x = (d || {}) as Record<string, number> & { top?: { name: string; qty: number }[] };
+    const short = (n: string) => n.replace(/^(Electric|Portable|Rechargeable)\s+/i, "").replace(/\s*(&|\/).*$/, "").trim();
+    const perOrder = x.orders ? ` · ${rs(x.ad_spend / x.orders)}/order` : "";
+    const lines = [
+      `Ads ${rs(x.ad_spend || 0)}${perOrder}`,
+      `Delivered ${x.delivered || 0} (${rs(x.delivered_value || 0)}) · Returned ${x.returned || 0}${x.problems ? ` · ⚠ ${x.problems} delivery problem${x.problems === 1 ? "" : "s"}` : ""}`,
+      `Profit today ≈ ${rs(x.profit || 0)}`,
+      x.top?.length ? `Top: ${x.top.map((t) => `${short(t.name)} ×${t.qty}`).join(", ")}` : "",
+      x.unconfirmed ? `${x.unconfirmed} order${x.unconfirmed === 1 ? "" : "s"} waiting for confirmation` : "",
+    ].filter(Boolean);
+    payload = {
+      title: `📊 Today: ${x.orders || 0} order${x.orders === 1 ? "" : "s"} · ${rs(x.orders_value || 0)}`,
+      body: lines.join("\n"),
+      url: "/admin/profit?days=7",
+      tag: `summary-${new Date().toISOString().slice(0, 10)}`,
+      kind: "summary",
+    };
   } else if (body.attempt_order_id || body.customer_response_order_id) {
     const id = body.attempt_order_id || body.customer_response_order_id;
     const { data: o } = await supabase.from("orders").select("id, order_number, customer_name, phone, city, total, postex_attempt_reason, customer_response").eq("id", id).maybeSingle();

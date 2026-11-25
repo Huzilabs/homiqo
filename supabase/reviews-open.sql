@@ -18,3 +18,6 @@
 -- customer_respond_order(number, phone, 'confirm'|'cancel') — anon; pending cancel = cancelled, booked = cancel_requested; push to admin.
 -- order_risk_flags(uuid[]) — admin: refused_before, short_address, duplicate.
 -- track_order also returns postex_status, postex_attempt_reason, customer_confirmed_at, customer_response.
+
+-- 2026-11-26: nightly summary — daily_summary(day) (orders, ad spend, delivered, returned, problems, profit; Pakistan day),
+-- send_daily_summary() (meta_ads_sync(1) then order-push {summary:true}); pg_cron 'daily-summary' 0 17 * * * (22:00 PKT).
