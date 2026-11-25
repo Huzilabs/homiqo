@@ -76,7 +76,7 @@ export default async function AbandonedCheckouts({ searchParams }: { searchParam
       {rows.length === 0 ? (
         <p className="card p-6 text-sm text-gray-500">Nothing here right now.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="max-h-[calc(100svh-14rem)] space-y-3 overflow-y-auto pr-1">
           {rows.map((l) => {
             const first = (l.customer_name || "").split(" ")[0];
             const list = (l.items || []).map((i) => `${i.name}${i.quantity > 1 ? ` x${i.quantity}` : ""}`).join(", ");

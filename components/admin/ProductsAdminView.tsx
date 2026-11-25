@@ -83,9 +83,9 @@ export default function ProductsAdminView({ all, costs, filter, q }: { all: Prod
       </form>
 
       {/* Desktop table */}
-      <div className="card hidden overflow-x-auto lg:block">
+      <div className="card hidden max-h-[calc(100svh-12rem)] overflow-auto lg:block">
         <table className="w-full text-sm">
-          <thead className="border-b bg-gray-50/80 text-left text-[11px] uppercase tracking-wider text-gray-500">
+          <thead className="sticky top-0 z-10 border-b bg-gray-50 text-left text-[11px] uppercase tracking-wider text-gray-500">
             <tr>
               <th className="px-4 py-3 font-medium">Product</th>
               <th className="px-4 py-3 font-medium">Price</th>
