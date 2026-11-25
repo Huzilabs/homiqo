@@ -109,7 +109,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           <div className="min-w-0 lg:pt-2">
             {/* price + real countdown first (deal style), then the name */}
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className={`text-[30px] font-extrabold leading-none lg:text-[36px] ${off > 0 ? "text-accent-600" : "text-ink"}`}>{formatPrice(product.price)}</span>
+              <span className={`text-[30px] font-bold leading-none lg:text-[34px] ${off > 0 ? "text-accent-600" : "text-ink"}`}>{formatPrice(product.price)}</span>
               {off > 0 && <span className="text-[15px] text-ink/40 line-through lg:text-[17px]">{formatPrice(product.compare_at_price!)}</span>}
               {off > 0 && <span className="text-[13px] font-semibold text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</span>}
             </div>
