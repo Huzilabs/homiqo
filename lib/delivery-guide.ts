@@ -18,7 +18,7 @@ export function deliveryGuideMessage(o: { customer_name: string; order_number: s
     o.items ? `📦 ${o.items}` : null,
     `💵 Sirf *${amount}* dein — delivery FREE, extra/advance *nahi*`,
     `🔍 Parcel khol kar check karein, phir payment`,
-    `❌ Wapas na karein — masla ho to call: *${helpline()}*`,
+    `🛵 Rider extra paise maange ya bura behave kare to parcel wapas *na* karein — foran call karein: *${helpline()}*`,
     DELIVERY_GUIDE_URL ? `🎥 ${DELIVERY_GUIDE_URL}` : null,
     `🔗 Order dekhein: ${link}`,
   ]

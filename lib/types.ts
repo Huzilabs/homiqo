@@ -51,6 +51,7 @@ export interface Order {
   updated_at: string;
   postex_status?: string | null;
   call_status?: string | null;
+  source?: string;
   call_attempts?: number;
   call_status_at?: string | null;
   postex_synced_at?: string | null;

@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   const { data: row } = await supabase.from("orders").select("id").eq("order_number", order.order_number).maybeSingle();
   if (row) {
     await supabase.from("order_events").insert({ order_id: row.id, status: "pending", note: b.lead_id ? "Created by admin from an abandoned checkout" : "Created by admin (WhatsApp / phone order)" });
-    if (b.confirm) await supabase.from("orders").update({ status: "confirmed" }).eq("id", row.id);
+    await supabase.from("orders").update({ source: b.lead_id ? "abandoned" : "whatsapp", ...(b.confirm ? { status: "confirmed" } : {}) }).eq("id", row.id);
     if (b.lead_id) await supabase.from("checkout_leads").update({ status: "converted", order_id: row.id, updated_at: new Date().toISOString() }).eq("id", b.lead_id);
   }
   revalidateTag(PRODUCTS_TAG); // stock changed

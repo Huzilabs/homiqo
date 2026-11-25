@@ -11,7 +11,7 @@ const TABS = [
 ] as const;
 
 type Row = {
-  id: string; name: string; city: string | null; rating: number; comment: string; status: string; created_at: string;
+  id: string; name: string; city: string | null; rating: number; comment: string; status: string; created_at: string; photo_url: string | null; verified: boolean;
   products: { name: string; slug: string } | null; orders: { order_number: string } | null;
 };
 
@@ -20,7 +20,7 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
   const status = TABS.some((t) => t.key === s) ? (s as string) : "pending";
   const supabase = await createClient();
   const [{ data }, ...counts] = await Promise.all([
-    supabase.from("reviews").select("id, name, city, rating, comment, status, created_at, products(name, slug), orders(order_number)").eq("status", status).order("created_at", { ascending: false }),
+    supabase.from("reviews").select("id, name, city, rating, comment, status, created_at, photo_url, verified, products(name, slug), orders(order_number)").eq("status", status).order("created_at", { ascending: false }),
     ...TABS.map((t) => supabase.from("reviews").select("id", { count: "exact", head: true }).eq("status", t.key)),
   ]);
   const rows = (data || []) as unknown as Row[];
@@ -52,12 +52,19 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
                   <Stars rating={r.rating} />
                   <span className="font-semibold">{r.name}</span>
                   {r.city && <span className="text-sm text-gray-500">{r.city}</span>}
+                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${r.verified ? "text-emerald-700" : "text-gray-400"}`}>{r.verified ? "✓ Verified buyer" : "Website review (not verified)"}</span>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
                   {r.products ? <a href={`/product/${r.products.slug}#reviews`} target="_blank" rel="noopener noreferrer" className="font-medium text-brand-700 hover:underline">{r.products.name}</a> : "Product removed"}
                   {r.orders && <> · order {r.orders.order_number}</>} · {formatDate(r.created_at)}
                 </p>
                 {r.comment ? <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-gray-800">{r.comment}</p> : <p className="mt-3 text-sm italic text-gray-400">No written comment (rating only)</p>}
+                {r.photo_url && (
+                  <a href={r.photo_url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={r.photo_url} alt={`Photo from ${r.name}`} className="h-28 w-28 border object-cover" />
+                  </a>
+                )}
               </div>
               <ReviewActions id={r.id} status={r.status} />
             </div>

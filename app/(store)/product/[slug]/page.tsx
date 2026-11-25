@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import WriteReview from "@/components/WriteReview";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageCircle } from "lucide-react";
@@ -224,11 +225,10 @@ export default async function ProductPage({ params }: { params: Params }) {
         </div>
       </section>
 
-      {rv.count > 0 && (
       <section id="reviews" className="container-x scroll-mt-28 pt-24">
         <div className="grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
           <div>
-            <p className="eyebrow">Verified customers</p>
+            <p className="eyebrow">What customers say</p>
             <h2 className="h-section mt-4">Customer reviews</h2>
             {rv.count > 0 ? (
               <div className="mt-6">
@@ -253,8 +253,9 @@ export default async function ProductPage({ params }: { params: Params }) {
                 </ul>
               </div>
             ) : (
-              <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink/60">No reviews yet. Reviews come only from customers who received this product — after delivery we send you a link to share yours.</p>
+              <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-ink/60">No reviews yet. Bought this product? Be the first to share your experience.</p>
             )}
+            <WriteReview productId={product.id} productName={product.name} />
           </div>
           {rv.count > 0 && (
             <ul className="divide-y divide-ink/10 border-y border-ink/10">
@@ -268,13 +269,18 @@ export default async function ProductPage({ params }: { params: Params }) {
                     <span className="ml-auto text-xs text-ink/40">{new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
                   </div>
                   {r.comment && <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-ink/75">{r.comment}</p>}
+                  {r.photo_url && (
+                    <a href={r.photo_url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={r.photo_url} alt={`Photo from ${r.name}`} loading="lazy" className="h-28 w-28 object-cover" />
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
           )}
         </div>
       </section>
-      )}
 
       {related.length > 0 && (
         <section className="container-x pt-10 lg:pt-28">

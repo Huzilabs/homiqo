@@ -1,4 +1,5 @@
 import Link from "next/link";
+import OrderFilters from "@/components/admin/OrderFilters";
 import CallStatusSelect from "@/components/admin/CallStatusSelect";
 import { CALL_STATUSES, showsCallStatus } from "@/lib/call-status";
 import { Suspense } from "react";
@@ -43,16 +44,30 @@ const when = (iso: string) => {
 export default async function AdminOrders({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; page?: string; view?: string; per?: string; call?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; view?: string; per?: string; call?: string; src?: string; product?: string }>;
 }) {
-  const { status, q, page: pageParam, view, per: perParam, call } = await searchParams;
+  const { status, q, page: pageParam, view, per: perParam, call, src: srcParam, product: productParam } = await searchParams;
   const callKey = CALL_STATUSES.some((c) => c.key === call) ? call : undefined;
   const PAGE_SIZE = (PAGE_SIZES as readonly number[]).includes(Number(perParam)) ? Number(perParam) : 25;
   const board = view === "board";
   const page = Math.max(1, Number(pageParam) || 1);
   const supabase = await createClient();
 
-  let query = supabase.from("orders").select("*", { count: "exact" }).order("created_at", { ascending: false });
+  const productsForForm = adminProducts(supabase);
+  const allProducts = await productsForForm;
+  const src = ["website", "whatsapp", "abandoned", "meta"].includes(srcParam || "") ? srcParam : undefined;
+  const productId = allProducts.some((p) => p.id === productParam) ? productParam : undefined;
+  // source / product filters apply to the list, the board and the status counts
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filtered = (qb: any) => {
+    if (src === "meta") qb = qb.gt("offer_discount", 0);
+    else if (src) qb = qb.eq("source", src);
+    if (productId) qb = qb.eq("order_items.product_id", productId);
+    return qb;
+  };
+  const sel = (cols: string) => (productId ? `${cols}, order_items!inner(product_id)` : cols);
+
+  let query = filtered(supabase.from("orders").select(sel("*"), { count: "exact" }).order("created_at", { ascending: false }));
   if (!board && status && (ORDER_STATUSES as readonly string[]).includes(status)) query = query.eq("status", status);
   if (!board && callKey) query = query.eq("call_status", callKey).in("status", ["pending", "confirmed"]);
   if (q) {
@@ -60,12 +75,11 @@ export default async function AdminOrders({
     if (term) query = query.or(`order_number.ilike.%${term}%,customer_name.ilike.%${term}%,phone.ilike.%${term}%,city.ilike.%${term}%`);
   }
 
-  const productsForForm = adminProducts(supabase);
   const [{ data: callRows }, { data, count }, ...statusCounts] = await Promise.all([
     supabase.from("orders").select("call_status").not("call_status", "is", null).in("status", ["pending", "confirmed"]),
     board ? query.limit(300) : query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1),
-    supabase.from("orders").select("id", { count: "exact", head: true }),
-    ...ORDER_STATUSES.map((s) => supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", s)),
+    filtered(supabase.from("orders").select(sel("id"), { count: "exact", head: true })),
+    ...ORDER_STATUSES.map((s) => filtered(supabase.from("orders").select(sel("id"), { count: "exact", head: true }).eq("status", s))),
   ]);
   const counts: Record<string, number> = { all: statusCounts[0].count || 0 };
   ORDER_STATUSES.forEach((s, i) => (counts[s] = statusCounts[i + 1].count || 0));
@@ -91,6 +105,8 @@ export default async function AdminOrders({
     if (q) sp.set("q", q);
     const c = "call" in o ? o.call : callKey;
     if (c) sp.set("call", c);
+    if (src) sp.set("src", src);
+    if (productId) sp.set("product", productId);
     const per = o.per ?? PAGE_SIZE;
     if (per !== 25) sp.set("per", String(per));
     if (o.page && o.page > 1) sp.set("page", String(o.page));
@@ -115,7 +131,7 @@ export default async function AdminOrders({
             <Link href={`/admin/orders?view=board${q ? `&q=${encodeURIComponent(q)}` : ""}`} className={`px-3 py-2 ${board ? "bg-ink text-white" : "text-gray-500 hover:text-ink"}`}>Board</Link>
           </div>
           <PostExSyncButton />
-          <CreateOrderButton products={await productsForForm} />
+          <CreateOrderButton products={allProducts} />
         </div>
       </div>
 
@@ -135,6 +151,10 @@ export default async function AdminOrders({
           </Link>
         ))}
       </div>
+
+      <Suspense fallback={null}>
+        <OrderFilters products={allProducts.map((p) => ({ id: p.id, name: p.name }))} />
+      </Suspense>
 
       {/* Website-only call follow-up labels (never sent to PostEx) — tap to filter */}
       {!board && Object.keys(callCounts).length > 0 && (
@@ -168,17 +188,17 @@ export default async function AdminOrders({
       ) : (
       <OrdersSelection>
       {/* Desktop table */}
-      <div className="card hidden overflow-x-auto lg:block">
+      <div className="card hidden overflow-auto lg:block lg:max-h-[calc(100svh-6rem)]">
         <table className="w-full text-sm">
-          <thead className="border-b bg-gray-50/80 text-left text-[11px] uppercase tracking-wider text-gray-500">
+          <thead className="sticky top-0 z-10 border-b bg-gray-50 text-left text-[11px] uppercase tracking-wider text-gray-500">
             <tr>
               <th className="w-10 py-3 pl-5"><SelectAll ids={orders.map((o) => o.id)} /></th>
-              <th className="px-5 py-3 font-medium">Order</th>
-              <th className="px-5 py-3 font-medium">Customer</th>
-              <th className="px-5 py-3 font-medium">Items</th>
-              <th className="px-5 py-3 font-medium">Status</th>
-              <th className="px-5 py-3 font-medium">Courier</th>
-              <th className="px-5 py-3 text-right font-medium">Total</th>
+              <th className="px-3 py-3 font-medium">Order</th>
+              <th className="px-3 py-3 font-medium">Customer</th>
+              <th className="px-3 py-3 font-medium">Items</th>
+              <th className="px-3 py-3 font-medium">Status</th>
+              <th className="px-3 py-3 font-medium">Courier</th>
+              <th className="px-3 py-3 text-right font-medium">Total</th>
               <th className="w-10" />
             </tr>
           </thead>
@@ -189,11 +209,11 @@ export default async function AdminOrders({
               return (
                 <tr key={o.id} className={`align-top transition ${STATUS_ROW[o.status] || "hover:bg-gray-50/70"}`}>
                   <td className="py-4 pl-5"><RowCheckbox id={o.id} label={o.order_number} /></td>
-                  <td className="px-5 py-4">
+                  <td className="px-3 py-4">
                     <Link href={`/admin/orders/${o.id}`} className="font-semibold text-brand-700 hover:underline">{o.order_number}</Link>
                     <p className="mt-0.5 text-xs text-gray-500">{t.date} · {t.time}</p>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-3 py-4">
                     <p className="font-medium">{o.customer_name}</p>
                     <p className="text-xs text-gray-500">{o.city}</p>
                     <div className="mt-1.5 flex items-center gap-3 text-xs">
@@ -205,20 +225,20 @@ export default async function AdminOrders({
                       </a>
                     </div>
                   </td>
-                  <td className="max-w-[260px] px-5 py-4 text-xs text-gray-600">
+                  <td className="max-w-[220px] px-3 py-4 text-xs text-gray-600">
                     {its.slice(0, 2).map((i, n) => (
                       <p key={n} className="truncate"><span className="font-semibold text-ink">{i.qty}×</span> {i.name}</p>
                     ))}
                     {its.length > 2 && <p className="text-gray-400">+{its.length - 2} more</p>}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-3 py-4">
                     <OrderStatusSelect id={o.id} orderNumber={o.order_number} status={o.status} courier={o.courier} trackingNumber={o.tracking_number} />
                     {showsCallStatus(o.status) && <div className="mt-1.5"><CallStatusSelect key={`${o.id}-${o.call_status}`} id={o.id} value={o.call_status} attempts={o.call_attempts} /></div>}
                   </td>
-                  <td className="px-5 py-4 text-xs">
+                  <td className="px-3 py-4 text-xs">
                     <CourierCell o={o} />
                   </td>
-                  <td className="px-5 py-4 text-right font-semibold tabular-nums">
+                  <td className="px-3 py-4 text-right font-semibold tabular-nums">
                     {formatPrice(o.total)}
                     <span className={`mt-0.5 block text-[10px] font-medium uppercase tracking-wider ${o.payment_method === "bank_transfer" ? "text-violet-700" : "text-gray-400"}`}>
                       {o.payment_method === "bank_transfer" ? "Bank transfer" : "COD"}

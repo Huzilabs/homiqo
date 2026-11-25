@@ -11,6 +11,7 @@ export interface Review {
   rating: number;
   comment: string;
   verified: boolean;
+  photo_url?: string | null;
   created_at: string;
 }
 
@@ -23,13 +24,13 @@ const getAllApproved = unstable_cache(
     const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
     const { data, error } = await sb
       .from("reviews")
-      .select("id, product_id, name, city, rating, comment, verified, created_at")
+      .select("id, product_id, name, city, rating, comment, verified, photo_url, created_at")
       .eq("status", "approved")
       .order("created_at", { ascending: false });
     if (error) throw new Error(`reviews: ${error.message}`);
     return (data as Review[]) || [];
   },
-  ["reviews-v1"],
+  ["reviews-v2"],
   { tags: [REVIEWS_TAG, PRODUCTS_TAG], revalidate: 600 },
 );
 
