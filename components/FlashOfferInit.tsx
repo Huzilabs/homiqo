@@ -14,8 +14,12 @@ const DELAY_MS = 10_000;
 export default function FlashOfferInit() {
   const params = useSearchParams();
   useEffect(() => {
-    const source = params.get("utm_source") || "";
-    const fromMeta = META.test(source) || params.has("fbclid");
+    // ?offer=test — forget an earlier offer in this browser so the popup can be tested again
+    if (params.get("offer") === "test") {
+      try { localStorage.removeItem("hq.flash"); } catch {}
+    }
+    const source = params.get("utm_source") || (params.get("offer") === "test" ? "test" : "");
+    const fromMeta = META.test(source) || params.has("fbclid") || source === "test";
     if (!fromMeta || hadFlash()) return;
     const t = setTimeout(() => {
       if (hadFlash()) return;
