@@ -12,21 +12,16 @@ export function deliveryGuideMessage(o: { customer_name: string; order_number: s
   const first = o.customer_name.trim().split(/\s+/)[0] || "";
   const amount = formatPrice(Number(o.total));
   return [
-    `Assalam o Alaikum ${first}! 🙏`,
-    `Homiqo se aapka order *${o.order_number}* confirm ho gaya hai ✅`,
+    `Assalam o Alaikum ${first}! Aapka Homiqo order *${o.order_number}* confirm ho gaya hai ✅`,
     o.items ? `📦 ${o.items}` : null,
-    `💵 Cash on Delivery: *${amount}*`,
-    `🚚 Delivery bilkul *FREE* hai — delivery charges hum pehle hi courier ko de chuke hain.`,
+    `💵 COD: *${amount}* · 🚚 Delivery *FREE*`,
     ``,
-    `*Rider aaye to yeh yaad rakhein:*`,
-    `✅ Sirf *${amount}* dene hain — is se zyada ek rupay bhi nahi`,
+    `✅ Rider ko sirf *${amount}* dein, extra ya advance *bilkul nahi*`,
     `✅ Parcel khol kar check karein, phir payment karein`,
-    `❌ Rider extra paise, delivery charges ya advance maange to *bilkul na dein*`,
-    `❌ Parcel *wapas na karein* — koi bhi masla ho to pehle humein call / WhatsApp karein: *${helpline()}*`,
+    `❌ Parcel wapas na karein — koi masla ho to call / WhatsApp: *${helpline()}*`,
+    DELIVERY_GUIDE_URL ? `🎥 ${DELIVERY_GUIDE_URL}` : null,
     ``,
-    `Aap ka parcel 2–5 working days mein pohanch jayega.`,
-    DELIVERY_GUIDE_URL ? `🎥 Is video mein sab samjhaya hai: ${DELIVERY_GUIDE_URL}` : null,
-    `Shukriya! — Team Homiqo`,
+    `2–5 din mein delivery. Shukriya! — Team Homiqo`,
   ]
     .filter((l) => l !== null)
     .join("\n");
