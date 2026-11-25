@@ -69,7 +69,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
           </a>
           {["pending", "confirmed", "shipped"].includes(o.status) && (
             <a
-              href={`https://wa.me/${waNumber}?text=${encodeURIComponent(deliveryGuideMessage({ customer_name: o.customer_name, order_number: o.order_number, total: Number(o.total), items: ((items || []) as OrderItem[]).map((i) => `${i.quantity}× ${i.product_name}`).join(", ") }))}`}
+              href={`https://wa.me/${waNumber}?text=${encodeURIComponent(deliveryGuideMessage({ customer_name: o.customer_name, order_number: o.order_number, phone: o.phone, total: Number(o.total), items: ((items || []) as OrderItem[]).map((i) => `${i.quantity}× ${i.product_name}`).join(", ") }))}`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-action border-emerald-600 bg-emerald-50 text-emerald-800 hover:border-emerald-700 hover:bg-emerald-100"

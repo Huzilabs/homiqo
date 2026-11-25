@@ -8,20 +8,19 @@ export const helpline = () => STORE.phone.replace(/^\+92\s?/, "0");
  * WhatsApp message sent to every customer after ordering: delivery is free, pay only the COD amount,
  * open the parcel, and call us instead of refusing if the rider asks for extra money / advance.
  */
-export function deliveryGuideMessage(o: { customer_name: string; order_number: string; total: number; items?: string }) {
+export function deliveryGuideMessage(o: { customer_name: string; order_number: string; total: number; items?: string; phone?: string }) {
   const first = o.customer_name.trim().split(/\s+/)[0] || "";
   const amount = formatPrice(Number(o.total));
+  const site = STORE.siteUrl.replace(/\/$/, "");
+  const link = o.phone ? `${site}/order/${o.order_number}?phone=${encodeURIComponent(o.phone)}` : site;
   return [
-    `Assalam o Alaikum ${first}! Aapka Homiqo order *${o.order_number}* confirm ho gaya hai ✅`,
+    `Assalam o Alaikum ${first}! Homiqo order *${o.order_number}* confirm ✅`,
     o.items ? `📦 ${o.items}` : null,
-    `💵 COD: *${amount}* · 🚚 Delivery *FREE*`,
-    ``,
-    `✅ Rider ko sirf *${amount}* dein, extra ya advance *bilkul nahi*`,
-    `✅ Parcel khol kar check karein, phir payment karein`,
-    `❌ Parcel wapas na karein — koi masla ho to call / WhatsApp: *${helpline()}*`,
+    `💵 Sirf *${amount}* dein — delivery FREE, extra/advance *nahi*`,
+    `🔍 Parcel khol kar check karein, phir payment`,
+    `❌ Wapas na karein — masla ho to call: *${helpline()}*`,
     DELIVERY_GUIDE_URL ? `🎥 ${DELIVERY_GUIDE_URL}` : null,
-    ``,
-    `2–5 din mein delivery. Shukriya! — Team Homiqo`,
+    `🔗 Order dekhein: ${link}`,
   ]
     .filter((l) => l !== null)
     .join("\n");

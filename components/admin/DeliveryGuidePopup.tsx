@@ -28,7 +28,7 @@ export default function DeliveryGuidePopup() {
         order_number: o.order_number,
         customer_name: o.customer_name,
         phone: o.phone,
-        message: deliveryGuideMessage({ customer_name: o.customer_name, order_number: o.order_number, total: Number(o.total), items }),
+        message: deliveryGuideMessage({ customer_name: o.customer_name, order_number: o.order_number, phone: o.phone, total: Number(o.total), items }),
       });
     };
     window.addEventListener(CONFIRMED_EVENT, onConfirmed);
