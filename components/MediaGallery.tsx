@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, CirclePlay } from "lucide-react";
+import { Banknote, ChevronLeft, ChevronRight, CirclePlay, PackageOpen, Truck } from "lucide-react";
 import HoverVideo from "./HoverVideo";
 import ProductImage from "./ProductImage";
 import VideoEmbed from "./VideoEmbed";
@@ -61,7 +61,7 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
               <button
                 type="button"
                 onClick={() => setIndex(Math.max(0, media.findIndex((m) => m.kind === "video")))}
-                className="absolute bottom-5 left-5 bg-paper/95 px-4 py-2.5 text-[10px] font-medium uppercase tracking-[.2em] text-ink hover:bg-white"
+                className="absolute bottom-14 left-3 bg-paper/95 px-3.5 py-2 text-[10px] font-medium uppercase tracking-[.2em] text-ink hover:bg-white sm:bottom-16"
               >
                 ▶ Watch it in action
               </button>
@@ -83,8 +83,20 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
         {badge && (
           <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-rose-600 px-2.5 py-1.5 text-[13px] font-bold text-white shadow">{badge}</span>
         )}
+        {/* the three COD promises, right on the photo / video */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 grid grid-cols-3 bg-white/95 text-[11.5px] font-semibold text-ink backdrop-blur-sm sm:text-[13px]">
+          {[
+            { Icon: Truck, label: "Free delivery" },
+            { Icon: PackageOpen, label: "Open & check" },
+            { Icon: Banknote, label: "Cash on delivery" },
+          ].map(({ Icon, label }, i) => (
+            <span key={label} className={`flex items-center justify-center gap-1.5 py-2.5 sm:py-3 ${i === 1 ? "border-x border-ink/10" : ""}`}>
+              <Icon className="h-4 w-4 shrink-0 text-brand-600 sm:h-[18px] sm:w-[18px]" strokeWidth={1.8} /> {label}
+            </span>
+          ))}
+        </div>
         {media.length > 1 && (
-          <span className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-full bg-black/65 px-2.5 py-1 text-[12px] font-semibold text-white">
+          <span className="pointer-events-none absolute right-3 top-3 z-10 rounded-full bg-black/65 px-2.5 py-1 text-[12px] font-semibold text-white">
             {index + 1} / {media.length}{current?.kind === "video" ? " · Video" : ""}
           </span>
         )}

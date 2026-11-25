@@ -127,22 +127,12 @@ export default async function ProductPage({ params }: { params: Params }) {
               </span>
             </div>
 
-            {/* the three promises that decide a COD purchase */}
-            <ul className="mt-4 grid grid-cols-3 gap-2 border border-ink/10 bg-white px-2 py-3.5 text-center text-[12px] font-semibold leading-tight text-ink">
-              {[
-                { icon: <Truck className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Free delivery" },
-                { icon: <PackageOpen className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Open & check" },
-                { icon: <Banknote className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Cash on delivery" },
-              ].map((x) => (
-                <li key={x.label} className="flex flex-col items-center gap-1.5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50">{x.icon}</span>
-                  {x.label}
-                </li>
-              ))}
-            </ul>
+
+
+            <ProductActions product={product} />
 
             {topFeatures.length > 0 && (
-              <ul className="mt-4 space-y-1.5">
+              <ul className="mt-5 space-y-1.5">
                 {topFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-[14px] leading-snug text-ink/85">
                     <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-leaf-600" /> {f}
@@ -150,8 +140,6 @@ export default async function ProductPage({ params }: { params: Params }) {
                 ))}
               </ul>
             )}
-
-            <ProductActions product={product} />
 
             {alsoBought.length > 0 && (
               <div className="mt-6">
