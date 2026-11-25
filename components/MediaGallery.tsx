@@ -56,7 +56,7 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
         onMouseLeave={() => setHover(false)}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative aspect-[3/4] w-full max-w-[min(560px,calc(100svh-250px))] overflow-hidden bg-white lg:aspect-square"
+        className="relative aspect-[6/7] w-full max-w-[min(560px,calc(100svh-250px))] overflow-hidden bg-white lg:aspect-square"
       >
         {!current ? (
           <ProductImage alt={name} />
