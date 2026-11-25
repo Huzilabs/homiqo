@@ -1,0 +1,6 @@
+-- public.admin_update_order(p_order_id, p_customer, p_items) — applied 2026-11-25.
+-- Edits a pending/confirmed order that is not (or no longer) booked on PostEx: puts the old items back in stock,
+-- takes the new ones out, keeps the agreed unit price for products already on the order, recalculates
+-- buy-2 / combo / bank / 3% offer discounts and the total, updates customer details and logs an order_event.
+-- The API route /api/admin/orders/[id]/edit cancels the PostEx booking first and re-books afterwards.
+-- (Full source lives in the database: select prosrc from pg_proc where proname = 'admin_update_order';)

@@ -7,6 +7,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
 import DeleteOrderButton from "@/components/admin/DeleteOrderButton";
+import EditOrderButton from "@/components/admin/EditOrderButton";
+import { adminProducts } from "@/lib/admin-products";
 import OrderStatusForm from "@/components/admin/OrderStatusForm";
 import PostExPanel from "@/components/admin/PostExPanel";
 import PrintButton from "@/components/admin/PrintButton";
@@ -27,6 +29,12 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
   if (!order) notFound();
   const o = order as Order;
   const { data: suggestedCity } = await supabase.rpc("postex_match_city", { p_city: o.city });
+  const orderItems = (items || []) as OrderItem[];
+  const editable = ["pending", "confirmed"].includes(o.status);
+  // the order's own units count as available while editing it
+  const editProducts = editable
+    ? (await adminProducts(supabase)).map((p) => ({ ...p, stock: p.stock + orderItems.filter((i) => i.product_id === p.id).reduce((n, i) => n + i.quantity, 0) }))
+    : [];
   const digits = o.phone.replace(/\D/g, "");
   const waNumber = digits.startsWith("0") ? "92" + digits.slice(1) : digits;
 
@@ -47,6 +55,14 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
           <p className="text-sm text-gray-500">Placed {formatDate(o.created_at)}</p>
         </div>
         <div className="flex flex-wrap gap-2 print:hidden">
+          {editable && (
+            <EditOrderButton
+              id={o.id}
+              products={editProducts}
+              booked={o.courier === "PostEx" && Boolean(o.tracking_number) && !/^cancel/i.test(o.postex_status || "")}
+              initial={{ customer_name: o.customer_name, phone: o.phone, city: o.city, address: o.address, notes: o.notes || "", items: orderItems.map((i) => ({ product_id: i.product_id || "", quantity: i.quantity })) }}
+            />
+          )}
           <a href={`tel:${o.phone}`} className="btn-secondary px-4 py-2"><Phone className="h-4 w-4" /> Call</a>
           <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name}, regarding your order ${o.order_number}`)}`} target="_blank" rel="noopener noreferrer" className="btn-secondary px-4 py-2">
             <MessageCircle className="h-4 w-4" /> WhatsApp

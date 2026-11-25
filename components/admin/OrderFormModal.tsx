@@ -29,6 +29,9 @@ export default function OrderFormModal({
   onClose,
   onCreate,
   onSave,
+  submitLabel = "Create order",
+  showConfirm = true,
+  notice,
 }: {
   title: string;
   products: AdminProduct[];
@@ -36,6 +39,9 @@ export default function OrderFormModal({
   onClose: () => void;
   onCreate: (draft: OrderDraft, confirm: boolean) => Promise<string | null>; // returns an error message or null
   onSave?: (draft: OrderDraft) => Promise<string | null>;
+  submitLabel?: string;
+  showConfirm?: boolean;
+  notice?: string;
 }) {
   const [d, setD] = useState<OrderDraft>(() => ({
     ...initial,
@@ -161,10 +167,13 @@ export default function OrderFormModal({
             </div>
           </section>
 
+          {notice && <p className="bg-amber-50 p-3 text-sm text-amber-800">{notice}</p>}
+          {showConfirm && (
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" checked={confirmNow} onChange={(e) => setConfirmNow(e.target.checked)} className="mt-0.5 h-4 w-4 accent-brand-600" />
             <span>Customer already confirmed — mark the order <b>Confirmed</b> (then book it on PostEx from the order page)</span>
           </label>
+          )}
         </div>
 
         <div className="border-t bg-gray-50 px-5 py-3">
@@ -178,7 +187,7 @@ export default function OrderFormModal({
                 </button>
               )}
               <button type="submit" disabled={!!busy} className="inline-flex items-center gap-2 bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-60">
-                {busy === "create" && <LoaderCircle className="h-4 w-4 animate-spin" />} Create order
+                {busy === "create" && <LoaderCircle className="h-4 w-4 animate-spin" />} {submitLabel}
               </button>
             </div>
           </div>
