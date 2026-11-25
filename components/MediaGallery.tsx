@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Banknote, ChevronLeft, ChevronRight, CirclePlay, PackageOpen, Truck } from "lucide-react";
 import HoverVideo from "./HoverVideo";
 import ProductImage from "./ProductImage";
@@ -38,12 +38,24 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
   const [hover, setHover] = useState(false);
   const current = media[index];
   const go = (d: number) => setIndex((i) => (i + d + media.length) % media.length);
+  // swipe left / right on phones
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => { const t = e.touches[0]; touch.current = { x: t.clientX, y: t.clientY }; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s0 = touch.current; touch.current = null;
+    if (!s0 || media.length < 2) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s0.x, dy = t.clientY - s0.y;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+  };
 
   return (
     <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
       <div
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         className="relative aspect-square w-full max-w-[min(560px,calc(100svh-250px))] overflow-hidden bg-white"
       >
         {!current ? (
@@ -120,8 +132,16 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
         )}
       </div>
 
+      {/* phones: small dots (swipe / arrows to move); desktop: thumbnails */}
       {media.length > 1 && (
-        <div className="mt-3 flex w-full min-w-0 max-w-[min(560px,calc(100svh-250px))] gap-2 overflow-x-auto pb-1">
+        <div className="mt-2.5 flex justify-center gap-1.5 lg:hidden" aria-hidden>
+          {media.map((m, i) => (
+            <span key={m.url + i} className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-ink" : "w-1.5 bg-ink/20"}`} />
+          ))}
+        </div>
+      )}
+      {media.length > 1 && (
+        <div className="mt-3 hidden w-full min-w-0 max-w-[min(560px,calc(100svh-250px))] gap-2 overflow-x-auto pb-1 lg:flex">
           {media.map((m, i) => {
             const yt = m.kind === "video" ? youTubeId(m.url) : null;
             return (
