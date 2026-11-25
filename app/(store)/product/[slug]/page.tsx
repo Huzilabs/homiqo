@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import WriteReview from "@/components/WriteReview";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Banknote, CircleCheck, MessageCircle, PackageOpen, Truck } from "lucide-react";
+import { Banknote, ChevronDown, CircleCheck, MessageCircle, PackageOpen, Truck } from "lucide-react";
 import ProductImage from "@/components/ProductImage";
 import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
-import ReadMore from "@/components/ReadMore";
 import Stars from "@/components/Stars";
 import UrgencyBox from "@/components/UrgencyBox";
 import { recentOrderCounts } from "@/lib/recent";
@@ -228,42 +227,68 @@ export default async function ProductPage({ params }: { params: Params }) {
               </a>
             )}
 
-            {product.features.length > topFeatures.length && (
-              <div className="mt-6 lg:mt-10">
-                <p className="label">More highlights</p>
-                <ul className="mt-2 space-y-1.5 lg:space-y-0">
-                  {product.features.slice(topFeatures.length).map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-ink/80 lg:items-center lg:gap-4 lg:border-b lg:border-ink/10 lg:py-3.5 lg:text-[15px]">
-                      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500 lg:mt-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* product details as collapsible sections, right under the buy area */}
+            <div className="mt-6 border-b border-ink/15 lg:mt-8">
+              {[
+                {
+                  title: "About the Product",
+                  body: (
+                    <>
+                      <RichText simple text={product.description || product.short_description} />
+                      {product.features.length > topFeatures.length && (
+                        <ul className="mt-4 space-y-1.5 text-[15px] leading-7 text-ink/75">
+                          {product.features.slice(topFeatures.length).map((f) => (
+                            <li key={f} className="flex gap-3"><span className="mt-[0.75em] h-1.5 w-1.5 shrink-0 rounded-full bg-ink/60" />{f}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ),
+                },
+                {
+                  title: "Delivery Information",
+                  body: (
+                    <ul className="space-y-2.5 text-[15px] leading-7 text-ink/75">
+                      {[
+                        ["Free delivery:", `All over Pakistan in 2–5 working days — expected ${deliveryWindow()}.`],
+                        ["Cash on delivery:", "No advance payment. Open the parcel and check the product in front of the rider, then pay."],
+                        ["Pay only the order amount:", "Delivery is already paid by us — never pay the rider anything extra."],
+                        ["Bank transfer:", `Prefer to pay in advance? Pay by bank transfer and get ${BANK.discountPct}% off.`],
+                      ].map(([b, t]) => (
+                        <li key={b} className="flex gap-3"><span className="mt-[0.75em] h-1.5 w-1.5 shrink-0 rounded-full bg-ink/60" /><span><b className="font-semibold text-ink">{b}</b> {t}</span></li>
+                      ))}
+                    </ul>
+                  ),
+                },
+                {
+                  title: "Returns, Exchanges & Warranty",
+                  body: (
+                    <ul className="space-y-2.5 text-[15px] leading-7 text-ink/75">
+                      {[
+                        ["7-day replacement:", "If the product arrives damaged or faulty, message us within 7 days of delivery for a free replacement or refund."],
+                        ["Check before you pay:", "You can open the parcel in front of the rider — if anything is wrong, don't accept it and call us."],
+                        ["How to claim:", `WhatsApp us your order number and a photo or video of the problem${STORE.phone ? ` (${STORE.phone})` : ""}.`],
+                      ].map(([b, t]) => (
+                        <li key={b} className="flex gap-3"><span className="mt-[0.75em] h-1.5 w-1.5 shrink-0 rounded-full bg-ink/60" /><span><b className="font-semibold text-ink">{b}</b> {t}</span></li>
+                      ))}
+                    </ul>
+                  ),
+                },
+                ...(productFaqs.length ? [{ title: "Questions & Answers", body: <Faq items={productFaqs} /> }] : []),
+              ].map((sec) => (
+                <details key={sec.title} className="group border-t border-ink/15">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[16px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                    {sec.title}
+                    <ChevronDown className="h-5 w-5 shrink-0 text-ink/60 transition group-open:rotate-180" />
+                  </summary>
+                  <div className="pb-5">{sec.body}</div>
+                </details>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <section className="mt-10 bg-sand py-8 lg:mt-16 lg:py-24">
-        <div className="container-x grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-24">
-          <div>
-            <p className="eyebrow hidden lg:block">The details</p>
-            <h2 className="text-lg font-semibold text-ink lg:h-section lg:mt-4">
-              <span className="lg:hidden">Description</span>
-              <span className="hidden lg:inline">About the {product.name}</span>
-            </h2>
-            <div className="mt-3 lg:mt-8">
-              <ReadMore><RichText text={product.description || product.short_description} /></ReadMore>
-            </div>
-          </div>
-          {/* Desktop: FAQs beside the description. Mobile: moved to a collapsed row at the very end of the page. */}
-          <div className="hidden lg:block lg:pt-16">
-            <h2 className="eyebrow mb-6">{product.name} — questions, answered</h2>
-            <Faq items={faqs} />
-          </div>
-        </div>
-      </section>
 
       {rv.count === 0 ? (
         <section id="reviews" className="container-x scroll-mt-28 pt-10 lg:pt-16">
@@ -350,15 +375,6 @@ export default async function ProductPage({ params }: { params: Params }) {
         </section>
       )}
 
-      {faqs.length > 0 && (
-        <details className="group container-x mt-10 lg:hidden">
-          <summary className="flex cursor-pointer list-none items-center justify-between border-y border-ink/10 py-4 text-[15px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
-            Questions &amp; answers ({faqs.length})
-            <span className="text-xl font-normal text-ink/50 transition group-open:rotate-45">+</span>
-          </summary>
-          <div className="pt-2"><Faq items={faqs} /></div>
-        </details>
-      )}
     </>
   );
 }

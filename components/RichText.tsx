@@ -3,10 +3,10 @@
  *   "## Heading" lines become sub-headings, "- item" lines become bullet lists,
  *   blank lines separate paragraphs.
  */
-export default function RichText({ text }: { text: string }) {
+export default function RichText({ text, simple = false }: { text: string; simple?: boolean }) {
   const blocks = text.replace(/\r\n/g, "\n").split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
   return (
-    <div className="space-y-5 text-[17px] leading-[1.8] text-ink/70">
+    <div className={simple ? "space-y-4 text-[15px] leading-7 text-ink/75" : "space-y-5 text-[17px] leading-[1.8] text-ink/70"}>
       {blocks.map((block, i) => {
         const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
         const out: React.ReactNode[] = [];
@@ -19,7 +19,7 @@ export default function RichText({ text }: { text: string }) {
               <ul key={`u${out.length}`} className="space-y-2">
                 {list.map((li) => (
                   <li key={li} className="flex gap-3">
-                    <span className="mt-[0.8em] h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
+                    <span className={`mt-[0.75em] h-1.5 w-1.5 shrink-0 rounded-full ${simple ? "bg-ink/60" : "bg-accent-500"}`} />
                     <span>{li}</span>
                   </li>
                 ))}
@@ -31,7 +31,7 @@ export default function RichText({ text }: { text: string }) {
         for (const l of lines) {
           if (l.startsWith("## ")) {
             flush();
-            out.push(<h3 key={`h${out.length}`} className="pt-3 font-serif text-2xl font-medium text-ink">{l.slice(3)}</h3>);
+            out.push(<h3 key={`h${out.length}`} className={simple ? "pt-2 text-[15px] font-semibold text-ink" : "pt-3 font-serif text-2xl font-medium text-ink"}>{l.slice(3)}</h3>);
           } else if (/^[-•]\s+/.test(l)) {
             if (para.length) { const keep = list; list = []; flush(); list = keep; }
             list.push(l.replace(/^[-•]\s+/, ""));
