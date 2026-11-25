@@ -19,7 +19,7 @@ async function shrink(file: File): Promise<Blob> {
 }
 
 /** Product page review: name, stars, comment and an optional photo. Shown on the site after admin approval. */
-export default function OpenReviewForm({ productId, productName }: { productId: string; productName: string }) {
+export default function OpenReviewForm({ productId, productName, onDone }: { productId: string; productName: string; onDone?: () => void }) {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [name, setName] = useState("");
@@ -56,9 +56,10 @@ export default function OpenReviewForm({ productId, productName }: { productId: 
     setBusy(false);
     if (!res.ok || !data.ok) return setError(data.error || "Could not save your review.");
     setDone(true);
+    if (onDone) setTimeout(onDone, 2000);
   }
 
-  if (done) return <p className="bg-leaf-100/70 p-4 text-sm font-medium text-leaf-600">Thank you! Your review of the {productName} will appear here after a quick check.</p>;
+  if (done) return <p className="bg-leaf-100/70 p-4 text-center text-[15px] font-semibold text-leaf-600">Thank you for your review! ⭐</p>;
 
   return (
     <form onSubmit={submit} className="space-y-4">

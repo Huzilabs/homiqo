@@ -27,7 +27,7 @@ export default function ReviewForm({ orderNumber, phone, productId, productName,
     setDone(true);
   }
 
-  if (done) return <p className="bg-leaf-100/70 p-4 text-sm font-medium text-leaf-600">Thank you! Your review of the {productName} will appear on our website after a quick check.</p>;
+  if (done) return <p className="bg-leaf-100/70 p-4 text-sm font-medium text-leaf-600">Thank you for your review of the {productName}! ⭐</p>;
 
   return (
     <form onSubmit={submit} className="space-y-4">

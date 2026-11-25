@@ -27,7 +27,7 @@ export default function WriteReview({ productId, productName, compact = false }:
               </div>
               <button onClick={() => setOpen(false)} aria-label="Close" className="-mr-1 -mt-1 p-2 text-ink/50 hover:text-ink"><X className="h-5 w-5" /></button>
             </div>
-            <OpenReviewForm productId={productId} productName={productName} />
+            <OpenReviewForm productId={productId} productName={productName} onDone={() => setOpen(false)} />
           </div>
         </div>
       )}
