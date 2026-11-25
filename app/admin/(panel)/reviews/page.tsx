@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Stars from "@/components/Stars";
 import ReviewActions from "@/components/admin/ReviewActions";
+import { ReviewCheckbox, ReviewsSelection } from "@/components/admin/ReviewsBulk";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import AskReviewsList from "@/components/admin/AskReviewsList";
@@ -77,9 +78,12 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="space-y-3">
+        <ReviewsSelection ids={rows.map((r) => r.id)} status={status}>
         {rows.map((r) => (
           <div key={r.id} className="card p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex min-w-0 gap-3">
+              <ReviewCheckbox id={r.id} label={r.name} />
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <Stars rating={r.rating} />
@@ -99,10 +103,12 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
                   </a>
                 )}
               </div>
+              </div>
               <ReviewActions id={r.id} status={r.status} />
             </div>
           </div>
         ))}
+        </ReviewsSelection>
         {rows.length === 0 && (
           <p className="card p-10 text-center text-sm text-gray-500">
             {status === "pending" ? "No reviews waiting. After an order is delivered, use “Ask for a review” on the order page — the customer also gets the link by email." : "Nothing here yet."}
