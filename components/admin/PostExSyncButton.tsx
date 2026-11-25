@@ -20,7 +20,7 @@ export default function PostExSyncButton() {
           router.refresh();
         }}
         disabled={busy}
-        className="btn-secondary px-4 py-2.5 text-[11px]"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-[13px] font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-60"
       >
         {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync PostEx
       </button>

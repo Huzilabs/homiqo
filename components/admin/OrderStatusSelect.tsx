@@ -55,23 +55,23 @@ export default function OrderStatusSelect({ id, orderNumber, status, courier, tr
   }
 
   return (
-    <div className="min-w-[150px]">
-      <div className={`relative inline-flex items-center rounded-full ring-1 ring-inset ${STATUS_STYLE[value] || ""}`}>
+    <div>
+      <div className={`relative inline-flex items-center rounded-lg ring-1 ring-inset ${STATUS_STYLE[value] || ""}`}>
         <select
           value={value}
           disabled={busy}
           onChange={(e) => change(e.target.value)}
           aria-label={`Status of ${orderNumber}`}
-          className="cursor-pointer appearance-none rounded-full bg-transparent py-1.5 pl-3.5 pr-8 text-xs font-semibold outline-none disabled:cursor-wait"
+          className="cursor-pointer appearance-none rounded-lg bg-transparent py-1 pl-2.5 pr-7 text-xs font-semibold outline-none disabled:cursor-wait"
         >
           {ORDER_STATUSES.map((s) => (
             <option key={s} value={s}>{LABEL[s]}</option>
           ))}
         </select>
         {busy ? (
-          <LoaderCircle className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 animate-spin" />
+          <LoaderCircle className="pointer-events-none absolute right-2 h-3.5 w-3.5 animate-spin" />
         ) : (
-          <ChevronDown className="pointer-events-none absolute right-2.5 h-3.5 w-3.5" />
+          <ChevronDown className="pointer-events-none absolute right-2 h-3.5 w-3.5" />
         )}
       </div>
       {error && <p className="mt-1 max-w-[220px] text-[11px] leading-snug text-rose-600">{error}</p>}

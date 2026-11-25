@@ -28,7 +28,7 @@ export default function CreateOrderButton({ products }: { products: AdminProduct
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 bg-gray-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white hover:bg-black">
+      <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-[13px] font-medium text-white shadow-sm hover:bg-black">
         <Plus className="h-4 w-4" /> Create order
       </button>
       {open && <OrderFormModal title="Create order" products={products} initial={empty} onClose={() => setOpen(false)} onCreate={create} />}

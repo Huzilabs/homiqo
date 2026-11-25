@@ -47,9 +47,9 @@ export default function CallStatusSelect({ id, value, attempts = 0 }: { id: stri
         disabled={busy}
         onChange={(e) => change(e.target.value)}
         aria-label="Call status"
-        className={`max-w-[11rem] rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset disabled:opacity-60 ${c ? c.style : "bg-white text-gray-500 ring-gray-300"}`}
+        className={`max-w-[11rem] cursor-pointer appearance-none rounded-lg px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset disabled:opacity-60 ${c ? c.style : "bg-transparent text-gray-400 ring-transparent hover:ring-gray-300"}`}
       >
-        <option value="">📞 Call status…</option>
+        <option value="">📞 Add call note</option>
         {CALL_STATUSES.map((s) => (
           <option key={s.key} value={s.key}>{s.emoji} {s.label}</option>
         ))}

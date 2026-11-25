@@ -33,7 +33,7 @@ export default function OrdersSearch() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Search order #, customer name, phone or city"
-        className="input pl-9 pr-9"
+        className="h-9 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-9 text-[13px] outline-none transition placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
         aria-label="Search orders"
       />
       {pending ? (
