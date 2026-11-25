@@ -128,7 +128,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             </div>
 
             {/* the three promises that decide a COD purchase */}
-            <ul className="mt-4 grid grid-cols-3 gap-2 rounded-xl border border-ink/10 bg-white px-2 py-3.5 text-center text-[12px] font-semibold leading-tight text-ink">
+            <ul className="mt-4 grid grid-cols-3 gap-2 border border-ink/10 bg-white px-2 py-3.5 text-center text-[12px] font-semibold leading-tight text-ink">
               {[
                 { icon: <Truck className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Free delivery" },
                 { icon: <PackageOpen className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Open & check" },
@@ -220,7 +220,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             )}
 
             {/* product details as collapsible sections, right under the buy area */}
-            <div className="mt-5 divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white px-4 lg:mt-6">
+            <div className="mt-5 divide-y divide-ink/10 border border-ink/10 bg-white px-4 lg:mt-6">
               {[
                 {
                   title: "About the Product",

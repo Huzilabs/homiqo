@@ -146,7 +146,7 @@ export function DealTimer({ saleEndsAt, hasDiscount }: { saleEndsAt?: string | n
   }
   const parts = ms == null ? ["--", "--", "--"] : [ms / 3.6e6, (ms / 6e4) % 60, (ms / 1e3) % 60].map((n) => String(Math.max(0, Math.floor(n))).padStart(2, "0"));
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-accent-50 px-3 py-2">
+    <div className="flex items-center justify-between gap-3 bg-accent-50 px-3 py-2">
       <span className="text-[13px] font-semibold text-accent-700">{label}</span>
       <span className="flex items-center gap-1 text-[13px] font-bold tabular-nums text-ink" aria-label="Time left">
         {parts.map((p, i) => (

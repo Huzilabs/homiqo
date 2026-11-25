@@ -3,7 +3,7 @@ import Stars from "@/components/Stars";
 import ReviewActions from "@/components/admin/ReviewActions";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
-import AskReviewButton from "@/components/admin/AskReviewButton";
+import AskReviewsList from "@/components/admin/AskReviewsList";
 import { reviewLink } from "@/lib/reviews";
 
 const TABS = [
@@ -57,17 +57,13 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
             <p className="font-semibold text-emerald-900">⭐ Ask for reviews · {toAsk.length} delivered customer{toAsk.length === 1 ? "" : "s"}</p>
             <p className="text-xs text-emerald-800/80">One tap opens WhatsApp with their personal review link. Best 1–2 days after delivery.</p>
           </div>
-          <ul className="max-h-[420px] divide-y divide-gray-100 overflow-y-auto">
-            {toAsk.map((o) => (
-              <li key={o.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
-                <span className="min-w-0">
-                  <span className="font-medium">{o.customer_name}</span> <span className="text-gray-500">· {o.city} · {o.order_number}</span>
-                  <span className="block truncate text-xs text-gray-500">{(o.order_items || []).map((i) => i.product_name).join(", ")}</span>
-                </span>
-                <AskReviewButton orderId={o.id} href={`https://wa.me/${waTo(o.phone)}?text=${encodeURIComponent(askText(o))}`} />
-              </li>
-            ))}
-          </ul>
+          <AskReviewsList
+            rows={toAsk.map((o) => ({
+              id: o.id, name: o.customer_name, city: o.city, order_number: o.order_number,
+              items: (o.order_items || []).map((i) => i.product_name).join(", "),
+              href: `https://wa.me/${waTo(o.phone)}?text=${encodeURIComponent(askText(o))}`,
+            }))}
+          />
         </div>
       )}
 
