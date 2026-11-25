@@ -4,7 +4,7 @@ import { PenLine, X } from "lucide-react";
 import OpenReviewForm from "./OpenReviewForm";
 
 /** Product page: "Write a review" → popup form for customers who received this product. */
-export default function WriteReview({ productId, productName }: { productId: string; productName: string }) {
+export default function WriteReview({ productId, productName, compact = false }: { productId: string; productName: string; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     if (!open) return;
@@ -14,7 +14,7 @@ export default function WriteReview({ productId, productName }: { productId: str
   }, [open]);
   return (
     <>
-      <button onClick={() => setOpen(true)} className="btn-secondary mt-6 w-full sm:w-auto">
+      <button onClick={() => setOpen(true)} className={`btn-secondary w-full sm:w-auto ${compact ? "shrink-0" : "mt-6"}`}>
         <PenLine className="h-4 w-4" /> Write a review
       </button>
       {open && (

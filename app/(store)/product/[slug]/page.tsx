@@ -265,6 +265,18 @@ export default async function ProductPage({ params }: { params: Params }) {
         </div>
       </section>
 
+      {rv.count === 0 ? (
+        <section id="reviews" className="container-x scroll-mt-28 pt-10 lg:pt-16">
+          <div className="flex flex-col items-start justify-between gap-4 border border-ink/10 bg-white px-5 py-5 sm:flex-row sm:items-center lg:px-8 lg:py-6">
+            <div>
+              <p className="text-lg tracking-[.15em] text-ink/25" aria-hidden>★★★★★</p>
+              <p className="mt-1 font-semibold text-ink">No reviews yet</p>
+              <p className="text-sm text-ink/60">Bought the {product.name}? Share your experience — it helps other customers.</p>
+            </div>
+            <WriteReview productId={product.id} productName={product.name} compact />
+          </div>
+        </section>
+      ) : (
       <section id="reviews" className="container-x scroll-mt-28 pt-24">
         <div className="grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
           <div>
@@ -321,6 +333,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           )}
         </div>
       </section>
+      )}
 
       {related.length > 0 && (
         <section className="container-x pt-10 lg:pt-28">
