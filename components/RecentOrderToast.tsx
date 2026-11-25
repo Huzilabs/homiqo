@@ -28,12 +28,18 @@ export default function RecentOrderToast() {
   const [cur, setCur] = useState<Recent | null>(null);
   const [visible, setVisible] = useState(false);
   const [off, setOff] = useState(true);
-  const [topPx, setTopPx] = useState(88);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const shown = useRef(0);
 
   // Not on checkout / order pages. While the Meta-offer countdown sits bottom-left, the popup goes just above it.
   const blocked = off || pathname === "/checkout" || pathname.startsWith("/order");
   const raised = Boolean(offer);
+
+  // hide while the offer popup / order form / cart is open
+  useEffect(() => {
+    const t = setInterval(() => setDialogOpen(Boolean(document.querySelector('[role="dialog"],[role="alertdialog"]'))), 500);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     try { setOff(sessionStorage.getItem(HIDE_KEY) === "1"); } catch { setOff(false); }
@@ -47,14 +53,13 @@ export default function RecentOrderToast() {
     const cycle = (delay: number) => {
       t = setTimeout(() => {
         if (shown.current >= MAX_PER_VISIT) return;
+        // never on top of the offer popup, order form or cart
+        if (document.querySelector('[role="dialog"],[role="alertdialog"]')) { cycle(GAP); return; }
         // prefer a different product than the one on screen, so it reads as "others are buying too"
         const onSlug = pathname.startsWith("/product/") ? pathname.split("/")[2] : "";
         let pick = list[i % list.length];
         for (let k = 0; k < list.length && pick.product_slug === onSlug && list.length > 1 && k < 1; k++) pick = list[++i % list.length];
         i++;
-        // sit just under the sticky header (its position changes while the top bar scrolls away)
-        const hb = document.querySelector("header")?.getBoundingClientRect().bottom;
-        setTopPx(Math.max(8, Math.round(hb ?? 80)) + 8);
         setCur(pick); setVisible(true); shown.current++;
         t = setTimeout(() => { setVisible(false); cycle(GAP); }, SHOW_FOR);
       }, delay);
@@ -64,17 +69,19 @@ export default function RecentOrderToast() {
   }, [blocked, list, pathname]);
 
   if (!cur || blocked) return null;
+  const covered = dialogOpen;
   const onProduct = pathname.startsWith("/product/");
 
   return (
     <div
       role="status"
-      style={onProduct && typeof window !== "undefined" && window.innerWidth < 1024 ? { top: topPx } : undefined}
       aria-live="polite"
-      // Phones, product page: top (over the photo) so it never covers the price or the Buy Now bar. Elsewhere: bottom-left.
-      className={`fixed left-3 right-[4.5rem] z-[45] transition-all duration-500 sm:right-auto sm:w-[420px] max-sm:max-w-[330px] lg:bottom-6 lg:left-6 lg:top-auto ${
-        onProduct ? (raised ? "lg:!bottom-24" : "") : raised ? "bottom-[4.5rem] lg:!bottom-24" : "bottom-4"
-      } ${visible ? "translate-y-0 opacity-100" : `pointer-events-none opacity-0 ${onProduct ? "max-lg:-translate-y-4 lg:translate-y-4" : "translate-y-4"}`}`}
+      // Bottom-left, above the phone's Buy Now bar and the offer countdown when they're on screen
+      className={`fixed left-3 right-[4.5rem] z-[45] transition-all duration-500 sm:right-auto sm:w-[420px] max-sm:max-w-[330px] lg:left-6 ${
+        onProduct
+          ? raised ? "bottom-[9.25rem] lg:bottom-24" : "bottom-[5.75rem] lg:bottom-6"
+          : raised ? "bottom-[4.5rem] lg:bottom-24" : "bottom-4 lg:bottom-6"
+      } ${visible && !covered ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"}`}
     >
       <div className="relative flex items-center gap-3 border border-ink/10 bg-white p-2 pr-8 shadow-[0_10px_40px_-8px_rgba(14,42,40,.35)] sm:gap-4 sm:p-3 sm:pr-10">
         <Link href={`/product/${cur.product_slug}`} className="relative h-14 w-14 shrink-0 overflow-hidden bg-sand sm:h-[76px] sm:w-[76px]">
