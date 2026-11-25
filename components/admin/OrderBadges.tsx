@@ -4,6 +4,7 @@ export const RISK_LABEL: Record<string, string> = {
   refused_before: "Refused / returned before",
   short_address: "Short address",
   duplicate: "Duplicate order",
+  blocked: "BLOCKED customer",
 };
 
 /** Small status chips for an order: customer confirmation, delivery problem, risk flags. */
