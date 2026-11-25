@@ -61,7 +61,7 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
               <button
                 type="button"
                 onClick={() => setIndex(Math.max(0, media.findIndex((m) => m.kind === "video")))}
-                className="absolute bottom-14 left-3 bg-paper/95 px-3.5 py-2 text-[10px] font-medium uppercase tracking-[.2em] text-ink hover:bg-white sm:bottom-16"
+                className="absolute bottom-[72px] left-3 bg-paper/95 px-3.5 py-2 text-[10px] font-medium uppercase tracking-[.2em] text-ink hover:bg-white sm:bottom-16"
               >
                 ▶ Watch it in action
               </button>
@@ -84,14 +84,14 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
           <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-rose-600 px-2.5 py-1.5 text-[13px] font-bold text-white shadow">{badge}</span>
         )}
         {/* the three COD promises, right on the photo / video */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 grid grid-cols-3 bg-white/95 text-[11.5px] font-semibold text-ink backdrop-blur-sm sm:text-[13px]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 grid grid-cols-3 bg-white/95 text-[10.5px] font-medium leading-tight text-ink backdrop-blur-sm sm:text-[13px] sm:font-semibold">
           {[
             { Icon: Truck, label: "Free delivery" },
             { Icon: PackageOpen, label: "Open & check" },
             { Icon: Banknote, label: "Cash on delivery" },
           ].map(({ Icon, label }, i) => (
-            <span key={label} className={`flex items-center justify-center gap-1.5 py-2.5 sm:py-3 ${i === 1 ? "border-x border-ink/10" : ""}`}>
-              <Icon className="h-4 w-4 shrink-0 text-brand-600 sm:h-[18px] sm:w-[18px]" strokeWidth={1.8} /> {label}
+            <span key={label} className={`flex flex-col items-center justify-center gap-1 whitespace-nowrap px-1 py-2 sm:flex-row sm:gap-1.5 sm:py-3 ${i === 1 ? "border-x border-ink/10" : ""}`}>
+              <Icon className="h-[18px] w-[18px] shrink-0 text-brand-600" strokeWidth={1.8} /> {label}
             </span>
           ))}
         </div>
