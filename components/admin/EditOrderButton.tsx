@@ -26,7 +26,7 @@ export default function EditOrderButton({ id, products, initial, booked }: { id:
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="btn-secondary px-4 py-2"><Pencil className="h-4 w-4" /> Edit order</button>
+      <button onClick={() => setOpen(true)} className="btn-action"><Pencil className="h-4 w-4" /> Edit order</button>
       {open && (
         <OrderFormModal
           title="Edit order"

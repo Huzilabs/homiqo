@@ -63,8 +63,8 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               initial={{ customer_name: o.customer_name, phone: o.phone, city: o.city, address: o.address, notes: o.notes || "", items: orderItems.map((i) => ({ product_id: i.product_id || "", quantity: i.quantity })) }}
             />
           )}
-          <a href={`tel:${o.phone}`} className="btn-secondary px-4 py-2"><Phone className="h-4 w-4" /> Call</a>
-          <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name}, regarding your order ${o.order_number}`)}`} target="_blank" rel="noopener noreferrer" className="btn-secondary px-4 py-2">
+          <a href={`tel:${o.phone}`} className="btn-action"><Phone className="h-4 w-4" /> Call</a>
+          <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name}, regarding your order ${o.order_number}`)}`} target="_blank" rel="noopener noreferrer" className="btn-action">
             <MessageCircle className="h-4 w-4" /> WhatsApp
           </a>
           {["pending", "confirmed", "shipped"].includes(o.status) && (
@@ -72,7 +72,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               href={`https://wa.me/${waNumber}?text=${encodeURIComponent(deliveryGuideMessage({ customer_name: o.customer_name, order_number: o.order_number, total: Number(o.total), items: ((items || []) as OrderItem[]).map((i) => `${i.quantity}× ${i.product_name}`).join(", ") }))}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary border-emerald-600 px-4 py-2 text-emerald-700"
+              className="btn-action border-emerald-600 bg-emerald-50 text-emerald-800 hover:border-emerald-700 hover:bg-emerald-100"
               title="WhatsApp the customer: free delivery, pay only the COD amount, don't pay extra / advance, call us instead of refusing"
             >
               <ShieldCheck className="h-4 w-4" /> Send delivery guide
@@ -83,7 +83,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name.split(" ")[0]}! Thank you for shopping with ${STORE.name}. We hope you're enjoying your order ${o.order_number}. Could you take a minute to leave a quick review? It really helps us: ${reviewLink(o.order_number, o.phone)}`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary px-4 py-2"
+              className="btn-action"
             >
               <Star className="h-4 w-4" /> Ask for a review
             </a>
