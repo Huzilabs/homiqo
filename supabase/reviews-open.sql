@@ -6,3 +6,7 @@
 
 -- 2026-11-25: checkout_leads_skip_if_ordered (BEFORE INSERT OR UPDATE on checkout_leads): a lead saved while/just after the
 -- same phone placed an order (within 24 h, not cancelled) is stored as 'converted' instead of showing as abandoned.
+
+-- 2026-11-26: checkout_leads.notified_at + public.notify_abandoned_leads() (pg_cron 'notify-abandoned-leads', every 5 min):
+-- push to admin phones ~15 min after an open lead with a valid phone (edge function order-push, body {lead_id}).
+-- orders.review_asked_at: set when the admin sends the review request from Admin → Reviews → "Ask for reviews".

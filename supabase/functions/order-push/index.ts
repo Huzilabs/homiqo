@@ -1,4 +1,5 @@
-// Sends a push notification to every admin device when a new order is saved.
+// Sends a push notification to every admin device when a new order is saved,
+// or (lead_id) when someone left the order form without ordering.
 // Called by the orders_push_notify trigger (pg_net) with the x-hook-secret header.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
@@ -16,6 +17,18 @@ Deno.serve(async (req) => {
   let payload: Record<string, unknown>;
   if (body.test) {
     payload = { title: "🔔 Homiqo notifications are on", body: "You'll get a notification here for every new order.", url: "/admin/orders", tag: "test" };
+  } else if (body.lead_id) {
+    // abandoned checkout: filled the order form (with a valid phone) but didn't order
+    const { data: l } = await supabase.from("checkout_leads").select("id, customer_name, phone, city, items, subtotal, status").eq("id", body.lead_id).maybeSingle();
+    if (!l || l.status !== "open") return new Response("no lead", { status: 404 });
+    const items = Array.isArray(l.items) ? (l.items as { name?: string; quantity?: number }[]).map((i) => `${i.quantity || 1}× ${i.name || "item"}`).join(", ") : "";
+    payload = {
+      title: `⏳ Didn't finish ordering — ${l.customer_name || "a customer"}${l.subtotal ? ` · ${rs(Number(l.subtotal))}` : ""}`,
+      body: `${l.phone}${l.city ? ` · ${l.city}` : ""}${items ? `\n${items}` : ""}\nCall or WhatsApp now while they're interested.`,
+      url: "/admin/abandoned",
+      tag: `lead-${l.id}`,
+      kind: "lead",
+    };
   } else {
     const { data: o } = await supabase
       .from("orders")

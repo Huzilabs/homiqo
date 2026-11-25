@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, CirclePlay } from "lucide-react";
 import HoverVideo from "./HoverVideo";
 import ProductImage from "./ProductImage";
@@ -14,13 +14,27 @@ type Media = { kind: "image" | "video"; url: string };
 const videoSent: Record<string, boolean> = {};
 
 export default function MediaGallery({ name, images, videos, productId }: { name: string; images: string[]; videos: string[]; productId?: string }) {
-  // Main photo first, then the video (so people see the product in action on the first swipe), then the other photos
-  const media: Media[] = [
-    ...images.slice(0, 1).map((url) => ({ kind: "image" as const, url })),
-    ...videos.map((url) => ({ kind: "video" as const, url })),
-    ...images.slice(1).map((url) => ({ kind: "image" as const, url })),
-  ];
+  // Video first (the best proof the product works), then the photos.
+  // It starts as the main photo (fast first paint) and switches to the muted video once the page has loaded.
+  const fileVideo = videos.find((v) => !youTubeId(v));
+  const media: Media[] = fileVideo
+    ? [{ kind: "video" as const, url: fileVideo }, ...images.map((url) => ({ kind: "image" as const, url }))]
+    : [
+        ...images.slice(0, 1).map((url) => ({ kind: "image" as const, url })),
+        ...videos.map((url) => ({ kind: "video" as const, url })),
+        ...images.slice(1).map((url) => ({ kind: "image" as const, url })),
+      ];
   const [index, setIndex] = useState(0);
+  const [videoReady, setVideoReady] = useState(false);
+  useEffect(() => {
+    if (!fileVideo) return;
+    const start = () => setTimeout(() => setVideoReady(true), 800);
+    if (document.readyState === "complete") { const t = start(); return () => clearTimeout(t); }
+    let t: ReturnType<typeof setTimeout>;
+    const onLoad = () => { t = start(); };
+    window.addEventListener("load", onLoad, { once: true });
+    return () => { window.removeEventListener("load", onLoad); clearTimeout(t); };
+  }, [fileVideo]);
   const [hover, setHover] = useState(false);
   const current = media[index];
   const go = (d: number) => setIndex((i) => (i + d + media.length) % media.length);
@@ -60,8 +74,10 @@ export default function MediaGallery({ name, images, videos, productId }: { name
                 <VideoEmbed key={current.url} url={current.url} title={name} autoPlay />
               </div>
             </div>
+          ) : index === 0 && fileVideo && !videoReady ? (
+            <ProductImage src={images[0]} alt={name} priority sizes="(max-width:1024px) 100vw, 50vw" />
           ) : (
-            <video key={current.url} src={current.url} autoPlay muted loop playsInline controls onPlay={() => { if (!videoSent[current.url]) { videoSent[current.url] = true; sendVisitEvent("video_play", { pid: productId }); } }} className="absolute inset-0 h-full w-full bg-black object-cover" />
+            <video key={current.url} src={current.url} poster={images[0]} autoPlay muted loop playsInline controls onPlay={() => { if (!videoSent[current.url]) { videoSent[current.url] = true; sendVisitEvent("video_play", { pid: productId }); } }} className="absolute inset-0 h-full w-full bg-black object-cover" />
           )
         )}
         {/* Free delivery is a big reason to buy — keep it on the photo itself */}

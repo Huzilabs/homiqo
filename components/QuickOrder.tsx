@@ -16,6 +16,14 @@ import type { CartItem, Product } from "@/lib/types";
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
 const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 const norm = (v: string) => v.toLowerCase().replace(/[^a-z]/g, "");
+const SAVED_KEY = "hq.customer";
+const remember = (form: HTMLFormElement) => {
+  try {
+    const f = new FormData(form);
+    const v = Object.fromEntries(["customer_name", "phone", "city", "address"].map((k) => [k, String(f.get(k) || "").trim()]));
+    if (Object.values(v).some(Boolean)) localStorage.setItem(SAVED_KEY, JSON.stringify(v));
+  } catch {}
+};
 
 /**
  * One-step order form that slides up on the product page (cash on delivery).
@@ -57,6 +65,16 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
+    // returning visitor: fill in the details they typed before (saved on this phone only)
+    try {
+      const saved = JSON.parse(localStorage.getItem(SAVED_KEY) || "null") as Record<string, string> | null;
+      if (saved) {
+        for (const k of ["customer_name", "phone", "city", "address"]) {
+          const el = dialog.current?.querySelector<HTMLInputElement>(`input[name=${k}]`);
+          if (el && !el.value && saved[k]) el.value = saved[k];
+        }
+      }
+    } catch {}
     dialog.current?.querySelector<HTMLInputElement>("input[name=customer_name]")?.focus({ preventScroll: true });
     return () => {
       document.body.style.overflow = prev;
@@ -68,12 +86,13 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
   const onFormChange = (e: React.FormEvent<HTMLFormElement>) => {
     const form = e.currentTarget;
     if (leadTimer.current) clearTimeout(leadTimer.current);
-    leadTimer.current = setTimeout(() => saveLead(form, [item], subtotal), 1200);
+    leadTimer.current = setTimeout(() => { saveLead(form, [item], subtotal); remember(form); }, 1200);
   };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    remember(e.currentTarget);
     const f = new FormData(e.currentTarget);
     const customer: Record<string, string> = Object.fromEntries(
       ["customer_name", "phone", "address", "city", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
@@ -189,6 +208,7 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
 
           <div className="border-t border-ink/10 bg-paper p-3">
             {error && <p className="mb-2 bg-rose-50 p-2 text-xs text-rose-700" role="alert">{error}</p>}
+            <p className="mb-2 text-center text-[12.5px] font-semibold text-leaf-600">✓ No advance payment · Pay when you receive</p>
             <button type="submit" disabled={submitting} className="flex h-14 w-full items-center justify-center gap-2 bg-accent-600 text-white shadow-lift active:bg-accent-700 disabled:opacity-70">
               {submitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Lock className="h-4 w-4" />}
               <span className="text-[15px] font-bold uppercase tracking-[.1em]">{submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}</span>

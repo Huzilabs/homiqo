@@ -19,3 +19,8 @@ export async function recentOrders(productId: string) {
   const counts = await getCounts().catch(() => ({}) as Record<string, number>);
   return counts[productId] || 0;
 }
+
+/** Orders in the last 7 days for every product (product id → count). */
+export async function recentOrderCounts() {
+  return getCounts().catch(() => ({}) as Record<string, number>);
+}

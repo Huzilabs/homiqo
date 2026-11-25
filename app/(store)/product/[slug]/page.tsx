@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import WriteReview from "@/components/WriteReview";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MessageCircle } from "lucide-react";
+import { Banknote, CircleCheck, MessageCircle, PackageOpen, Truck } from "lucide-react";
+import ProductImage from "@/components/ProductImage";
 import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
 import ReadMore from "@/components/ReadMore";
 import Stars from "@/components/Stars";
 import UrgencyBox from "@/components/UrgencyBox";
-import { recentOrders } from "@/lib/recent";
+import { recentOrderCounts } from "@/lib/recent";
 import { getProductReviews } from "@/lib/reviews";
 import { categoryPath } from "@/lib/categories";
 import MediaGallery from "@/components/MediaGallery";
@@ -73,7 +74,14 @@ export default async function ProductPage({ params }: { params: Params }) {
     .filter(({ c, parts }) => parts.length === (c.components || []).length && parts.reduce((s, p) => s + Number(p.price), 0) > Number(c.price));
   const preview = previewVideo(product.videos);
 
-  const [rv, recent] = await Promise.all([getProductReviews(product.id), recentOrders(product.id)]);
+  const [rv, counts] = await Promise.all([getProductReviews(product.id), recentOrderCounts()]);
+  const recent = counts[product.id] || 0;
+  // "Customers also bought": best sellers of the last 7 days (other in-stock products)
+  const alsoBought = all
+    .filter((p) => p.id !== product.id && p.stock > 0 && !(p.components || []).includes(product.id))
+    .sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0))
+    .slice(0, 2);
+  const topFeatures = product.features.slice(0, 4);
   const productFaqs = (product.faqs || []).filter((f) => f?.q && f?.a);
   const faqs = [
     ...productFaqs,
@@ -102,11 +110,14 @@ export default async function ProductPage({ params }: { params: Params }) {
           <div className="min-w-0 lg:pt-2">
             <p className="eyebrow hidden lg:block">{product.category}</p>
             <h1 className="text-[1.3rem] font-semibold leading-snug text-ink [text-wrap:wrap] lg:mt-3 lg:[text-wrap:balance] lg:font-serif lg:text-[2.75rem] lg:font-medium lg:leading-[1.05]">{product.name}</h1>
-            {rv.count > 0 && (
-              <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink">
+            {rv.count > 0 ? (
+              <a href="#reviews" className="mt-2 inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink lg:mt-3">
                 <Stars rating={rv.average} /> <span className="font-medium text-ink">{rv.average.toFixed(1)}</span> · {rv.count} review{rv.count === 1 ? "" : "s"}
+                {recent >= 3 && <span className="text-ink/50">· {recent} sold this week</span>}
               </a>
-            )}
+            ) : recent >= 3 ? (
+              <p className="mt-2 text-sm font-medium text-accent-700 lg:mt-3">🔥 {recent} people ordered this in the last 7 days</p>
+            ) : null}
             <p className="mt-3 hidden text-[16px] leading-relaxed text-ink/65 lg:line-clamp-2 lg:block">{product.short_description}</p>
 
             <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2 lg:mt-5 lg:gap-x-4 lg:border-t lg:border-ink/10 lg:pt-5">
@@ -117,7 +128,6 @@ export default async function ProductPage({ params }: { params: Params }) {
                   <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-600 px-2.5 text-[12px] font-semibold tracking-[.04em] text-white">Save {off}%</span>
                 </>
               )}
-              <span className="inline-flex h-7 items-center border border-leaf-600 bg-leaf-600 px-2.5 text-[12px] font-semibold tracking-[.04em] text-white">🚚 FREE delivery</span>
               {Number(product.bundle_save) > 0 && !(product.components || []).length && product.stock >= 2 && (
                 <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-50 px-2.5 text-[12px] font-semibold tracking-[.04em] text-accent-700">
                   🎁 Buy 2, save {formatPrice(Number(product.bundle_save))}
@@ -127,14 +137,44 @@ export default async function ProductPage({ params }: { params: Params }) {
             {off > 0 && (
               <p className="mt-1 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
             )}
-            <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[12px] font-medium text-leaf-600 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-1.5 lg:border lg:border-leaf-600/20 lg:bg-leaf-100/40 lg:px-4 lg:py-2.5 lg:text-[13px] lg:text-ink/80">
-              <li>✓ Cash on delivery</li>
-              <li>✓ Free delivery</li>
-              <li>✓ Open parcel before paying</li>
-              <li>✓ 7-day replacement</li>
+            {/* the three promises that decide a COD purchase — right under the price */}
+            <ul className="mt-3 grid grid-cols-3 border border-leaf-600/25 bg-leaf-100/50 text-center text-[11.5px] font-semibold leading-tight text-ink lg:text-[13px]">
+              <li className="flex flex-col items-center gap-1 px-1.5 py-2.5"><Truck className="h-5 w-5 text-leaf-600" />FREE delivery</li>
+              <li className="flex flex-col items-center gap-1 border-x border-leaf-600/25 px-1.5 py-2.5"><PackageOpen className="h-5 w-5 text-leaf-600" />Open parcel before paying</li>
+              <li className="flex flex-col items-center gap-1 px-1.5 py-2.5"><Banknote className="h-5 w-5 text-leaf-600" />Cash on delivery</li>
             </ul>
 
+            {topFeatures.length > 0 && (
+              <ul className="mt-4 space-y-1.5">
+                {topFeatures.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-[14px] leading-snug text-ink/85">
+                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent-600" /> {f}
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <ProductActions product={product} />
+
+            {alsoBought.length > 0 && (
+              <div className="mt-6">
+                <p className="text-[12px] font-semibold uppercase tracking-[.14em] text-ink/55">Customers also bought</p>
+                <div className="mt-2 grid grid-cols-2 gap-2.5">
+                  {alsoBought.map((p) => (
+                    <Link key={p.id} href={`/product/${p.slug}`} className="group flex gap-2.5 border border-ink/10 bg-white p-2 transition hover:border-ink/40">
+                      <span className="relative h-14 w-14 shrink-0 overflow-hidden bg-sand">
+                        <ProductImage src={p.images[0]} alt={p.name} sizes="56px" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="line-clamp-2 text-[12.5px] font-medium leading-snug text-ink group-hover:underline">{p.name}</span>
+                        <span className="mt-0.5 block text-[13px] font-bold text-accent-700">{formatPrice(p.price)}</span>
+                        {Number(p.bundle_save) > 0 && <span className="block text-[11px] text-leaf-600">Buy 2, save {formatPrice(Number(p.bundle_save))}</span>}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
 
             <p className={`mt-4 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
@@ -188,11 +228,11 @@ export default async function ProductPage({ params }: { params: Params }) {
               </a>
             )}
 
-            {product.features.length > 0 && (
+            {product.features.length > topFeatures.length && (
               <div className="mt-6 lg:mt-10">
-                <p className="label">Highlights</p>
+                <p className="label">More highlights</p>
                 <ul className="mt-2 space-y-1.5 lg:space-y-0">
-                  {product.features.map((f) => (
+                  {product.features.slice(topFeatures.length).map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-ink/80 lg:items-center lg:gap-4 lg:border-b lg:border-ink/10 lg:py-3.5 lg:text-[15px]">
                       <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500 lg:mt-0" />
                       {f}

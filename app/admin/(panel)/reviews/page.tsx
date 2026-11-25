@@ -3,6 +3,8 @@ import Stars from "@/components/Stars";
 import ReviewActions from "@/components/admin/ReviewActions";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
+import AskReviewButton from "@/components/admin/AskReviewButton";
+import { reviewLink } from "@/lib/reviews";
 
 const TABS = [
   { key: "pending", label: "Waiting for approval" },
@@ -25,14 +27,49 @@ export default async function AdminReviews({ searchParams }: { searchParams: Pro
   ]);
   const rows = (data || []) as unknown as Row[];
 
+  // Delivered customers (last 45 days) who haven't reviewed and haven't been asked yet
+  const since = new Date(Date.now() - 45 * 864e5).toISOString();
+  const [{ data: delivered }, { data: reviewed }] = await Promise.all([
+    supabase.from("orders").select("id, order_number, customer_name, phone, city, created_at, order_items(product_name)").eq("status", "delivered").is("review_asked_at", null).gte("created_at", since).order("created_at", { ascending: false }).limit(60),
+    supabase.from("reviews").select("order_id").not("order_id", "is", null),
+  ]);
+  const reviewedIds = new Set(((reviewed || []) as { order_id: string }[]).map((r) => r.order_id));
+  const toAsk = ((delivered || []) as unknown as { id: string; order_number: string; customer_name: string; phone: string; city: string; order_items: { product_name: string }[] }[])
+    .filter((o) => !reviewedIds.has(o.id))
+    .slice(0, 30);
+  const waTo = (p: string) => { const d = p.replace(/\D/g, ""); return d.startsWith("0") ? "92" + d.slice(1) : d; };
+  const askText = (o: (typeof toAsk)[number]) =>
+    `Assalam o Alaikum ${o.customer_name.split(" ")[0]}! Umeed hai aapko Homiqo ka ${o.order_items?.[0]?.product_name || "order"} pasand aaya 😊\n` +
+    `Agar 1 minute ho to apna review zaroor dein — is se doosre customers ko bohat madad milti hai:\n${reviewLink(o.order_number, o.phone)}\n\nShukriya! — Team Homiqo`;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold">Reviews</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Only customers with a delivered order can leave a review. Nothing appears on the website until you approve it.
+          Reviews come from delivered customers (verified) and from the product page (not verified). Nothing appears on the website until you approve it.
         </p>
       </div>
+
+      {toAsk.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-emerald-200 bg-white">
+          <div className="border-b border-emerald-100 bg-emerald-50 px-4 py-3">
+            <p className="font-semibold text-emerald-900">⭐ Ask for reviews · {toAsk.length} delivered customer{toAsk.length === 1 ? "" : "s"}</p>
+            <p className="text-xs text-emerald-800/80">One tap opens WhatsApp with their personal review link. Best 1–2 days after delivery.</p>
+          </div>
+          <ul className="max-h-[420px] divide-y divide-gray-100 overflow-y-auto">
+            {toAsk.map((o) => (
+              <li key={o.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                <span className="min-w-0">
+                  <span className="font-medium">{o.customer_name}</span> <span className="text-gray-500">· {o.city} · {o.order_number}</span>
+                  <span className="block truncate text-xs text-gray-500">{(o.order_items || []).map((i) => i.product_name).join(", ")}</span>
+                </span>
+                <AskReviewButton orderId={o.id} href={`https://wa.me/${waTo(o.phone)}?text=${encodeURIComponent(askText(o))}`} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-2">
         {TABS.map((t, i) => (
