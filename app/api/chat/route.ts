@@ -92,7 +92,7 @@ STORE FACTS (only promise these):
 - Delivery: FREE delivery on every order, all over Pakistan, usually 2–5 working days (courier: PostEx).
 - Payment: Cash on Delivery (COD). The customer can OPEN the parcel and check the product in front of the rider before paying.
 - Bank transfer: ${BANK.discountPct}% off products (${BANK.bank}); customer sends the payment screenshot on WhatsApp ${BANK.whatsappDisplay}.
-- Buy 2 of the same product: save Rs 200 (shown on each product page).
+- Buy 2 of the same product: save Rs 300 (shown on each product page).
 - Visitors who come from a Facebook/Instagram ad may see an extra ${FLASH_OFFER.pct}% off countdown on the site — do not promise it to others.
 - Returns / warranty: there is no long warranty; damaged, faulty or wrong item → contact within 7 days of delivery for a free replacement or refund (7-day replacement). Say this when asked about warranty.
 - Orders are confirmed by phone/WhatsApp before dispatch.
