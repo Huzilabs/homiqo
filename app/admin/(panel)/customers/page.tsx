@@ -53,7 +53,7 @@ export default async function Customers({ searchParams }: { searchParams: Promis
           {tab !== "all" && <input type="hidden" name="tab" value={tab} />}
           <input name="q" defaultValue={q || ""} placeholder="Search name, phone or city" className="h-9 w-full rounded-lg border border-gray-300 px-3 text-[13px] outline-none focus:border-gray-900" />
         </form>
-        <ul className="divide-y divide-gray-100">
+        <ul className="max-h-[calc(100svh-15rem)] divide-y divide-gray-100 overflow-y-auto border-t border-gray-100 lg:max-h-[calc(100svh-13rem)]">
           {rows.map((r) => (
             <li key={r.phone10} className={`flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-[13px] ${r.blocked ? "bg-rose-50/60" : ""}`}>
               <div className="min-w-[200px] flex-1">
@@ -70,8 +70,8 @@ export default async function Customers({ searchParams }: { searchParams: Promis
                 {r.open_orders > 0 && <span className="rounded bg-blue-50 px-2 py-1 text-blue-700">{r.open_orders} open</span>}
               </div>
               <div className="w-28 text-right">
-                <p className="font-semibold tabular-nums text-gray-900">{formatPrice(Number(r.spent))}</p>
-                <p className="text-[11px] text-gray-500">last {day(r.last_at)}</p>
+                <p className="font-semibold tabular-nums text-gray-900">{Number(r.spent) > 0 ? formatPrice(Number(r.spent)) : "—"}</p>
+                <p className="text-[11px] text-gray-500">{Number(r.spent) > 0 ? "spent · " : ""}last {day(r.last_at)}</p>
               </div>
               <div className="flex items-center gap-1">
                 <Link href={`/admin/orders?q=${r.phone10}`} className="rounded-md px-2.5 py-1.5 text-xs font-semibold text-brand-700 hover:bg-gray-50">Orders</Link>
