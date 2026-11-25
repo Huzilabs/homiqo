@@ -93,7 +93,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
           <div className="card p-6">
             <h2 className="font-bold">Items</h2>
             <ul className="mt-4 divide-y">
