@@ -4,6 +4,7 @@ import { CircleCheck, Mail, PhoneCall, Truck } from "lucide-react";
 import BankDetails from "@/components/BankDetails";
 import OrderDetails from "@/components/OrderDetails";
 import ConfirmOrderBox from "@/components/ConfirmOrderBox";
+import OrderTimeline from "@/components/OrderTimeline";
 import { createClient } from "@/lib/supabase/server";
 import type { TrackedOrder } from "@/lib/types";
 import { BANK, STORE } from "@/lib/config";
@@ -41,6 +42,8 @@ export default async function OrderPage({
           Your order <b className="text-brand-700">{number}</b> has been placed successfully.
         </p>
       </div>
+
+      {order && <OrderTimeline order={order} />}
 
       {/* the customer confirms (or cancels) — the WhatsApp link we send opens this page */}
       {order && phone && ["pending", "confirmed"].includes(order.status) && order.payment_method !== "bank_transfer" && (

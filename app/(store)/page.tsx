@@ -9,6 +9,9 @@ import ProductImage from "@/components/ProductImage";
 import SetupNotice from "@/components/SetupNotice";
 import VideoShowcase from "@/components/VideoShowcase";
 import { getProducts } from "@/lib/products";
+import { recentOrderCounts } from "@/lib/recent";
+import { getLatestReviews } from "@/lib/reviews";
+import Stars from "@/components/Stars";
 import { supabaseConfigured } from "@/lib/supabase/server";
 import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { BANK, STORE } from "@/lib/config";
@@ -37,9 +40,12 @@ export default async function HomePage() {
   const products = await getProducts();
   if (products.length === 0) return <div className="container-x py-32 text-center font-serif text-3xl text-ink/50">The collection is being prepared.</div>;
 
+  const [counts, latestReviews] = await Promise.all([recentOrderCounts(), getLatestReviews(8)]);
+  const bestSellers = [...products].filter((p) => p.stock > 0).sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0)).slice(0, 4);
+  const productName = new Map(products.map((p) => [p.id, p]));
   const featured = products.filter((p) => p.is_featured);
   const edit = [...featured, ...products.filter((p) => !p.is_featured)].slice(0, 4);
-  const hero = products.find((p) => p.slug.includes("qeema")) || featured[0] || products[0];
+  const hero = (counts[bestSellers[0]?.id] || 0) >= 3 ? bestSellers[0] : products.find((p) => p.slug.includes("qeema")) || featured[0] || products[0];
   const spotlight = products.find((p) => p.slug.includes("vacuum") && p.id !== hero.id) || featured.find((p) => p.id !== hero.id) || products[0];
   const deal = [...products].filter((p) => p.stock > 0 && p.id !== hero.id && p.id !== spotlight.id).sort((a, b) => discountPercent(b.price, b.compare_at_price) - discountPercent(a.price, a.compare_at_price))[0];
   const reels = products.filter((p) => previewVideo(p.videos)).slice(0, 4);
@@ -103,6 +109,63 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* ═════════ PROMISES STRIP (same as the product page) ═════════ */}
+      <div className="border-b border-ink/10 bg-white">
+        <ul className="container-x grid grid-cols-3 py-3 text-center text-[11px] font-semibold text-ink sm:text-[13px]">
+          {[
+            { Icon: Truck, label: "Free delivery" },
+            { Icon: PackageCheck, label: "Open & check" },
+            { Icon: Banknote, label: "Cash on delivery" },
+          ].map(({ Icon, label }) => (
+            <li key={label} className="flex flex-col items-center justify-center gap-1 sm:flex-row sm:gap-2">
+              <Icon className="h-5 w-5 text-brand-600" strokeWidth={1.8} /> {label}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* ═════════ BEST SELLERS THIS WEEK (real orders) ═════════ */}
+      {bestSellers.length > 0 && (
+        <section className="container-x pt-12 sm:pt-16">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-[.16em] text-accent-600">Most ordered</p>
+              <h2 className="mt-1 text-2xl font-bold text-ink sm:text-3xl">Best sellers this week</h2>
+            </div>
+            <Link href="/shop" className="shrink-0 text-sm font-semibold text-brand-700 hover:underline">Shop all →</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-6 lg:grid-cols-4">
+            {bestSellers.map((p, i) => <ProductCard key={p.id} product={p} priority={i < 2} sold={counts[p.id] || 0} />)}
+          </div>
+        </section>
+      )}
+
+      {/* ═════════ REAL CUSTOMER REVIEWS ═════════ */}
+      {latestReviews.length > 0 && (
+        <section className="pt-14 sm:pt-20">
+          <div className="container-x mb-5">
+            <p className="text-[12px] font-semibold uppercase tracking-[.16em] text-accent-600">What customers say</p>
+            <h2 className="mt-1 text-2xl font-bold text-ink sm:text-3xl">Real reviews from our customers</h2>
+          </div>
+          <div className="container-x flex snap-x gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {latestReviews.map((r) => {
+              const prod = productName.get(r.product_id);
+              return (
+                <figure key={r.id} className="w-[260px] shrink-0 snap-start border border-ink/10 bg-white p-4 sm:w-[300px]">
+                  <Stars rating={r.rating} />
+                  <blockquote className="mt-2 line-clamp-4 text-[14px] leading-relaxed text-ink/80">“{r.comment}”</blockquote>
+                  <figcaption className="mt-3 text-[12.5px]">
+                    <span className="font-semibold text-ink">{r.name}</span>
+                    {r.city && <span className="text-ink/50"> · {r.city}</span>}
+                    {prod && <Link href={`/product/${prod.slug}`} className="mt-0.5 block truncate text-brand-700 hover:underline">{prod.name}</Link>}
+                  </figcaption>
+                </figure>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ═════════ CATEGORIES ═════════ */}
       <section className="container-x pt-24 sm:pt-28">

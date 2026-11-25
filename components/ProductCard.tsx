@@ -8,7 +8,7 @@ import { discountPercent, formatPrice, previewVideo } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import type { Product } from "@/lib/types";
 
-export default function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
+export default function ProductCard({ product, priority, sold }: { product: Product; priority?: boolean; sold?: number }) {
   const { add } = useCart();
   const [playing, setPlaying] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -39,7 +39,7 @@ export default function ProductCard({ product, priority }: { product: Product; p
           {soldOut ? (
             <span className="bg-ink px-2 py-0.5 text-[9px] font-medium uppercase tracking-[.14em] text-white sm:px-2.5 sm:py-1 sm:text-[10px]">Sold out</span>
           ) : off > 0 ? (
-            <span className="bg-accent-600 px-2 py-0.5 text-[9px] font-medium tracking-[.1em] text-white sm:px-2.5 sm:py-1 sm:text-[10px]">−{off}%</span>
+            <span className="rounded bg-rose-600 px-2 py-1 text-[11px] font-bold text-white sm:text-[12px]">-{off}%</span>
           ) : null}
           {product.is_featured && !soldOut && (
             <span className="hidden bg-white px-2.5 py-1 text-[10px] font-medium uppercase tracking-[.16em] text-ink lg:inline-block">Bestseller</span>
@@ -70,23 +70,28 @@ export default function ProductCard({ product, priority }: { product: Product; p
 
       <div className="flex flex-1 flex-col pt-4">
         <p className="text-[10px] font-medium uppercase tracking-[.2em] text-ink/50 sm:text-[11px]">{product.category}</p>
-        <Link href={`/product/${product.slug}`} className="h-card mt-1.5 line-clamp-2 min-h-[2.6em] text-ink transition hover:text-brand-600 max-sm:text-[1.05rem] max-sm:leading-snug">
+        <Link href={`/product/${product.slug}`} className="mt-1 line-clamp-2 min-h-[2.7em] text-[14px] font-semibold leading-snug text-ink transition hover:text-brand-600 sm:text-[15px]">
           {product.name}
         </Link>
-        <p className="mb-3 mt-1.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-sm">
-          <span className={`font-medium ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
+        <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className={`text-[17px] font-bold ${off > 0 ? "text-accent-600" : "text-ink"}`}>{formatPrice(product.price)}</span>
           {off > 0 && <span data-nosnippet className="text-xs text-ink/40 line-through">{formatPrice(product.compare_at_price!)}</span>}
-          <span className="basis-full text-[11px] font-semibold text-leaf-600">🚚 Free delivery · COD</span>
+        </p>
+        {sold != null && sold >= 3 && <p data-nosnippet className="mt-0.5 text-[11.5px] font-medium text-accent-700">🔥 {sold} sold this week</p>}
+        <p data-nosnippet className="mb-3 mt-1 flex flex-wrap gap-1 text-[10.5px] font-semibold">
+          <span className="rounded-sm bg-leaf-100 px-1.5 py-0.5 text-leaf-600">Free delivery · COD</span>
+          {Number(product.bundle_save) > 0 && !soldOut && !(product.components || []).length && (
+            <span className="rounded-sm bg-accent-50 px-1.5 py-0.5 text-accent-700">Buy 2, save {formatPrice(Number(product.bundle_save))}</span>
+          )}
         </p>
         {!soldOut && (
-          <button
-            type="button"
+          <Link
+            href={`/product/${product.slug}`}
             data-nosnippet
-            onClick={() => add(product, 1)}
-            className="mt-auto w-full border border-ink/80 py-2.5 text-[10px] font-medium uppercase tracking-[.18em] text-ink transition active:bg-ink active:text-white lg:hidden"
+            className="mt-auto flex w-full items-center justify-center rounded bg-accent-600 py-2.5 text-[13px] font-semibold text-white transition hover:bg-accent-700 lg:hidden"
           >
-            Add to cart
-          </button>
+            Buy now
+          </Link>
         )}
       </div>
     </div>

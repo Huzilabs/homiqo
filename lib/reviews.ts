@@ -45,3 +45,9 @@ export async function getProductReviews(productId: string) {
 /** Review link sent to customers after delivery */
 export const reviewLink = (orderNumber: string, phone: string) =>
   `${STORE.siteUrl.replace(/\/$/, "")}/review/${encodeURIComponent(orderNumber)}?phone=${encodeURIComponent(phone)}`;
+
+/** Latest approved reviews with a written comment (home page strip). */
+export async function getLatestReviews(n = 8) {
+  const all = await getAllApproved().catch(() => [] as Review[]);
+  return all.filter((r) => (r.comment || "").trim().length >= 8).slice(0, n);
+}
