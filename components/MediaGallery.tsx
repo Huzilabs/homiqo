@@ -56,7 +56,7 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
         onMouseLeave={() => setHover(false)}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative aspect-square w-full max-w-[min(560px,calc(100svh-250px))] overflow-hidden bg-white"
+        className="relative aspect-[3/4] w-full max-w-[min(560px,calc(100svh-250px))] overflow-hidden bg-white lg:aspect-square"
       >
         {!current ? (
           <ProductImage alt={name} />
@@ -89,7 +89,7 @@ export default function MediaGallery({ name, images, videos, productId, badge }:
           ) : index === 0 && fileVideo && !videoReady ? (
             <ProductImage src={images[0]} alt={name} priority sizes="(max-width:1024px) 100vw, 50vw" />
           ) : (
-            <video key={current.url} src={current.url} poster={images[0]} autoPlay muted loop playsInline controls onPlay={() => { if (!videoSent[current.url]) { videoSent[current.url] = true; sendVisitEvent("video_play", { pid: productId }); } }} className="absolute inset-0 h-full w-full bg-black object-cover" />
+            <video key={current.url} src={current.url} poster={images[0]} autoPlay muted loop={media.length < 2} playsInline controls onEnded={() => media.length > 1 && go(1)} onPlay={() => { if (!videoSent[current.url]) { videoSent[current.url] = true; sendVisitEvent("video_play", { pid: productId }); } }} className="absolute inset-0 h-full w-full bg-black object-cover" />
           )
         )}
         {badge && (
