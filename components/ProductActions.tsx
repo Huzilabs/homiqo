@@ -11,6 +11,7 @@ import type { Product } from "@/lib/types";
 import { STORE } from "@/lib/config";
 import QuickOrder from "@/components/QuickOrder";
 import { quickOrderVariant } from "@/lib/ab";
+import { BUY_NOW_EVENT } from "./FlashOfferPopup";
 
 export default function ProductActions({ product }: { product: Product }) {
   const { add } = useCart();
@@ -76,6 +77,13 @@ export default function ProductActions({ product }: { product: Product }) {
     add(product, qty, false);
     router.push("/checkout");
   };
+  // "Order now" in the Meta offer popup opens the same order form
+  useEffect(() => {
+    const onBuy = () => !soldOut && buyNow();
+    window.addEventListener(BUY_NOW_EVENT, onBuy);
+    return () => window.removeEventListener(BUY_NOW_EVENT, onBuy);
+  });
+
 
   return (
     <>
