@@ -215,16 +215,6 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
                 })}
               </div>
             )}
-            {addon && (
-              <label className={`flex cursor-pointer items-center gap-3 rounded border px-3 py-2.5 transition ${addOn ? "border-accent-600 bg-accent-50" : "border-dashed border-ink/25 bg-white"}`}>
-                <input type="checkbox" checked={addOn} onChange={(e) => setAddOn(e.target.checked)} className="h-5 w-5 shrink-0 accent-accent-600" />
-                <span className="relative h-11 w-11 shrink-0 overflow-hidden bg-sand"><ProductImage src={addon.images[0]} alt={addon.name} sizes="44px" /></span>
-                <span className="min-w-0 flex-1 text-[13px] leading-snug">
-                  <span className="block font-semibold text-ink">Add {addon.name}</span>
-                  <span className="text-ink/60">+{formatPrice(addon.price)} · same parcel, free delivery</span>
-                </span>
-              </label>
-            )}
             {offerDiscount > 0 && (
               <p className="bg-accent-50 px-3 py-2 text-sm text-accent-700">⚡ Extra {FLASH_OFFER.pct}% off applied (−{formatPrice(offerDiscount)}) · {mmss(msLeft)} left</p>
             )}
@@ -253,6 +243,16 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
               <input id="qo-address" name="address" autoComplete="street-address" placeholder="House #, street, area / block, landmark" aria-invalid={!!fieldErr.address} className={`input ${fieldErr.address ? "border-rose-500" : ""}`} />
               {fieldErr.address && <p className="mt-1 text-xs font-medium text-rose-600">{fieldErr.address}</p>}
             </div>
+            {addon && (
+              <label className={`flex cursor-pointer items-center gap-3 rounded border px-3 py-2.5 transition ${addOn ? "border-accent-600 bg-accent-50" : "border-dashed border-ink/25 bg-white"}`}>
+                <input type="checkbox" checked={addOn} onChange={(e) => setAddOn(e.target.checked)} className="h-5 w-5 shrink-0 accent-accent-600" />
+                <span className="relative h-11 w-11 shrink-0 overflow-hidden bg-sand"><ProductImage src={addon.images[0]} alt={addon.name} sizes="44px" /></span>
+                <span className="min-w-0 flex-1 text-[13px] leading-snug">
+                  <span className="block font-semibold text-ink">Add {addon.name}</span>
+                  <span className="text-ink/60">+{formatPrice(addon.price)} · same parcel, free delivery</span>
+                </span>
+              </label>
+            )}
             <ul className="space-y-1 pt-1 text-xs text-ink/65">
               <li>🚚 Free delivery all over Pakistan · 2–5 working days</li>
               <li>💵 Cash on delivery — open the parcel and check it, then pay</li>
