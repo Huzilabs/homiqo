@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Clock, Flame, ShoppingBag, Truck } from "lucide-react";
+import { FLASH_OFFER } from "@/lib/config";
+import { useFlashOffer } from "@/lib/flash";
 
 /** Daily order cut-off (Pakistan time): orders confirmed by 6 PM are booked on PostEx that day. */
 export const CUTOFF_HOUR_PKT = 18;
@@ -118,6 +120,42 @@ export function BigCountdown({ endsAt, dark }: { endsAt?: string | null; dark?: 
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Deal countdown box (always a REAL timer): the Meta-ad extra-discount offer when the visitor has one,
+ * else a real sale end, else the daily courier cut-off.
+ */
+export function DealTimer({ saleEndsAt, hasDiscount }: { saleEndsAt?: string | null; hasDiscount: boolean }) {
+  const now = useNow();
+  const { offer, msLeft } = useFlashOffer();
+  const saleMs = saleEndsAt && now != null ? new Date(saleEndsAt).getTime() - now : 0;
+  let label: string;
+  let ms: number | null;
+  if (offer) {
+    label = `Extra ${FLASH_OFFER.pct}% off ends in`;
+    ms = msLeft;
+  } else if (saleEndsAt && hasDiscount && saleMs > 0) {
+    label = "Deal ends in";
+    ms = saleMs;
+  } else {
+    label = now == null || beforeCutoff(now) ? "Order now — ships today" : "Order now — ships tomorrow";
+    ms = now == null ? null : msToCutoff(now);
+  }
+  const parts = ms == null ? ["--", "--", "--"] : [ms / 3.6e6, (ms / 6e4) % 60, (ms / 1e3) % 60].map((n) => String(Math.max(0, Math.floor(n))).padStart(2, "0"));
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-accent-50 px-3 py-2">
+      <span className="text-[13px] font-semibold text-accent-700">{label}</span>
+      <span className="flex items-center gap-1 text-[13px] font-bold tabular-nums text-ink" aria-label="Time left">
+        {parts.map((p, i) => (
+          <span key={i} className="flex items-center gap-1">
+            {i > 0 && <span>:</span>}
+            <span className="rounded bg-ink px-1.5 py-0.5 text-white">{p}</span>
+          </span>
+        ))}
+      </span>
     </div>
   );
 }

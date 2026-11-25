@@ -87,41 +87,47 @@ export default function ProductActions({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="mt-4 flex flex-col gap-3">
-        <div className="flex gap-3">
-          <div className="flex h-[52px] items-center border border-ink/20">
-            <button className="flex h-full w-12 items-center justify-center hover:bg-sand" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Decrease quantity">
-              <Minus className="h-4 w-4" strokeWidth={1.5} />
-            </button>
-            <span className="w-8 text-center text-sm font-medium" aria-live="polite">{qty}</span>
-            <button className="flex h-full w-12 items-center justify-center hover:bg-sand" onClick={() => setQty((q) => Math.min(max, q + 1))} aria-label="Increase quantity">
-              <Plus className="h-4 w-4" strokeWidth={1.5} />
-            </button>
+      <div className="mt-3 flex flex-col gap-3">
+        {/* Choose your deal (Buy 1 / Buy 2) — or a plain quantity stepper for products without a Buy-2 saving */}
+        {!soldOut && bundleSave > 0 && max >= 2 ? (
+          <div className="rounded-xl border border-ink/10 bg-white p-3.5">
+            <p className="text-[14px] font-bold text-ink">Choose your deal</p>
+            <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+              {[1, 2].map((n) => {
+                const on = (n === 1 && qty === 1) || (n === 2 && qty >= 2);
+                const total = Number(product.price) * n - (n === 2 ? bundleSave : 0);
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setQty(n)}
+                    aria-pressed={on}
+                    className={`relative rounded-[10px] px-3 py-2.5 text-left transition ${on ? "border-2 border-accent-600 bg-accent-50" : "border-[1.5px] border-ink/15 bg-white hover:border-ink/40"}`}
+                  >
+                    {n === 2 && <span className="absolute -top-2.5 right-2 rounded bg-accent-600 px-1.5 py-0.5 text-[10px] font-bold text-white">BEST VALUE</span>}
+                    <span className="block text-[12.5px] text-ink/60">{n === 1 ? "Buy 1" : `Buy 2 · save ${formatPrice(bundleSave)}`}</span>
+                    <span className="mt-0.5 block text-[17px] font-bold text-ink">{formatPrice(total)}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {qty > 2 && <p className="mt-2 text-[12.5px] font-medium text-accent-700">{qty} pieces · {formatPrice(lineTotal)}</p>}
           </div>
-          <button disabled={soldOut} onClick={() => add(product, qty)} className="btn-secondary h-[52px] flex-1">
-            Add to cart
-          </button>
-        </div>
-        {!soldOut && bundleSave > 0 && max >= 2 && (
-          <div className="flex items-center justify-between gap-3 border border-accent-500/40 bg-accent-50 px-4 py-3 text-sm">
-            {qty >= 2 ? (
-              <p className="font-medium text-accent-700">
-                ✓ You save {formatPrice(Math.floor(qty / 2) * bundleSave)} — {qty} for {formatPrice(lineTotal)}
-              </p>
-            ) : (
-              <>
-                <p className="text-ink/80">
-                  🎁 <b className="text-accent-700">Buy 2, save {formatPrice(bundleSave)}</b> — 2 for {formatPrice(Number(product.price) * 2 - bundleSave)}
-                </p>
-                <button type="button" onClick={() => setQty(2)} className="shrink-0 bg-accent-600 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[.14em] text-white hover:bg-accent-700">
-                  Get 2
-                </button>
-              </>
-            )}
-          </div>
+        ) : (
+          !soldOut && (
+            <div className="flex h-12 w-fit items-center overflow-hidden rounded-[10px] border border-ink/15 bg-white">
+              <button className="flex h-full w-12 items-center justify-center hover:bg-sand" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Decrease quantity">
+                <Minus className="h-4 w-4" strokeWidth={1.5} />
+              </button>
+              <span className="w-8 text-center text-sm font-semibold" aria-live="polite">{qty}</span>
+              <button className="flex h-full w-12 items-center justify-center hover:bg-sand" onClick={() => setQty((q) => Math.min(max, q + 1))} aria-label="Increase quantity">
+                <Plus className="h-4 w-4" strokeWidth={1.5} />
+              </button>
+            </div>
+          )
         )}
-        <button disabled={soldOut} onClick={buyNow} className="btn-primary h-[56px] w-full">
-          {soldOut ? "Sold out" : "Buy now — cash on delivery"}
+        <button disabled={soldOut} onClick={buyNow} className="flex h-14 w-full items-center justify-center rounded-[10px] bg-accent-600 text-[15px] font-extrabold uppercase tracking-[.06em] text-white shadow-lift transition hover:bg-accent-700 disabled:opacity-50">
+          {soldOut ? "Sold out" : `Buy now · ${formatPrice(lineTotal)}`}
         </button>
         {!soldOut && STORE.whatsapp && (
           <a
@@ -129,35 +135,36 @@ export default function ProductActions({ product }: { product: Product }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => { e.currentTarget.href = waHref(true); track.whatsappOrder(product, qty); }}
-            className="flex h-[52px] w-full items-center justify-center gap-2.5 bg-[#25D366] text-[13px] font-semibold uppercase tracking-[.18em] text-white transition hover:bg-[#1ebe5b]"
+            className="flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[10px] bg-[#25D366] text-[14px] font-bold text-white transition hover:bg-[#1ebe5b]"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.24-9.43 9.44-9.43 2.52 0 4.89.98 6.67 2.77a9.37 9.37 0 0 1 2.76 6.67c0 5.2-4.24 9.43-9.44 9.43m8.03-17.46A11.27 11.27 0 0 0 12.05.72C5.8.72.7 5.8.7 12.06c0 2 .52 3.95 1.52 5.67L.6 23.28l5.68-1.49a11.3 11.3 0 0 0 5.43 1.38h.01c6.25 0 11.34-5.09 11.34-11.34 0-3.03-1.18-5.88-3.32-8.02"/></svg>
             Order on WhatsApp
           </a>
         )}
+        {!soldOut && (
+          <button onClick={() => add(product, qty)} className="text-[13px] font-semibold text-ink/60 underline underline-offset-4 hover:text-ink">
+            or add to cart
+          </button>
+        )}
       </div>
 
       {!soldOut && (
-        <div className="fixed inset-x-0 bottom-0 z-30 flex items-stretch gap-2 border-t border-ink/10 bg-paper/95 px-3 py-2.5 backdrop-blur lg:hidden">
-          <button onClick={buyNow} className="flex h-14 flex-1 basis-0 flex-col items-center justify-center bg-accent-600 text-white shadow-lift active:bg-accent-700">
-            <span className="text-[15px] font-bold uppercase tracking-[.12em]">Buy now</span>
-            <span className="text-[11px] font-medium text-white/90">{formatPrice(product.price)} · Free delivery · COD</span>
-          </button>
-          {STORE.whatsapp && (
+        <div className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-[1fr_1.6fr] gap-2 border-t border-ink/10 bg-white px-3 pb-3 pt-2.5 lg:hidden">
+          {STORE.whatsapp ? (
             <a
               href={waHref()}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => { e.currentTarget.href = waHref(true); track.whatsappOrder(product, qty); }}
-              className="flex h-14 flex-1 basis-0 flex-col items-center justify-center bg-[#25D366] text-white shadow-lift active:bg-[#1ebe5b]"
+              className="flex h-[52px] items-center justify-center gap-1.5 rounded-[10px] bg-[#25D366] text-[14px] font-bold text-white active:bg-[#1ebe5b]"
             >
-              <span className="flex items-center gap-1.5 text-[14px] font-bold uppercase tracking-[.08em]">
-                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.24-9.43 9.44-9.43 2.52 0 4.89.98 6.67 2.77a9.37 9.37 0 0 1 2.76 6.67c0 5.2-4.24 9.43-9.44 9.43m8.03-17.46A11.27 11.27 0 0 0 12.05.72C5.8.72.7 5.8.7 12.06c0 2 .52 3.95 1.52 5.67L.6 23.28l5.68-1.49a11.3 11.3 0 0 0 5.43 1.38h.01c6.25 0 11.34-5.09 11.34-11.34 0-3.03-1.18-5.88-3.32-8.02"/></svg>
-                WhatsApp
-              </span>
-              <span className="text-[11px] font-medium text-white/90">Order on chat</span>
+              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true"><path d="M12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.24-9.43 9.44-9.43 2.52 0 4.89.98 6.67 2.77a9.37 9.37 0 0 1 2.76 6.67c0 5.2-4.24 9.43-9.44 9.43m8.03-17.46A11.27 11.27 0 0 0 12.05.72C5.8.72.7 5.8.7 12.06c0 2 .52 3.95 1.52 5.67L.6 23.28l5.68-1.49a11.3 11.3 0 0 0 5.43 1.38h.01c6.25 0 11.34-5.09 11.34-11.34 0-3.03-1.18-5.88-3.32-8.02"/></svg>
+              WhatsApp
             </a>
-          )}
+          ) : <span />}
+          <button onClick={buyNow} className="flex h-[52px] items-center justify-center rounded-[10px] bg-accent-600 text-[15px] font-extrabold uppercase tracking-[.04em] text-white shadow-lift active:bg-accent-700">
+            Buy now · {formatPrice(lineTotal)}
+          </button>
         </div>
       )}
       {quick && <QuickOrder product={product} initialQty={qty} onClose={() => setQuick(false)} />}

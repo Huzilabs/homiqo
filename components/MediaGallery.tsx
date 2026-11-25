@@ -13,7 +13,7 @@ type Media = { kind: "image" | "video"; url: string };
 /** one video_play event per video per page load */
 const videoSent: Record<string, boolean> = {};
 
-export default function MediaGallery({ name, images, videos, productId }: { name: string; images: string[]; videos: string[]; productId?: string }) {
+export default function MediaGallery({ name, images, videos, productId, badge }: { name: string; images: string[]; videos: string[]; productId?: string; badge?: string }) {
   // Video first (the best proof the product works), then the photos.
   // It starts as the main photo (fast first paint) and switches to the muted video once the page has loaded.
   const fileVideo = videos.find((v) => !youTubeId(v));
@@ -80,10 +80,14 @@ export default function MediaGallery({ name, images, videos, productId }: { name
             <video key={current.url} src={current.url} poster={images[0]} autoPlay muted loop playsInline controls onPlay={() => { if (!videoSent[current.url]) { videoSent[current.url] = true; sendVisitEvent("video_play", { pid: productId }); } }} className="absolute inset-0 h-full w-full bg-black object-cover" />
           )
         )}
-        {/* Free delivery is a big reason to buy — keep it on the photo itself */}
-        <span className="pointer-events-none absolute bottom-5 right-4 z-10 inline-flex items-center gap-1.5 bg-leaf-600 px-3 py-2 text-[11px] font-bold uppercase tracking-[.08em] text-white shadow-md">
-          🚚 Free delivery
-        </span>
+        {badge && (
+          <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-rose-600 px-2.5 py-1.5 text-[13px] font-bold text-white shadow">{badge}</span>
+        )}
+        {media.length > 1 && (
+          <span className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-full bg-black/65 px-2.5 py-1 text-[12px] font-semibold text-white">
+            {index + 1} / {media.length}{current?.kind === "video" ? " · Video" : ""}
+          </span>
+        )}
         {media.length > 1 && (
           <>
             <button

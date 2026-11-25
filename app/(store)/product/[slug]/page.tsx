@@ -7,7 +7,7 @@ import ProductImage from "@/components/ProductImage";
 import Faq from "@/components/Faq";
 import RichText from "@/components/RichText";
 import Stars from "@/components/Stars";
-import UrgencyBox from "@/components/UrgencyBox";
+import { DealTimer } from "@/components/UrgencyBox";
 import { recentOrderCounts } from "@/lib/recent";
 import { getProductReviews } from "@/lib/reviews";
 import { categoryPath } from "@/lib/categories";
@@ -104,50 +104,48 @@ export default async function ProductPage({ params }: { params: Params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={ld(jsonLd)} />
       <div className="container-x pb-4 pt-3 lg:pb-10 lg:pt-8">
         <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
-          <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} productId={product.id} />
+          <MediaGallery name={product.name} images={product.images} videos={preview ? [preview] : []} productId={product.id} badge={off > 0 ? `-${off}%` : undefined} />
 
           <div className="min-w-0 lg:pt-2">
-            <p className="eyebrow hidden lg:block">{product.category}</p>
-            <h1 className="text-[1.3rem] font-semibold leading-snug text-ink [text-wrap:wrap] lg:mt-3 lg:[text-wrap:balance] lg:font-serif lg:text-[2.75rem] lg:font-medium lg:leading-[1.05]">{product.name}</h1>
-            {rv.count > 0 ? (
-              <a href="#reviews" className="mt-2 inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink lg:mt-3">
-                <Stars rating={rv.average} /> <span className="font-medium text-ink">{rv.average.toFixed(1)}</span> · {rv.count} review{rv.count === 1 ? "" : "s"}
-                {recent >= 3 && <span className="text-ink/50">· {recent} sold this week</span>}
-              </a>
-            ) : recent >= 3 ? (
-              <p className="mt-2 text-sm font-medium text-accent-700 lg:mt-3">🔥 {recent} people ordered this in the last 7 days</p>
-            ) : null}
-            <p className="mt-3 hidden text-[16px] leading-relaxed text-ink/65 lg:line-clamp-2 lg:block">{product.short_description}</p>
-
-            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2 lg:mt-5 lg:gap-x-4 lg:border-t lg:border-ink/10 lg:pt-5">
-              <span className={`text-[1.6rem] font-bold lg:font-serif lg:text-4xl lg:font-normal ${off > 0 ? "text-accent-700" : "text-ink"}`}>{formatPrice(product.price)}</span>
-              {off > 0 && (
-                <>
-                  <span className="text-base text-ink/35 line-through lg:text-lg">{formatPrice(product.compare_at_price!)}</span>
-                  <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-600 px-2.5 text-[12px] font-semibold tracking-[.04em] text-white">Save {off}%</span>
-                </>
-              )}
-              {Number(product.bundle_save) > 0 && !(product.components || []).length && product.stock >= 2 && (
-                <span className="inline-flex h-7 items-center border border-accent-600 bg-accent-50 px-2.5 text-[12px] font-semibold tracking-[.04em] text-accent-700">
-                  🎁 Buy 2, save {formatPrice(Number(product.bundle_save))}
-                </span>
-              )}
+            {/* price + real countdown first (deal style), then the name */}
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className={`text-[30px] font-extrabold leading-none lg:text-[36px] ${off > 0 ? "text-accent-600" : "text-ink"}`}>{formatPrice(product.price)}</span>
+              {off > 0 && <span className="text-[15px] text-ink/40 line-through lg:text-[17px]">{formatPrice(product.compare_at_price!)}</span>}
+              {off > 0 && <span className="text-[13px] font-semibold text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</span>}
             </div>
-            {off > 0 && (
-              <p className="mt-1 text-sm font-medium text-accent-700">You save {formatPrice(product.compare_at_price! - product.price)}</p>
-            )}
-            {/* the three promises that decide a COD purchase — right under the price */}
-            <ul className="mt-3 grid grid-cols-3 border border-leaf-600/25 bg-leaf-100/50 text-center text-[11.5px] font-semibold leading-tight text-ink lg:text-[13px]">
-              <li className="flex flex-col items-center gap-1 px-1.5 py-2.5"><Truck className="h-5 w-5 text-leaf-600" />FREE delivery</li>
-              <li className="flex flex-col items-center gap-1 border-x border-leaf-600/25 px-1.5 py-2.5"><PackageOpen className="h-5 w-5 text-leaf-600" />Open parcel before paying</li>
-              <li className="flex flex-col items-center gap-1 px-1.5 py-2.5"><Banknote className="h-5 w-5 text-leaf-600" />Cash on delivery</li>
+            {product.stock > 0 && <div className="mt-3"><DealTimer saleEndsAt={product.sale_ends_at} hasDiscount={off > 0} /></div>}
+            <h1 className="mt-3 text-[19px] font-semibold leading-snug text-ink lg:text-[28px] lg:leading-tight">{product.name}</h1>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
+              {rv.count > 0 && (
+                <a href="#reviews" className="inline-flex items-center gap-1.5 text-ink/70 hover:text-ink">
+                  <Stars rating={rv.average} /> <span className="font-medium text-ink">{rv.average.toFixed(1)}</span> ({rv.count})
+                </a>
+              )}
+              {recent >= 3 && <span className="text-ink/60">{rv.count > 0 ? "· " : ""}{recent} sold this week</span>}
+              <span className={`ml-auto font-semibold ${product.stock > 0 ? (product.stock <= 5 ? "text-rose-700" : "text-leaf-600") : "text-rose-700"}`}>
+                {product.stock <= 0 ? "Out of stock" : product.stock <= 5 ? `Only ${product.stock} left` : "In stock"}
+              </span>
+            </div>
+
+            {/* the three promises that decide a COD purchase */}
+            <ul className="mt-4 grid grid-cols-3 gap-2 rounded-xl border border-ink/10 bg-white px-2 py-3.5 text-center text-[12px] font-semibold leading-tight text-ink">
+              {[
+                { icon: <Truck className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Free delivery" },
+                { icon: <PackageOpen className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Open & check" },
+                { icon: <Banknote className="h-[22px] w-[22px] text-brand-600" strokeWidth={1.8} />, label: "Cash on delivery" },
+              ].map((x) => (
+                <li key={x.label} className="flex flex-col items-center gap-1.5">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50">{x.icon}</span>
+                  {x.label}
+                </li>
+              ))}
             </ul>
 
             {topFeatures.length > 0 && (
               <ul className="mt-4 space-y-1.5">
                 {topFeatures.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-[14px] leading-snug text-ink/85">
-                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent-600" /> {f}
+                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-leaf-600" /> {f}
                   </li>
                 ))}
               </ul>
@@ -176,12 +174,6 @@ export default async function ProductPage({ params }: { params: Params }) {
             )}
 
 
-            <p className={`mt-4 text-[12px] uppercase tracking-[.18em] ${product.stock > 0 ? "text-leaf-600" : "text-rose-700"}`}>
-              {product.stock > 0 ? "In stock · ready to ship" : "Out of stock"}
-              {product.stock > 0 && <span className="ml-2 hidden normal-case tracking-normal text-ink/50 lg:inline">· or pay by bank transfer for {BANK.discountPct}% off</span>}
-            </p>
-
-            <UrgencyBox stock={product.stock} saleEndsAt={product.sale_ends_at} hasDiscount={off > 0} recentOrders={recent} />
 
             {included.length > 0 && (
               <div className="mt-6 border border-ink/10 bg-white p-4">
@@ -228,7 +220,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             )}
 
             {/* product details as collapsible sections, right under the buy area */}
-            <div className="mt-6 border-b border-ink/15 lg:mt-8">
+            <div className="mt-5 divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white px-4 lg:mt-6">
               {[
                 {
                   title: "About the Product",
@@ -276,12 +268,12 @@ export default async function ProductPage({ params }: { params: Params }) {
                 },
                 ...(productFaqs.length ? [{ title: "Questions & Answers", body: <Faq items={productFaqs} /> }] : []),
               ].map((sec) => (
-                <details key={sec.title} className="group border-t border-ink/15">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[16px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                <details key={sec.title} className="group">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-3.5 text-[15px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
                     {sec.title}
                     <ChevronDown className="h-5 w-5 shrink-0 text-ink/60 transition group-open:rotate-180" />
                   </summary>
-                  <div className="pb-5">{sec.body}</div>
+                  <div className="pb-4">{sec.body}</div>
                 </details>
               ))}
             </div>
