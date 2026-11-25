@@ -52,6 +52,10 @@ export interface Order {
   postex_status?: string | null;
   call_status?: string | null;
   source?: string;
+  customer_confirmed_at?: string | null;
+  customer_response?: string | null;
+  postex_attempt_reason?: string | null;
+  postex_attempt_at?: string | null;
   call_attempts?: number;
   call_status_at?: string | null;
   postex_synced_at?: string | null;
@@ -88,6 +92,10 @@ export interface TrackedOrder {
   status: OrderStatus;
   courier: string | null;
   tracking_number: string | null;
+  postex_status?: string | null;
+  postex_attempt_reason?: string | null;
+  customer_confirmed_at?: string | null;
+  customer_response?: string | null;
   subtotal: number;
   shipping_fee: number;
   discount?: number;

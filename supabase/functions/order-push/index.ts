@@ -1,5 +1,6 @@
 // Sends a push notification to every admin device when a new order is saved,
-// or (lead_id) when someone left the order form without ordering.
+// (lead_id) when someone left the order form without ordering, (attempt_order_id) when a PostEx
+// delivery attempt fails, and (customer_response_order_id) when a customer confirms / cancels online.
 // Called by the orders_push_notify trigger (pg_net) with the x-hook-secret header.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
@@ -17,6 +18,28 @@ Deno.serve(async (req) => {
   let payload: Record<string, unknown>;
   if (body.test) {
     payload = { title: "🔔 Homiqo notifications are on", body: "You'll get a notification here for every new order.", url: "/admin/orders", tag: "test" };
+  } else if (body.attempt_order_id || body.customer_response_order_id) {
+    const id = body.attempt_order_id || body.customer_response_order_id;
+    const { data: o } = await supabase.from("orders").select("id, order_number, customer_name, phone, city, total, postex_attempt_reason, customer_response").eq("id", id).maybeSingle();
+    if (!o) return new Response("no order", { status: 404 });
+    if (body.attempt_order_id) {
+      payload = {
+        title: `⚠️ Delivery problem — ${o.order_number}`,
+        body: `Rider: ${o.postex_attempt_reason || "attempt failed"}\n${o.customer_name} · ${o.city} · ${o.phone}\nCall the customer now, then ask PostEx to re-attempt.`,
+        url: `/admin/orders/${o.id}`,
+        tag: `attempt-${o.order_number}`,
+        kind: "alert",
+      };
+    } else {
+      const resp = o.customer_response;
+      payload = {
+        title: resp === "confirmed" ? `✅ ${o.customer_name} confirmed ${o.order_number}` : resp === "cancelled" ? `❌ ${o.customer_name} cancelled ${o.order_number}` : `❗ ${o.customer_name} wants to cancel ${o.order_number}`,
+        body: resp === "confirmed" ? `${o.city} · ${rs(Number(o.total))} — ready to book on PostEx.` : resp === "cancelled" ? `${o.city} · ${rs(Number(o.total))} — cancelled by the customer, stock returned.` : `Already booked — cancel it on PostEx before pickup.`,
+        url: `/admin/orders/${o.id}`,
+        tag: `resp-${o.order_number}`,
+        kind: "alert",
+      };
+    }
   } else if (body.lead_id) {
     // abandoned checkout: filled the order form (with a valid phone) but didn't order
     const { data: l } = await supabase.from("checkout_leads").select("id, customer_name, phone, city, items, subtotal, status").eq("id", body.lead_id).maybeSingle();

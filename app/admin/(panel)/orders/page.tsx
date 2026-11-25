@@ -1,5 +1,6 @@
 import Link from "next/link";
 import OrderFilters from "@/components/admin/OrderFilters";
+import OrderBadges from "@/components/admin/OrderBadges";
 import CallStatusSelect from "@/components/admin/CallStatusSelect";
 import { CALL_STATUSES, showsCallStatus } from "@/lib/call-status";
 import { Suspense } from "react";
@@ -54,7 +55,7 @@ export default async function AdminOrders({
 
   const productsForForm = adminProducts(supabase);
   const allProducts = await productsForForm;
-  const src = ["website", "whatsapp", "abandoned", "meta"].includes(srcParam || "") ? srcParam : undefined;
+  const src = ["website", "whatsapp", "abandoned", "meta", "problems", "unconfirmed"].includes(srcParam || "") ? srcParam : undefined;
   const productId = allProducts.some((p) => p.id === productParam) ? productParam : undefined;
   // date ranges in Pakistan time (UTC+5)
   const PK = 5 * 3600e3;
@@ -69,6 +70,8 @@ export default async function AdminOrders({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filtered = (qb: any) => {
     if (src === "meta") qb = qb.gt("offer_discount", 0);
+    else if (src === "problems") qb = qb.not("postex_attempt_reason", "is", null).in("status", ["confirmed", "shipped"]).not("postex_status", "ilike", "return*").not("postex_status", "ilike", "delivered*");
+    else if (src === "unconfirmed") qb = qb.eq("status", "pending").is("customer_response", null);
     else if (src) qb = qb.eq("source", src);
     if (productId) qb = qb.eq("order_items.product_id", productId);
     if (range) {
@@ -100,6 +103,9 @@ export default async function AdminOrders({
   const callCounts: Record<string, number> = {};
   for (const r of (callRows || []) as { call_status: string }[]) callCounts[r.call_status] = (callCounts[r.call_status] || 0) + 1;
   const orders = (data || []) as Order[];
+  // risk flags for the orders on this page
+  const { data: riskRows } = orders.length ? await supabase.rpc("order_risk_flags", { p_ids: orders.map((o) => o.id) }) : { data: [] };
+  const risk = new Map(((riskRows || []) as { order_id: string; flags: string[] }[]).map((r) => [r.order_id, r.flags]));
   const pages = Math.max(1, Math.ceil((count || 0) / PAGE_SIZE));
 
   const { data: itemRows } = orders.length
@@ -232,6 +238,7 @@ export default async function AdminOrders({
                         <a href={`https://wa.me/${waNumber(o.phone)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-gray-400 hover:text-emerald-600"><MessageCircle className="h-3.5 w-3.5" /></a>
                       </div>
                       <p className="text-xs text-gray-500">{o.city}</p>
+                      <OrderBadges o={o} flags={risk.get(o.id)} />
                     </td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-medium tabular-nums text-gray-900">
                       {formatPrice(o.total)}
@@ -286,6 +293,7 @@ export default async function AdminOrders({
                       <span className="shrink-0">{t.date}, {t.time}</span>
                     </div>
                     <p className="mt-0.5 truncate text-xs text-gray-500">{it.names}</p>
+                    <OrderBadges o={o} flags={risk.get(o.id)} />
                     <div className="mt-2 flex items-center justify-between gap-2">
                       <span className="flex min-w-0 flex-wrap items-center gap-1.5">
                         <OrderStatusSelect id={o.id} orderNumber={o.order_number} status={o.status} courier={o.courier} trackingNumber={o.tracking_number} />

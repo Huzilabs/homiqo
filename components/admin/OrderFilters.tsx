@@ -8,6 +8,8 @@ export const ORDER_SOURCES = [
   { key: "meta", label: "⚡ Meta offer" },
   { key: "whatsapp", label: "💬 WhatsApp" },
   { key: "abandoned", label: "🛒 Abandoned checkout" },
+  { key: "unconfirmed", label: "⏳ Customer not confirmed" },
+  { key: "problems", label: "⚠ Delivery problems" },
 ] as const;
 
 export const ORDER_DATES = [

@@ -10,3 +10,11 @@
 -- 2026-11-26: checkout_leads.notified_at + public.notify_abandoned_leads() (pg_cron 'notify-abandoned-leads', every 5 min):
 -- push to admin phones ~15 min after an open lead with a valid phone (edge function order-push, body {lead_id}).
 -- orders.review_asked_at: set when the admin sends the review request from Admin → Reviews → "Ask for reviews".
+
+-- 2026-11-26: delivery problems + customer confirmation + risk flags
+-- orders: customer_confirmed_at, customer_response (confirmed|cancelled|cancel_requested), postex_attempt_reason/_at, postex_alert_key.
+-- postex_attempt_label(msg) → plain reason (RFD refused, CNA not available, ICA incomplete address, RAD restricted, under review).
+-- orders_postex_attempt_alert: BEFORE UPDATE OF postex_history — new "Attempt Made"/"Delivery Under Review" → push (order-push {attempt_order_id}).
+-- customer_respond_order(number, phone, 'confirm'|'cancel') — anon; pending cancel = cancelled, booked = cancel_requested; push to admin.
+-- order_risk_flags(uuid[]) — admin: refused_before, short_address, duplicate.
+-- track_order also returns postex_status, postex_attempt_reason, customer_confirmed_at, customer_response.

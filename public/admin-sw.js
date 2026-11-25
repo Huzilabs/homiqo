@@ -17,7 +17,7 @@ self.addEventListener("push", (e) => {
   try { d = e.data ? e.data.json() : {}; } catch { d = { title: "Homiqo", body: e.data ? e.data.text() : "" }; }
   e.waitUntil(Promise.all([
     // If the admin app is open, tell it to play the "ka-ching" order sound (phones only allow the system sound for notifications)
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => wins.forEach((w) => w.postMessage({ type: d.kind === "lead" ? "homiqo-lead" : "homiqo-new-order", title: d.title, url: d.url }))),
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => wins.forEach((w) => w.postMessage({ type: d.kind ? "homiqo-" + d.kind : "homiqo-new-order", title: d.title, url: d.url }))),
     self.registration.showNotification(d.title || "🛒 New order", {
       body: d.body || "",
       icon: "/admin-icon-192.png",

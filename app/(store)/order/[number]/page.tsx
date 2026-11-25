@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { CircleCheck, Mail, PhoneCall, Truck } from "lucide-react";
 import BankDetails from "@/components/BankDetails";
 import OrderDetails from "@/components/OrderDetails";
+import ConfirmOrderBox from "@/components/ConfirmOrderBox";
 import { createClient } from "@/lib/supabase/server";
 import type { TrackedOrder } from "@/lib/types";
 import { BANK, STORE } from "@/lib/config";
@@ -41,22 +42,9 @@ export default async function OrderPage({
         </p>
       </div>
 
-      {order && order.status === "pending" && STORE.whatsapp && order.payment_method !== "bank_transfer" && (
-        <div className="mx-auto mt-8 max-w-xl border border-[#25D366]/40 bg-[#25D366]/10 p-5 text-center">
-          <p className="font-semibold text-ink">Confirm your order in one tap ✅</p>
-          <p className="mt-1 text-sm text-ink/65">Send us a quick WhatsApp so we can confirm and dispatch your parcel faster.</p>
-          <a
-            href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(
-              `Assalam o Alaikum! I confirm my order ${order.order_number} — ${formatPrice(Number(order.total))} Cash on Delivery. Please dispatch it. — ${order.customer_name}`,
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex h-12 items-center justify-center gap-2 bg-[#25D366] px-6 text-sm font-bold uppercase tracking-[.12em] text-white hover:bg-[#1ebe5b]"
-          >
-            Confirm on WhatsApp
-          </a>
-          <p className="mt-2 text-xs text-ink/50">or wait for our call on your number · {BANK.whatsappDisplay}</p>
-        </div>
+      {/* the customer confirms (or cancels) — the WhatsApp link we send opens this page */}
+      {order && phone && ["pending", "confirmed"].includes(order.status) && order.payment_method !== "bank_transfer" && (
+        <ConfirmOrderBox orderNumber={order.order_number} phone={phone} total={Number(order.total)} response={order.customer_response} />
       )}
 
       {/* Before delivery: tell the customer what the rider may NOT ask for, and to call us instead of refusing */}

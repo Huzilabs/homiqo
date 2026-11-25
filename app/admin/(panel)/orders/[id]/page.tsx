@@ -1,11 +1,12 @@
 import { BANK, STORE } from "@/lib/config";
+import OrderBadges from "@/components/admin/OrderBadges";
 import CallStatusSelect from "@/components/admin/CallStatusSelect";
 import { showsCallStatus } from "@/lib/call-status";
 import { reviewLink } from "@/lib/reviews";
 import { deliveryGuideMessage } from "@/lib/delivery-guide";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
+import { ChevronLeft, CircleCheck, MessageCircle, Phone, ShieldCheck, Star } from "lucide-react";
 import DeleteOrderButton from "@/components/admin/DeleteOrderButton";
 import EditOrderButton from "@/components/admin/EditOrderButton";
 import { adminProducts } from "@/lib/admin-products";
@@ -35,6 +36,13 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
   const editProducts = editable
     ? (await adminProducts(supabase)).map((p) => ({ ...p, stock: p.stock + orderItems.filter((i) => i.product_id === p.id).reduce((n, i) => n + i.quantity, 0) }))
     : [];
+  const { data: riskRows } = await supabase.rpc("order_risk_flags", { p_ids: [o.id] });
+  const riskFlags = (((riskRows || []) as { flags: string[] }[])[0]?.flags) || [];
+  const trackLink = `${STORE.siteUrl.replace(/\/$/, "")}/order/${o.order_number}?phone=${encodeURIComponent(o.phone)}`;
+  const confirmLinkMessage =
+    `Assalam o Alaikum ${o.customer_name.split(" ")[0]}! Homiqo se aap ka order *${o.order_number}* (${formatPrice(Number(o.total))}, cash on delivery) mila hai.\n` +
+    `Barah-e-karam is link par tap kar ke order confirm karein taake hum foran dispatch kar sakein:\n${trackLink}\n\nShukriya! — Team Homiqo`;
+  const deliveringNow = ["confirmed", "shipped"].includes(o.status) && !/^(delivered|return)/i.test(o.postex_status || "");
   const digits = o.phone.replace(/\D/g, "");
   const waNumber = digits.startsWith("0") ? "92" + digits.slice(1) : digits;
 
@@ -53,6 +61,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
             <p className="mt-1 text-sm font-medium text-violet-700">Check the payment screenshot on WhatsApp ({BANK.whatsappDisplay}) before confirming. PostEx will collect Rs 0 for this order.</p>
           )}
           <p className="text-sm text-gray-500">Placed {formatDate(o.created_at)}</p>
+          <OrderBadges o={o} flags={riskFlags} />
         </div>
         <div className="flex flex-wrap gap-2 print:hidden">
           {editable && (
@@ -67,6 +76,17 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
           <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Assalam o Alaikum ${o.customer_name}, regarding your order ${o.order_number}`)}`} target="_blank" rel="noopener noreferrer" className="btn-action">
             <MessageCircle className="h-4 w-4" /> WhatsApp
           </a>
+          {["pending", "confirmed"].includes(o.status) && o.customer_response !== "confirmed" && o.payment_method !== "bank_transfer" && (
+            <a
+              href={`https://wa.me/${waNumber}?text=${encodeURIComponent(confirmLinkMessage)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-action border-orange-500 bg-orange-50 text-orange-800 hover:border-orange-600 hover:bg-orange-100"
+              title="WhatsApp the customer a link to confirm (or cancel) the order themselves"
+            >
+              <CircleCheck className="h-4 w-4" /> Send confirm link
+            </a>
+          )}
           {["pending", "confirmed", "shipped"].includes(o.status) && (
             <a
               href={`https://wa.me/${waNumber}?text=${encodeURIComponent(deliveryGuideMessage({ customer_name: o.customer_name, order_number: o.order_number, phone: o.phone, total: Number(o.total), items: ((items || []) as OrderItem[]).map((i) => `${i.quantity}× ${i.product_name}`).join(", ") }))}`}
@@ -92,6 +112,14 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
         </div>
       </div>
 
+      {o.customer_response === "cancel_requested" && ["pending", "confirmed"].includes(o.status) && (
+        <p className="border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"><b>The customer asked to cancel this order</b> from their order page. It&apos;s already booked — cancel it on PostEx (set the status to Cancelled) before pickup, or call them first.</p>
+      )}
+      {o.postex_attempt_reason && deliveringNow && (
+        <p className="border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <b>⚠ Delivery problem:</b> {o.postex_attempt_reason}{o.postex_attempt_at ? ` (${formatDate(o.postex_attempt_at)})` : ""}. Call the customer now, then ask PostEx to re-attempt so the parcel doesn&apos;t come back.
+        </p>
+      )}
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
           <div className="card p-6">
