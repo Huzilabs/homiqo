@@ -9,7 +9,7 @@ import { FLASH_OFFER, STORE, flashDiscount } from "@/lib/config";
 import { claimFlash, markFlashUsed, mmss, useFlashOffer } from "@/lib/flash";
 import { createClient } from "@/lib/supabase/client";
 import { clearLead, saveLead } from "@/lib/checkout-lead";
-import { PK_MOBILE_PATTERN } from "@/lib/phone";
+import { isPkMobile, normalizePkMobile } from "@/lib/phone";
 import { sendVisitEvent } from "@/lib/visits";
 import type { CartItem, Product } from "@/lib/types";
 
@@ -36,13 +36,17 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
   const [cities, setCities] = useState<string[]>(POPULAR);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErr, setFieldErr] = useState<Record<string, string>>({});
+  const [addon, setAddon] = useState<Product | null>(null);
+  const [addOn, setAddOn] = useState(false);
   const { offer, msLeft } = useFlashOffer();
   const leadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialog = useRef<HTMLDivElement>(null);
 
   const price = Number(product.price);
   const bundleSave = Number(product.bundle_save || 0);
-  const subtotal = price * qty;
+  const addonPrice = addOn && addon ? Number(addon.price) : 0;
+  const subtotal = price * qty + addonPrice;
   const bundle = Math.floor(qty / 2) * bundleSave;
   const offerDiscount = offer?.claimed ? flashDiscount(subtotal) : 0;
   const total = subtotal - bundle - offerDiscount;
@@ -59,6 +63,20 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
       .order("name")
       .then(({ data }) => {
         if (data?.length) setCities(Array.from(new Set([...POPULAR, ...data.map((c) => titleCase(c.name))])));
+      });
+    // one-tap add-on: a low-priced best-fit extra (cheapest other in-stock product)
+    createClient()
+      .from("products")
+      .select("id, name, slug, price, images, stock, bundle_save, components, category")
+      .eq("is_active", true)
+      .gt("stock", 0)
+      .neq("id", product.id)
+      .lte("price", 1300)
+      .order("price")
+      .limit(5)
+      .then(({ data }) => {
+        const list = ((data || []) as Product[]).filter((p) => !(p.components || []).length);
+        setAddon(list.find((p) => p.category === product.category) || list[0] || null);
       });
     // lock page scroll behind the sheet; Esc closes
     const prev = document.body.style.overflow;
@@ -97,6 +115,20 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
     const customer: Record<string, string> = Object.fromEntries(
       ["customer_name", "phone", "address", "city", "notes"].map((k) => [k, String(f.get(k) || "").trim()]),
     );
+    // friendly checks shown under each field (instead of the browser's popups)
+    const errs: Record<string, string> = {};
+    if (customer.customer_name.length < 2) errs.customer_name = "Please write your name";
+    if (!customer.phone) errs.phone = "Please write your mobile number";
+    else if (!isPkMobile(customer.phone)) errs.phone = "This number looks incomplete — e.g. 0300 1234567";
+    if (customer.city.length < 2) errs.city = "Please write your city";
+    if (customer.address.length < 8) errs.address = "Please add your house / street number and area";
+    setFieldErr(errs);
+    if (Object.keys(errs).length) {
+      sendVisitEvent("checkout_error", { label: `quick form: ${Object.keys(errs).join(", ")}` });
+      dialog.current?.querySelector<HTMLInputElement>(`[name=${Object.keys(errs)[0]}]`)?.focus();
+      return;
+    }
+    customer.phone = normalizePkMobile(customer.phone);
     customer.payment_method = "cod";
     if (offer?.claimed) customer.flash_offer = offer.id;
     const typed = norm(customer.city);
@@ -108,7 +140,7 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer, items: [{ product_id: product.id, quantity: qty }] }),
+        body: JSON.stringify({ customer, items: [{ product_id: product.id, quantity: qty }, ...(addOn && addon ? [{ product_id: addon.id, quantity: 1 }] : [])] }),
       });
       data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Could not place your order. Please try again.");
@@ -122,7 +154,7 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
     const { order_number, total: serverTotal } = data!;
     if (leadTimer.current) clearTimeout(leadTimer.current);
     clearLead();
-    track.purchase(order_number, [item], Number(serverTotal), 0, "cod");
+    track.purchase(order_number, addOn && addon ? [item, { product_id: addon.id, slug: addon.slug, name: addon.name, price: Number(addon.price), image: addon.images[0] || null, quantity: 1, stock: addon.stock, bundle_save: Number(addon.bundle_save || 0) }] : [item], Number(serverTotal), 0, "cod");
     try {
       sessionStorage.setItem("homecart.lastOrder", JSON.stringify({ order_number, phone: customer.phone }));
     } catch {}
@@ -164,18 +196,34 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
           onSubmit={onSubmit}
           onChange={onFormChange}
           onBlur={onFormChange}
-          onInvalidCapture={(e) => sendVisitEvent("checkout_error", { label: `quick form invalid field: ${(e.target as HTMLInputElement).name}` })}
+          noValidate
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
             {bundleSave > 0 && max >= 2 && (
-              qty >= 2 ? (
-                <p className="bg-leaf-100 px-3 py-2 text-sm font-medium text-leaf-600">✓ Buy 2 deal: you save {formatPrice(bundle)}</p>
-              ) : (
-                <button type="button" onClick={() => setQty(2)} className="w-full border border-accent-500/40 bg-accent-50 px-3 py-2 text-left text-sm">
-                  🎁 <b className="text-accent-700">Buy 2, save {formatPrice(bundleSave)}</b> — tap to make it 2 for {formatPrice(price * 2 - bundleSave)}
-                </button>
-              )
+              <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Quantity deal">
+                {[1, 2].map((n) => {
+                  const on = n === 1 ? qty === 1 : qty >= 2;
+                  return (
+                    <button key={n} type="button" role="radio" aria-checked={on} onClick={() => setQty(n)}
+                      className={`relative rounded border px-3 py-2.5 text-left transition ${on ? "border-accent-600 bg-accent-50 ring-1 ring-accent-600" : "border-ink/15 bg-white"}`}>
+                      {n === 2 && <span className="absolute -top-2 right-2 rounded-sm bg-leaf-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">SAVE {formatPrice(bundleSave)}</span>}
+                      <span className="block text-[12.5px] text-ink/60">{n === 1 ? "Buy 1" : "Make it 2"}</span>
+                      <span className="block text-[15px] font-semibold">{formatPrice(price * n - (n === 2 ? bundleSave : 0))}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {addon && (
+              <label className={`flex cursor-pointer items-center gap-3 rounded border px-3 py-2.5 transition ${addOn ? "border-accent-600 bg-accent-50" : "border-dashed border-ink/25 bg-white"}`}>
+                <input type="checkbox" checked={addOn} onChange={(e) => setAddOn(e.target.checked)} className="h-5 w-5 shrink-0 accent-accent-600" />
+                <span className="relative h-11 w-11 shrink-0 overflow-hidden bg-sand"><ProductImage src={addon.images[0]} alt={addon.name} sizes="44px" /></span>
+                <span className="min-w-0 flex-1 text-[13px] leading-snug">
+                  <span className="block font-semibold text-ink">Add {addon.name}</span>
+                  <span className="text-ink/60">+{formatPrice(addon.price)} · same parcel, free delivery</span>
+                </span>
+              </label>
             )}
             {offerDiscount > 0 && (
               <p className="bg-accent-50 px-3 py-2 text-sm text-accent-700">⚡ Extra {FLASH_OFFER.pct}% off applied (−{formatPrice(offerDiscount)}) · {mmss(msLeft)} left</p>
@@ -184,20 +232,26 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
             <p className="text-sm font-semibold">Delivery details</p>
             <div>
               <label className="label" htmlFor="qo-name">Full name *</label>
-              <input id="qo-name" name="customer_name" required autoComplete="name" className="input" />
+              <input id="qo-name" name="customer_name" autoComplete="name" aria-invalid={!!fieldErr.customer_name} className={`input ${fieldErr.customer_name ? "border-rose-500" : ""}`} />
+              {fieldErr.customer_name && <p className="mt-1 text-xs font-medium text-rose-600">{fieldErr.customer_name}</p>}
             </div>
             <div>
               <label className="label" htmlFor="qo-phone">Phone number *</label>
-              <input id="qo-phone" name="phone" type="tel" required inputMode="tel" autoComplete="tel" placeholder="03XX XXXXXXX" pattern={PK_MOBILE_PATTERN} title="Enter a complete mobile number, e.g. 0300 1234567" className="input" />
+              <input id="qo-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="03XX XXXXXXX" aria-invalid={!!fieldErr.phone}
+                onBlur={(e) => { if (isPkMobile(e.target.value)) e.target.value = normalizePkMobile(e.target.value); }}
+                className={`input ${fieldErr.phone ? "border-rose-500" : ""}`} />
+              {fieldErr.phone && <p className="mt-1 text-xs font-medium text-rose-600">{fieldErr.phone}</p>}
             </div>
             <div>
               <label className="label" htmlFor="qo-city">City *</label>
-              <input id="qo-city" name="city" list="qo-cities" required autoComplete="address-level2" placeholder="Start typing your city" className="input" />
+              <input id="qo-city" name="city" list="qo-cities" autoComplete="address-level2" placeholder="Start typing your city" aria-invalid={!!fieldErr.city} className={`input ${fieldErr.city ? "border-rose-500" : ""}`} />
+              {fieldErr.city && <p className="mt-1 text-xs font-medium text-rose-600">{fieldErr.city}</p>}
               <datalist id="qo-cities">{cities.map((c) => <option key={c} value={c} />)}</datalist>
             </div>
             <div>
               <label className="label" htmlFor="qo-address">Complete address *</label>
-              <input id="qo-address" name="address" required autoComplete="street-address" placeholder="House #, street, area / block, landmark" className="input" />
+              <input id="qo-address" name="address" autoComplete="street-address" placeholder="House #, street, area / block, landmark" aria-invalid={!!fieldErr.address} className={`input ${fieldErr.address ? "border-rose-500" : ""}`} />
+              {fieldErr.address && <p className="mt-1 text-xs font-medium text-rose-600">{fieldErr.address}</p>}
             </div>
             <ul className="space-y-1 pt-1 text-xs text-ink/65">
               <li>🚚 Free delivery all over Pakistan · 2–5 working days</li>
