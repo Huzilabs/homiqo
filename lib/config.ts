@@ -31,7 +31,7 @@ export const BANK = {
 };
 /** Meta-ad visitor offer: reach checkout within 2 minutes of arriving → extra 5% off, locked in for 30 minutes to finish the order.
  *  Keep in sync with start_flash_offer() / claim_flash_offer() / place_order(). */
-export const FLASH_OFFER = { reachMinutes: 2, completeMinutes: 30, pct: 3 };
+export const FLASH_OFFER = { reachMinutes: 2, completeMinutes: 30, pct: 5 };
 export const flashDiscount = (subtotal: number) => Math.round(subtotal * FLASH_OFFER.pct / 100);
 
 export const bankDiscount = (subtotal: number) => Math.round(subtotal * BANK.discountPct / 100);

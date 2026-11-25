@@ -137,7 +137,7 @@ begin
   end if;
   v_shipping := 0;   -- free delivery on every order
 
-  -- Meta ad offer: extra 3% if ordered before the offer expires (1 min grace), single use, once per phone number
+  -- Meta ad offer: extra 5% (was 3% until 2026-11-25) if ordered before the offer expires (1 min grace), single use, once per phone number
   if coalesce(customer->>'flash_offer', '') ~ '^[0-9a-fA-F-]{36}$' then
     select id into v_offer_id from flash_offers
     where id = (customer->>'flash_offer')::uuid and used_at is null and expires_at + interval '1 minute' > now()
@@ -145,7 +145,7 @@ begin
     if v_offer_id is not null and not exists (
       select 1 from orders where offer_discount > 0 and status <> 'cancelled' and id <> v_order_id
         and right(regexp_replace(phone, '\D', '', 'g'), 10) = right(regexp_replace(v_phone, '\D', '', 'g'), 10)) then
-      v_offer_disc := round(v_subtotal * 0.03);
+      v_offer_disc := round(v_subtotal * 0.05);
       update flash_offers set used_at = now(), order_id = v_order_id where id = v_offer_id;
     end if;
   end if;
