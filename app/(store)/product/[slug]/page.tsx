@@ -327,7 +327,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             <WriteReview productId={product.id} productName={product.name} />
           </div>
           {rv.count > 0 && (
-            <ul className="max-h-[440px] divide-y divide-ink/10 overflow-y-auto overscroll-contain border-y border-ink/10 pr-2 [scrollbar-width:thin] lg:max-h-[560px]">
+            <ul className="max-h-[440px] divide-y divide-ink/10 overflow-y-auto overscroll-contain border-y border-ink/10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:max-h-[560px]">
               {rv.reviews.slice(0, 20).map((r) => (
                 <li key={r.id} className="py-6">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
