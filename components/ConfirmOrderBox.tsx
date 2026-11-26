@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { formatPrice } from "@/lib/format";
+import { STORE } from "@/lib/config";
 
 /** "Please confirm your order" — the link we send on WhatsApp opens the order page with this box. */
 export default function ConfirmOrderBox({ orderNumber, phone, total, response }: { orderNumber: string; phone: string; total: number; response?: string | null }) {
@@ -12,6 +13,9 @@ export default function ConfirmOrderBox({ orderNumber, phone, total, response }:
   const [done, setDone] = useState<string | null>(response || null);
   const [error, setError] = useState<string | null>(null);
 
+  // Confirming also opens WhatsApp with a ready message, so we get the confirmation in the chat too.
+  const waConfirm = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(`Assalam o Alaikum! Main apna order *${orderNumber}* (${formatPrice(total)}) confirm karta/karti hoon ✅ Please jald dispatch kar dein.`)}`;
+
   async function send(action: "confirm" | "cancel") {
     setBusy(action);
     setError(null);
@@ -20,11 +24,17 @@ export default function ConfirmOrderBox({ orderNumber, phone, total, response }:
     setBusy(null);
     if (!res.ok || !d.ok) return setError(d.error || "Something went wrong. Please call us.");
     setDone(action === "confirm" ? "confirmed" : d.status === "cancelled" ? "cancelled" : "cancel_requested");
+    if (action === "confirm") { window.location.href = waConfirm; return; }
     router.refresh();
   }
 
   if (done === "confirmed")
-    return <p className="mx-auto mt-8 max-w-xl border border-leaf-600/30 bg-leaf-100/60 p-4 text-center text-sm font-semibold text-leaf-600">✅ Shukriya! Aap ne apna order confirm kar diya hai — hum jald dispatch kar dein ge.</p>;
+    return (
+      <div className="mx-auto mt-8 max-w-xl border border-leaf-600/30 bg-leaf-100/60 p-4 text-center">
+        <p className="text-sm font-semibold text-leaf-600">✅ Shukriya! Aap ne apna order confirm kar diya hai — hum jald dispatch kar dein ge.</p>
+        <a href={waConfirm} className="mt-3 inline-flex h-11 items-center justify-center rounded bg-[#25D366] px-5 text-sm font-semibold text-white">WhatsApp par confirmation bhejein</a>
+      </div>
+    );
   if (done === "cancelled" || done === "cancel_requested")
     return <p className="mx-auto mt-8 max-w-xl border border-ink/10 bg-white p-4 text-center text-sm text-ink/70">{done === "cancelled" ? "Your order has been cancelled." : "We've received your cancel request — our team will contact you."}</p>;
 
