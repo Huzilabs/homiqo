@@ -21,3 +21,8 @@
 
 -- 2026-11-26: nightly summary — daily_summary(day) (orders, ad spend, delivered, returned, problems, profit; Pakistan day),
 -- send_daily_summary() (meta_ads_sync(1) then order-push {summary:true}); pg_cron 'daily-summary' 0 17 * * * (22:00 PKT).
+
+-- 2026-11-26: customer_respond_order now sends the admin push ONLY for cancels.
+-- Confirms open WhatsApp with a ready message instead (ConfirmOrderBox), and a push on every
+-- confirm doubled notifications — Chrome on Android began labelling them "Possible spam".
+-- (Same body as before; the net.http_post block is wrapped in `if p_action = 'cancel' then ... end if;`.)
