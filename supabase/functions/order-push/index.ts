@@ -44,8 +44,9 @@ Deno.serve(async (req) => {
     if (!o) return new Response("no order", { status: 404 });
     if (body.attempt_order_id) {
       payload = {
-        title: `⚠️ Delivery problem — ${o.order_number}`,
-        body: `Rider: ${o.postex_attempt_reason || "attempt failed"}\n${o.customer_name} · ${o.city} · ${o.phone}\nCall the customer now, then ask PostEx to re-attempt.`,
+        // calm wording, no phone number: Chrome's spam check flagged "⚠️ … call now" + a number as spam
+        title: `Order ${o.order_number}: delivery update`,
+        body: `PostEx: ${o.postex_attempt_reason || "delivery attempt not completed"}\n${o.customer_name}, ${o.city}. Open the order to follow up.`,
         url: `/admin/orders/${o.id}`,
         tag: `attempt-${o.order_number}`,
         kind: "alert",
@@ -53,7 +54,7 @@ Deno.serve(async (req) => {
     } else {
       const resp = o.customer_response;
       payload = {
-        title: resp === "confirmed" ? `✅ ${o.customer_name} confirmed ${o.order_number}` : resp === "cancelled" ? `❌ ${o.customer_name} cancelled ${o.order_number}` : `❗ ${o.customer_name} wants to cancel ${o.order_number}`,
+        title: resp === "confirmed" ? `${o.customer_name} confirmed ${o.order_number}` : resp === "cancelled" ? `${o.customer_name} cancelled ${o.order_number}` : `${o.customer_name} asked to cancel ${o.order_number}`,
         body: resp === "confirmed" ? `${o.city} · ${rs(Number(o.total))} — ready to book on PostEx.` : resp === "cancelled" ? `${o.city} · ${rs(Number(o.total))} — cancelled by the customer, stock returned.` : `Already booked — cancel it on PostEx before pickup.`,
         url: `/admin/orders/${o.id}`,
         tag: `resp-${o.order_number}`,
@@ -66,8 +67,8 @@ Deno.serve(async (req) => {
     if (!l || l.status !== "open") return new Response("no lead", { status: 404 });
     const items = Array.isArray(l.items) ? (l.items as { name?: string; quantity?: number }[]).map((i) => `${i.quantity || 1}× ${i.name || "item"}`).join(", ") : "";
     payload = {
-      title: `⏳ Didn't finish ordering — ${l.customer_name || "a customer"}${l.subtotal ? ` · ${rs(Number(l.subtotal))}` : ""}`,
-      body: `${l.phone}${l.city ? ` · ${l.city}` : ""}${items ? `\n${items}` : ""}\nCall or WhatsApp now while they're interested.`,
+      title: `Unfinished order: ${l.customer_name || "a customer"}${l.subtotal ? ` · ${rs(Number(l.subtotal))}` : ""}`,
+      body: `${l.city ? `${l.city}` : "Order form left"}${items ? ` · ${items}` : ""}\nOpen Abandoned to follow up.`,
       url: "/admin/abandoned",
       tag: `lead-${l.id}`,
       kind: "lead",
