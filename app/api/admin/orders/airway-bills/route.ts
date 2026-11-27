@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { PDFDocument } from "pdf-lib";
 import { adminClient } from "@/lib/admin-auth";
+import { airwayBills3PerPage } from "@/lib/airway-layout";
 
 export const maxDuration = 60;
 
@@ -24,16 +24,10 @@ export async function GET(req: Request) {
     );
   }
 
-  const out = await PDFDocument.create();
-  for (const bytes of pdfs) {
-    if (!bytes) continue;
-    try {
-      const src = await PDFDocument.load(bytes);
-      for (const p of await out.copyPages(src, src.getPageIndices())) out.addPage(p);
-    } catch { /* skip a broken PDF */ }
-  }
-  if (!out.getPageCount()) return new NextResponse("No airway bills available — are these orders booked on PostEx?", { status: 400 });
-  return new NextResponse(Buffer.from(await out.save()), {
+  const got = pdfs.filter((p): p is Uint8Array => !!p);
+  if (!got.length) return new NextResponse("No airway bills available — are these orders booked on PostEx?", { status: 400 });
+  // 3 labels per A4 page (PostEx gives one per page)
+  return new NextResponse(Buffer.from(await airwayBills3PerPage(got)), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="airway-bills-${ids.length}.pdf"`,
