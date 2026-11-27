@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useMemo, useState } from "react";
-import { LoaderCircle, Printer, Trash2, X } from "lucide-react";
+import { Download, LoaderCircle, Printer, Trash2, X } from "lucide-react";
 import { STATUS_LABEL } from "@/lib/format";
 import { ORDER_STATUSES } from "@/lib/config";
 
@@ -106,6 +106,12 @@ export function BulkBar({ orders }: { orders: { id: string; order_number: string
             {ORDER_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
           </select>
           <button onClick={() => run("status")} disabled={!status || !!busy} className="h-10 bg-gray-900 px-4 text-xs font-semibold uppercase tracking-wider text-white hover:bg-black disabled:opacity-40">Apply</button>
+          <a
+            href={`/api/admin/orders/pdf?ids=${picked.map((o) => o.id).join(",")}`}
+            className="inline-flex h-10 items-center gap-1.5 border border-gray-300 bg-white px-3 text-xs font-semibold text-gray-800 hover:bg-gray-50"
+          >
+            <Download className="h-4 w-4" /> Download PDF ({picked.length})
+          </a>
           {booked.length > 0 && (
             <a
               href={`/api/admin/orders/airway-bills?ids=${booked.map((o) => o.id).join(",")}`}
