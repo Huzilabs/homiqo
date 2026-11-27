@@ -237,7 +237,7 @@ export default async function AdminOrders({
                         <a href={`tel:${o.phone}`} aria-label={`Call ${o.phone}`} title={o.phone} className="text-gray-400 hover:text-gray-900"><Phone className="h-3.5 w-3.5" /></a>
                         <a href={`https://wa.me/${waNumber(o.phone)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-gray-400 hover:text-emerald-600"><MessageCircle className="h-3.5 w-3.5" /></a>
                       </div>
-                      <p className="text-xs text-gray-500">{o.city}</p>
+                      <p className="text-xs text-gray-500"><a href={`tel:${o.phone}`} className="tabular-nums text-gray-700 hover:underline">{o.phone}</a> · {o.city}</p>
                       <OrderBadges o={o} flags={risk.get(o.id)} />
                     </td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-medium tabular-nums text-gray-900">
@@ -289,7 +289,7 @@ export default async function AdminOrders({
                       <span className="text-[15px] font-semibold tabular-nums text-gray-900">{formatPrice(o.total)}</span>
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-2 text-[13px] text-gray-500">
-                      <span className="truncate">{o.customer_name} · {o.city}</span>
+                      <span className="truncate">{o.customer_name} · <a href={`tel:${o.phone}`} className="tabular-nums">{o.phone}</a> · {o.city}</span>
                       <span className="shrink-0">{t.date}, {t.time}</span>
                     </div>
                     <p className="mt-0.5 truncate text-xs text-gray-500">{it.names}</p>
@@ -313,7 +313,7 @@ export default async function AdminOrders({
           {orders.length === 0 && <p className="p-10 text-center text-gray-500">No orders found.</p>}
         </div>
 
-        <BulkBar orders={orders.map((o) => ({ id: o.id, order_number: o.order_number, status: o.status }))} />
+        <BulkBar orders={orders.map((o) => ({ id: o.id, order_number: o.order_number, status: o.status, booked: o.courier === "PostEx" && !!o.tracking_number }))} />
         </OrdersSelection>
         )}
       </div>

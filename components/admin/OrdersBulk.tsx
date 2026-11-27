@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useMemo, useState } from "react";
-import { LoaderCircle, Trash2, X } from "lucide-react";
+import { LoaderCircle, Printer, Trash2, X } from "lucide-react";
 import { STATUS_LABEL } from "@/lib/format";
 import { ORDER_STATUSES } from "@/lib/config";
 
@@ -50,13 +50,14 @@ export function SelectAll({ ids }: { ids: string[] }) {
 }
 
 /** Floating bar shown while orders are ticked: change status (books / cancels PostEx like a single change) or delete. */
-export function BulkBar({ orders }: { orders: { id: string; order_number: string; status: string }[] }) {
+export function BulkBar({ orders }: { orders: { id: string; order_number: string; status: string; booked?: boolean }[] }) {
   const router = useRouter();
   const { selected, clear } = useSel();
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [report, setReport] = useState<{ ok: number; failed: string[] } | null>(null);
   const picked = orders.filter((o) => selected.has(o.id));
+  const booked = picked.filter((o) => o.booked);
   if (!picked.length && !report) return null;
 
   async function run(kind: "status" | "delete") {
@@ -105,6 +106,17 @@ export function BulkBar({ orders }: { orders: { id: string; order_number: string
             {ORDER_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
           </select>
           <button onClick={() => run("status")} disabled={!status || !!busy} className="h-10 bg-gray-900 px-4 text-xs font-semibold uppercase tracking-wider text-white hover:bg-black disabled:opacity-40">Apply</button>
+          {booked.length > 0 && (
+            <a
+              href={`/api/admin/orders/airway-bills?ids=${booked.map((o) => o.id).join(",")}`}
+              target="_blank"
+              rel="noopener"
+              title={booked.length < picked.length ? `${picked.length - booked.length} selected order(s) aren't booked on PostEx yet` : undefined}
+              className="inline-flex h-10 items-center gap-1.5 border border-gray-300 bg-white px-3 text-xs font-semibold text-gray-800 hover:bg-gray-50"
+            >
+              <Printer className="h-4 w-4" /> Print airway bills ({booked.length})
+            </a>
+          )}
           <button onClick={() => run("delete")} disabled={!!busy} className="inline-flex h-10 items-center gap-1.5 border border-rose-300 px-3 text-xs font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-40">
             <Trash2 className="h-4 w-4" /> Delete
           </button>
