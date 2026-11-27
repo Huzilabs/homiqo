@@ -4,3 +4,10 @@
 -- buy-2 / combo / bank / 5% Meta offer discounts and the total, updates customer details and logs an order_event.
 -- The API route /api/admin/orders/[id]/edit cancels the PostEx booking first and re-books afterwards.
 -- (Full source lives in the database: select prosrc from pg_proc where proname = 'admin_update_order';)
+
+-- 2026-11-27: special price per line. Each p_items element may carry "unit_price" (admin-set price per piece,
+-- e.g. repeat customer). The line price is now:
+--   v_price := coalesce(nullif(v_item->>'unit_price','')::numeric, (v_old->>v_product.id::text)::numeric, v_product.price);
+--   if v_price <= 0 or v_price > 200000 then raise exception 'Invalid price'; end if;
+-- The admin form sends unit_price only when it differs from the shop price. Create-order applies it by calling
+-- admin_update_order right after place_order. (HC-EJ38QM set to Rs 1,450 by hand the same day.)

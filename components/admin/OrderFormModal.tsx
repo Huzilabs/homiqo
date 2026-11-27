@@ -12,7 +12,7 @@ export type OrderDraft = {
   city: string;
   address: string;
   notes: string;
-  items: { product_id: string; quantity: number }[];
+  items: { product_id: string; quantity: number; unit_price?: number | null }[]; // unit_price: special price per piece (repeat customer etc.)
 };
 
 const POPULAR = ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad"];
@@ -67,9 +67,9 @@ export default function OrderFormModal({
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const lines = d.items.map((i) => {
     const p = byId.get(i.product_id);
-    const price = Number(p?.price || 0);
+    const price = Number(i.unit_price || p?.price || 0);
     const bundle = Math.floor(i.quantity / 2) * Number(p?.bundle_save || 0);
-    return { ...i, p, total: price * i.quantity - bundle, bundle };
+    return { ...i, p, price, total: price * i.quantity - bundle, bundle };
   });
   const total = lines.reduce((s, l) => s + l.total, 0);
   const set = <K extends keyof OrderDraft>(k: K, v: OrderDraft[K]) => setD((x) => ({ ...x, [k]: v }));
@@ -81,7 +81,17 @@ export default function OrderFormModal({
     setError(null);
     if (kind === "create" && !lines.every((l) => l.p)) return setError("Choose a product for every line.");
     setBusy(kind);
-    const draft = { ...d, items: d.items.filter((i) => i.product_id && i.quantity > 0) };
+    const draft = {
+      ...d,
+      items: d.items
+        .filter((i) => i.product_id && i.quantity > 0)
+        .map((i) => {
+          const base = Number(byId.get(i.product_id)?.price || 0);
+          const up = Number(i.unit_price || 0);
+          return { product_id: i.product_id, quantity: i.quantity, ...(up > 0 && up !== base ? { unit_price: up } : {}) };
+        }),
+    };
+    if (draft.items.some((i) => "unit_price" in i && Number(i.unit_price) < 1)) { setBusy(null); return setError("Enter a valid price."); }
     const err = kind === "create" ? await onCreate(draft, confirmNow) : await onSave!(draft);
     setBusy(null);
     if (err) setError(err);
@@ -109,7 +119,7 @@ export default function OrderFormModal({
               <div key={idx} className="flex items-center gap-2">
                 <select
                   value={l.product_id}
-                  onChange={(e) => setItem(idx, { product_id: e.target.value })}
+                  onChange={(e) => setItem(idx, { product_id: e.target.value, unit_price: null })}
                   className="input min-w-0 flex-1"
                   required
                 >
@@ -126,9 +136,23 @@ export default function OrderFormModal({
                   max={20}
                   value={l.quantity}
                   onChange={(e) => setItem(idx, { quantity: Math.max(1, Math.min(20, Number(e.target.value) || 1)) })}
-                  className="input w-20"
+                  className="input w-16"
                   aria-label="Quantity"
+                  title="Quantity"
                 />
+                <label className="relative w-28 shrink-0" title="Price per piece — change it for a special price (e.g. repeat customer)">
+                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">Rs</span>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={l.unit_price ?? (l.p ? l.p.price : "")}
+                    onChange={(e) => setItem(idx, { unit_price: e.target.value === "" ? null : Math.max(0, Number(e.target.value)) })}
+                    className={`input pl-8 ${l.unit_price && l.p && Number(l.unit_price) !== Number(l.p.price) ? "border-amber-400 bg-amber-50" : ""}`}
+                    aria-label="Price per piece"
+                  />
+                </label>
                 {d.items.length > 1 && (
                   <button type="button" onClick={() => set("items", d.items.filter((_, i) => i !== idx))} aria-label="Remove product" className="p-2 text-gray-400 hover:text-rose-600">
                     <Trash2 className="h-4 w-4" />
@@ -140,6 +164,7 @@ export default function OrderFormModal({
               <Plus className="h-4 w-4" /> Add another product
             </button>
             {lines.some((l) => l.bundle > 0) && <p className="text-xs text-emerald-700">Buy-2 saving applied automatically.</p>}
+            {lines.some((l) => l.p && l.unit_price && Number(l.unit_price) !== Number(l.p.price)) && <p className="text-xs text-amber-700">Special price set (normal price {lines.filter((l) => l.p && l.unit_price && Number(l.unit_price) !== Number(l.p.price)).map((l) => formatPrice(l.p!.price)).join(", ")}).</p>}
           </section>
 
           <section className="grid gap-3 sm:grid-cols-2">

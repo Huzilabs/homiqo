@@ -6,7 +6,7 @@ import { isPkMobile } from "@/lib/phone";
 
 type Body = {
   customer?: { customer_name?: string; phone?: string; city?: string; address?: string; notes?: string };
-  items?: { product_id?: string; quantity?: number }[];
+  items?: { product_id?: string; quantity?: number; unit_price?: number }[];
   confirm?: boolean;
   lead_id?: string;
 };
@@ -48,6 +48,22 @@ export async function POST(req: Request) {
     await supabase.from("orders").update({ source: b.lead_id ? "abandoned" : "whatsapp", ...(b.confirm ? { status: "confirmed" } : {}) }).eq("id", row.id);
     if (b.lead_id) await supabase.from("checkout_leads").update({ status: "converted", order_id: row.id, updated_at: new Date().toISOString() }).eq("id", b.lead_id);
   }
+  // special price (repeat customer etc.): place_order always uses the shop price, so set the agreed price right after
+  let total = order.total;
+  const special = (b.items || []).filter((i) => i.product_id && Number(i.quantity) > 0);
+  if (row && special.some((i) => Number(i.unit_price) > 0)) {
+    const { data: up, error: ue } = await supabase.rpc("admin_update_order", {
+      p_order_id: row.id,
+      p_customer: { customer_name: (c.customer_name || "").trim(), phone: (c.phone || "").trim(), city: (c.city || "").trim(), address: (c.address || "").trim() },
+      p_items: special.map((i) => ({
+        product_id: i.product_id,
+        quantity: Math.min(20, Math.floor(Number(i.quantity))),
+        ...(Number(i.unit_price) > 0 ? { unit_price: Math.round(Number(i.unit_price)) } : {}),
+      })),
+    });
+    if (ue) return NextResponse.json({ error: `Order ${order.order_number} created at the normal price — special price failed: ${ue.message}` }, { status: 400 });
+    total = (up as { total: number }).total;
+  }
   revalidateTag(PRODUCTS_TAG); // stock changed
-  return NextResponse.json({ ok: true, order_number: order.order_number, id: row?.id, total: order.total });
+  return NextResponse.json({ ok: true, order_number: order.order_number, id: row?.id, total });
 }

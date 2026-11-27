@@ -69,7 +69,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               id={o.id}
               products={editProducts}
               booked={o.courier === "PostEx" && Boolean(o.tracking_number) && !/^cancel/i.test(o.postex_status || "")}
-              initial={{ customer_name: o.customer_name, phone: o.phone, city: o.city, address: o.address, notes: o.notes || "", items: orderItems.map((i) => ({ product_id: i.product_id || "", quantity: i.quantity })) }}
+              initial={{ customer_name: o.customer_name, phone: o.phone, city: o.city, address: o.address, notes: o.notes || "", items: orderItems.map((i) => ({ product_id: i.product_id || "", quantity: i.quantity, unit_price: Number(i.unit_price) || null })) }}
             />
           )}
           <a href={`tel:${o.phone}`} className="btn-action"><Phone className="h-4 w-4" /> Call</a>

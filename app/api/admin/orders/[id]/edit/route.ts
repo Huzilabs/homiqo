@@ -16,10 +16,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { data: isAdmin } = await supabase.rpc("is_admin");
   if (!isAdmin) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
 
-  const b = (await req.json().catch(() => ({}))) as { customer?: Record<string, string>; items?: { product_id: string; quantity: number }[] };
+  const b = (await req.json().catch(() => ({}))) as { customer?: Record<string, string>; items?: { product_id: string; quantity: number; unit_price?: number }[] };
   const items = (b.items || [])
     .filter((i) => i.product_id && Number(i.quantity) > 0)
-    .map((i) => ({ product_id: i.product_id, quantity: Math.min(50, Math.floor(Number(i.quantity))) }));
+    .map((i) => ({
+      product_id: i.product_id,
+      quantity: Math.min(50, Math.floor(Number(i.quantity))),
+      ...(Number(i.unit_price) > 0 ? { unit_price: Math.round(Number(i.unit_price)) } : {}),
+    }));
   if (!items.length) return NextResponse.json({ error: "Add at least one product" }, { status: 400 });
 
   const { data: before } = await supabase.from("orders").select("status, courier, tracking_number, postex_status, postex_city").eq("id", id).maybeSingle();
