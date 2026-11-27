@@ -15,6 +15,7 @@ export interface Product {
   compare_at_price: number | null;
   stock: number;
   bundle_save?: number;
+  addon_price?: number | null; // special price when added from the order form next to another product
   components?: string[] | null;
   sale_ends_at?: string | null;
   images: string[];

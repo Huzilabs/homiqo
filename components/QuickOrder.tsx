@@ -45,7 +45,9 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
 
   const price = Number(product.price);
   const bundleSave = Number(product.bundle_save || 0);
-  const addonPrice = addOn && addon ? Number(addon.price) : 0;
+  // add-on price: the special order-form price (e.g. knife sharpener Rs 550) when one is set
+  const addonUnit = addon ? Number(addon.addon_price || addon.price) : 0;
+  const addonPrice = addOn && addon ? addonUnit : 0;
   const subtotal = price * qty + addonPrice;
   const bundle = Math.floor(qty / 2) * bundleSave;
   const offerDiscount = offer?.claimed ? flashDiscount(subtotal) : 0;
@@ -67,16 +69,17 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
     // one-tap add-on: a low-priced best-fit extra (cheapest other in-stock product)
     createClient()
       .from("products")
-      .select("id, name, slug, price, images, stock, bundle_save, components, category")
+      .select("id, name, slug, price, compare_at_price, addon_price, images, stock, bundle_save, components, category")
       .eq("is_active", true)
       .gt("stock", 0)
       .neq("id", product.id)
       .lte("price", 1300)
       .order("price")
-      .limit(5)
+      .limit(8)
       .then(({ data }) => {
         const list = ((data || []) as Product[]).filter((p) => !(p.components || []).length);
-        setAddon(list.find((p) => p.category === product.category) || list[0] || null);
+        // a product with a special add-on price wins; otherwise the cheapest one, same category first
+        setAddon(list.find((p) => Number(p.addon_price) > 0) || list.find((p) => p.category === product.category) || list[0] || null);
       });
     // lock page scroll behind the sheet; Esc closes
     const prev = document.body.style.overflow;
@@ -140,7 +143,7 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer, items: [{ product_id: product.id, quantity: qty }, ...(addOn && addon ? [{ product_id: addon.id, quantity: 1 }] : [])] }),
+        body: JSON.stringify({ customer, items: [{ product_id: product.id, quantity: qty }, ...(addOn && addon ? [{ product_id: addon.id, quantity: 1, addon: true }] : [])] }),
       });
       data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Could not place your order. Please try again.");
@@ -154,7 +157,7 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
     const { order_number, total: serverTotal } = data!;
     if (leadTimer.current) clearTimeout(leadTimer.current);
     clearLead();
-    track.purchase(order_number, addOn && addon ? [item, { product_id: addon.id, slug: addon.slug, name: addon.name, price: Number(addon.price), image: addon.images[0] || null, quantity: 1, stock: addon.stock, bundle_save: Number(addon.bundle_save || 0) }] : [item], Number(serverTotal), 0, "cod");
+    track.purchase(order_number, addOn && addon ? [item, { product_id: addon.id, slug: addon.slug, name: addon.name, price: addonUnit, image: addon.images[0] || null, quantity: 1, stock: addon.stock, bundle_save: Number(addon.bundle_save || 0) }] : [item], Number(serverTotal), 0, "cod");
     try {
       sessionStorage.setItem("homecart.lastOrder", JSON.stringify({ order_number, phone: customer.phone }));
     } catch {}
@@ -249,7 +252,16 @@ export default function QuickOrder({ product, initialQty, onClose }: { product: 
                 <span className="relative h-11 w-11 shrink-0 overflow-hidden bg-sand"><ProductImage src={addon.images[0]} alt={addon.name} sizes="44px" /></span>
                 <span className="min-w-0 flex-1 text-[13px] leading-snug">
                   <span className="block font-semibold text-ink">Add {addon.name}</span>
-                  <span className="text-ink/60">+{formatPrice(addon.price)} · same parcel, free delivery</span>
+                  {addonUnit < Number(addon.price) ? (
+                    <span className="flex flex-wrap items-baseline gap-x-1.5">
+                      <span className="font-bold text-accent-700">+{formatPrice(addonUnit)}</span>
+                      <s className="text-ink/45">{formatPrice(Math.max(Number(addon.price), Number(addon.compare_at_price || 0)))}</s>
+                      <span className="rounded-sm bg-rose-600 px-1 text-[10.5px] font-bold text-white">Save {formatPrice(Math.max(Number(addon.price), Number(addon.compare_at_price || 0)) - addonUnit)}</span>
+                      <span className="w-full text-ink/60">Only with this order · same parcel, free delivery</span>
+                    </span>
+                  ) : (
+                    <span className="text-ink/60">+{formatPrice(addon.price)} · same parcel, free delivery</span>
+                  )}
                 </span>
               </label>
             )}
