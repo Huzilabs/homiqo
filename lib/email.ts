@@ -46,7 +46,7 @@ function getTransport() {
 
 /** Store owner inboxes: they receive the "new order received" alert only. Override with ADMIN_NOTIFY_EMAIL (comma-separated). */
 export const adminRecipients = () =>
-  (process.env.ADMIN_NOTIFY_EMAIL || "amirsohail1468@gmail.com")
+  (process.env.ADMIN_NOTIFY_EMAIL || "hifsaanjum22@gmail.com")
     .split(",")
     .map((e) => e.trim())
     .filter(Boolean);
